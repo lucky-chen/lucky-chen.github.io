@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="概要 API21 AMS 启动进程 Zygote fork进程 应用端初始化  上一张调用流程的时序图:">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android源码之进程启动过程">
+<meta property="og:url" content="https://lucky-chen.github.io/2017/02/14/android/android_process_start/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="概要 API21 AMS 启动进程 Zygote fork进程 应用端初始化  上一张调用流程的时序图:">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lucky-chen.github.io/image/android/android_process_start.svg">
+<meta property="article:published_time" content="2017-02-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-08T07:40:05.739Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lucky-chen.github.io/image/android/android_process_start.svg">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2017/02/14/android/android_process_start/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android源码之进程启动过程 | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2017/02/14/android/android_process_start/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android源码之进程启动过程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-02-14 00:00:00" itemprop="dateCreated datePublished" datetime="2017-02-14T00:00:00+08:00">2017-02-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-08 15:40:05" itemprop="dateModified" datetime="2020-06-08T15:40:05+08:00">2020-06-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h1><ul>
+<li>API21</li>
+<li>AMS 启动进程</li>
+<li>Zygote fork进程</li>
+<li>应用端初始化</li>
+</ul>
+<p>上一张调用流程的时序图:<br><img src="/image/android/android_process_start.svg" alt=""></p>
+<a id="more"></a>
+
+<p>在启动四大组件时,会检查组件所在的进程是否运行，否则启动该组件指定的进程。<br>先上一张流程图，以startActivity举例。<br>在之前 <a href="https://lucky-chen.github.io/2017/01/25/android-activity-ams-wms/">Android源码之Activity启动过程</a> 中提到,AMS启动Activity时，会执行到startSpecificActivityLocked方法,调用startProcessLocked启动进程</p>
+<h2 id="AMS启动进程处理"><a href="#AMS启动进程处理" class="headerlink" title="AMS启动进程处理"></a>AMS启动进程处理</h2><ul>
+<li><p>1 AMS.startProcessLocked</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;info &#x3D; ApplicationInfo</span><br><span class="line">app &#x3D; newProcessRecordLocked(info, processName, isolated, isolatedUid);</span><br><span class="line">entryPoint &#x3D; &quot;android.app.ActivityThread&quot;;</span><br><span class="line">Process.start(entryPoint,app.processName, uid, uid, gids, ...);</span><br></pre></td></tr></table></figure>
+<p>  可以看到这个函数主要是准备相关的数据。</p>
+<ul>
+<li>创建一个进程相关的数据记录。</li>
+<li>entryPoint值为 <code>android.app.ActivityThread</code> ，表明新进程的入口类。<br>  这个参数会一路传下去，在Zygote fork进程后，子进程会加载ActivityThread类的main方法。</li>
+<li>调用Process.start创建进程</li>
+</ul>
+</li>
+<li><p>2 Process.start</p>
+<p>  start方法直接调用startViaZygote，看实现</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ProcessStartResult start(...)&#123;</span><br><span class="line">    startViaZygote(...)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private static ProcessStartResult startViaZygote(final String processClass,final String niceName,..)&#123;</span><br><span class="line">    ArrayList&lt;String&gt; argsForZygote &#x3D; new ArrayList&lt;String&gt;();</span><br><span class="line">    argsForZygote.add(&quot;--runtime-init&quot;);</span><br><span class="line">    argsForZygote.add(processClass);</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">    zygoteSendArgsAndGetResult(...,argsForZygote)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  startViaZygote方法很简单，将传入的以及默认的参数重新拼装,以 <code>List&lt;String&gt;</code> 形式往下调用</p>
+</li>
+<li><p>3 Process.zygoteSendArgsAndGetResult</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">private static ProcessStartResult zygoteSendArgsAndGetResult(ZygoteState zygoteState, ArrayList&lt;String&gt; args)&#123;</span><br><span class="line">    final BufferedWriter writer &#x3D; zygoteState.writer;</span><br><span class="line">    final DataInputStream inputStream &#x3D; zygoteState.inputStream;</span><br><span class="line">    int sz &#x3D; args.size();</span><br><span class="line">    for (int i &#x3D; 0; i &lt; sz; i++) &#123;</span><br><span class="line">        String arg &#x3D; args.get(i);</span><br><span class="line">        writer.write(arg);</span><br><span class="line">        writer.newLine();</span><br><span class="line">    &#125;</span><br><span class="line">    writer.flush();</span><br><span class="line">    ProcessStartResult result &#x3D; new ProcessStartResult();</span><br><span class="line">    result.pid &#x3D; inputStream.readInt();</span><br><span class="line">    return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  有两个重要的变量</p>
+<ul>
+<li><p>zygoteState.writer</p>
+</li>
+<li><p>zygoteState.inputStream</p>
+<p>由名知意，这是一个输入/输入流。ZygoteInit在main函数中注册了一个SocketServer，之后不断监听输入、输出,进行处理。<br>函数逻辑很简单：通过Socket方式将之前准备的参数指令传送给ZygoteInit，由ZygoteInit进行处理。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Zygote-处理"><a href="#Zygote-处理" class="headerlink" title="Zygote 处理"></a>Zygote 处理</h2><ul>
+<li><p>8 先看ZygoteInit的mian函数</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String argv[]) &#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        &#x2F;&#x2F;1. 打开Socket</span><br><span class="line">        registerZygoteSocket(socketName);</span><br><span class="line">        preload();</span><br><span class="line">        &#x2F;&#x2F;2. 监听输入输出</span><br><span class="line">        runSelectLoop(abiList);</span><br><span class="line">        &#x2F;&#x2F;3. 关闭</span><br><span class="line">        closeServerSocket();</span><br><span class="line">    &#125; catch (MethodAndArgsCaller caller) &#123;</span><br><span class="line">        &#x2F;&#x2F;4. 执行反射ActivityThread方法</span><br><span class="line">        caller.run();</span><br><span class="line">    &#125; catch (RuntimeException ex) &#123;</span><br><span class="line">        &#x2F;&#x2F;...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  我们不去纠结1、3步的具体实现，只要知道在函数中开启了一个Socket服务，并在适合的时机关闭。<br>重点关注2、4两步<br>  在第二步中，进行了子进程的fork操作，并将进程信息以异常的形式抛上来。<br>第四步,捕获到进程信息后，执行run方法</p>
+</li>
+<li><p>4 先看第二步runSelectLoop实现</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">private static void runSelectLoop(String abiList)&#123;</span><br><span class="line">    ArrayList&lt;FileDescriptor&gt; fds &#x3D; new ArrayList&lt;FileDescriptor&gt;();</span><br><span class="line">    ArrayList&lt;ZygoteConnection&gt; peers &#x3D; new ArrayList&lt;ZygoteConnection&gt;();</span><br><span class="line">    FileDescriptor[] fdArray &#x3D; new FileDescriptor[4];</span><br><span class="line">    fds.add(sServerSocket.getFileDescriptor());</span><br><span class="line">    while (true) &#123;</span><br><span class="line">        index &#x3D; selectReadable(fdArray);</span><br><span class="line">        if (index &lt; 0) &#123;</span><br><span class="line">            throw new RuntimeException(&quot;Error in select()&quot;);</span><br><span class="line">        &#125; else if (index &#x3D;&#x3D; 0) &#123;</span><br><span class="line">            &#x2F;&#x2F;接收到一个Socket连接</span><br><span class="line">            ZygoteConnection newPeer &#x3D; acceptCommandPeer(abiList);</span><br><span class="line">            peers.add(newPeer);</span><br><span class="line">            fds.add(newPeer.getFileDescriptor());</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            &#x2F;&#x2F;处理连接</span><br><span class="line">            done &#x3D; peers.get(index).runOnce();</span><br><span class="line">            &#x2F;&#x2F;后续清理...</span><br><span class="line">        &#125; </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  函数中开启了一个死循环，不断获取socket上的连接。<br>  当接收到一个连接 ZygoteConnection 后，先存到一个List中<br>  在下次循环时，调用ZygoteConnection的runOnce方法</p>
+</li>
+<li><p>5 runOnce</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** ZygoteConnection **&#x2F;</span><br><span class="line">boolean runOnce() throws ZygoteInit.MethodAndArgsCaller &#123;</span><br><span class="line">    args &#x3D; readArgumentList();</span><br><span class="line">    parsedArgs &#x3D; new Arguments(args);</span><br><span class="line">    pid &#x3D; Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, ...parsedArgs.niceName, ..);</span><br><span class="line">    if (pid &#x3D;&#x3D; 0) &#123;</span><br><span class="line">        handleChildProc(parsedArgs, descriptors, childPipeFd, newStderr);</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        handleParentProc</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  在第2行代码中，解析之前一路传下来的参数，而参数中包含了入口类等各种信息。<br>  第四行代码,由函数名可知，<strong>进行了进程的fork操作</strong>。<br>  第5行和第7行判断当前属于哪个进程。<br>  当pid=0时，进入子进程的处理流程handleChildProc</p>
+</li>
+<li><p>6 handleChildProc</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** ZygoteInit **&#x2F;</span><br><span class="line">private void handleChildProc(Arguments parsedArgs,...)throws ZygoteInit.MethodAndArgsCaller)&#123;</span><br><span class="line">    cloader &#x3D; new PathClassLoader(parsedArgs.classpath,ClassLoader.getSystemClassLoader());</span><br><span class="line">    ZygoteInit.invokeStaticMain(cloader, className, mainArgs);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  创建了一个ClassLoader，ClassLoader指向待启动应用的代码<br>  执行ZygoteInit.invokeStaticMain方法。</p>
+</li>
+<li><p>7 invokeStaticMain</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** ZygoteInit **&#x2F;</span><br><span class="line">static void invokeStaticMain(ClassLoader loader,String className, String[] argv)throws ZygoteInit.MethodAndArgsCaller &#123;</span><br><span class="line">    Class&lt;?&gt; cl &#x3D; loader.loadClass(className);</span><br><span class="line">    Method m &#x3D; cl.getMethod(&quot;main&quot;, new Class[] &#123; String[].class &#125;);</span><br><span class="line">    throw new ZygoteInit.MethodAndArgsCaller(m, argv);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  参数className是之前一路传下来的 <code>android.app.ActivityThread</code> 。<br>  函数通过应用的ClassLoader,反射到代码中ActivityThread的main函数对象<br>  最后，创建一个MethodAndArgsCaller对象，以异常形式抛出。<br>  在时序图的第8步中，ZygoteInit的main方法中catch了这个异常，执行了run方法</p>
+</li>
+<li><p>9 run</p>
+<p>  ZygoteInit.MethodAndArgsCaller</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public void run() &#123;</span><br><span class="line">    mMethod.invoke(null, new Object[] &#123; mArgs &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  方法很简单，反射执行方法。<br>  我们知道这个mMethod实际上指向的是应用ActivityThread的main方法。<br>  进入应用端，看ActivityThread的main方法实现。</p>
+</li>
+</ul>
+<h2 id="应用端处理"><a href="#应用端处理" class="headerlink" title="应用端处理"></a>应用端处理</h2><ul>
+<li><p>10 main</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** ActivityThread **&#x2F;</span><br><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">    Looper.prepareMainLooper();</span><br><span class="line">    ActivityThread thread &#x3D; new ActivityThread();</span><br><span class="line">    thread.attach(false);</span><br><span class="line">    Looper.loop();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  main方法包括三部分</p>
+<ul>
+<li>Looper.prepareMainLooper</li>
+<li>thread.attach</li>
+<li>Looper.loop</li>
+</ul>
+</li>
+<li><p>11 prepareMainLooper</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** Looper **&#x2F;</span><br><span class="line">public static void prepare() &#123;</span><br><span class="line">    sThreadLocal.set(new Looper());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  创建一个Loper对象，并保存到当前线程的ThreadLocal中</p>
+</li>
+<li><p>12 attach</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** ActivityThread **&#x2F;</span><br><span class="line">ActivityManager mgr &#x3D; ActivityManagerNative.getDefault();</span><br><span class="line">mgr.attachApplication(mAppThread);</span><br><span class="line">mInstrumentation &#x3D; new Instrumentation();</span><br><span class="line">mInitialApplication &#x3D; context.mPackageInfo.makeApplication(true, null);</span><br><span class="line">mInitialApplication.onCreate();</span><br></pre></td></tr></table></figure>
+<p>  第三行代码，通过binder调用,将进程的Binder关联到ASM中<br>  创建Application对象，并调用我们熟悉的的onCreate方法<br>  探究Application对象的创建过程</p>
+</li>
+<li><p>13 attachApplication</p>
+</li>
+<li><p>14 attachApplicationLocked</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** AMS **&#x2F;</span><br><span class="line">private final boolean attachApplicationLocked(IApplicationThread thread,int pid) &#123;</span><br><span class="line">    List&lt;ProviderInfo&gt; providers &#x3D;  generateApplicationProvidersLocked(app) ;</span><br><span class="line">    thread.bindApplication(processName, appInfo, ...)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  在AMS中，做了很多事，其中收集了App的Provider信息,再次通过binder调用到App端的进程中</p>
+</li>
+<li><p>15 bindApplication</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** ActivityThread **&#x2F;</span><br><span class="line">public final void bindApplication(String processName, ApplicationInfo appInfo ...)&#123;</span><br><span class="line">    AppBindData data &#x3D; new AppBindData();</span><br><span class="line">    data.processName &#x3D; processName;</span><br><span class="line">    data.appInfo &#x3D; appInfo;</span><br><span class="line">    data.providers &#x3D; providers;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">    sendMessage(H.BIND_APPLICATION, data);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  组装AMS端传过来的数据，发送到Handler上，我们知道，这个Handler是Actvith上的mH对象，在handleMessage方法中又分发到了ActivityThread上的handleBindApplication中</p>
+</li>
+<li><p>16,17 handleBindApplication</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">private void handleBindApplication(AppBindData data) &#123;</span><br><span class="line">    mInstrumentation &#x3D; new Instrumentation();</span><br><span class="line">    Application app &#x3D; data.info.makeApplication(data.restrictedBackupMode, null);</span><br><span class="line">    List&lt;ProviderInfo&gt; providers &#x3D; data.providers;</span><br><span class="line">    if (providers !&#x3D; null) &#123;</span><br><span class="line">        installContentProviders(app, providers);</span><br><span class="line">    &#125;</span><br><span class="line">    mInstrumentation.callApplicationOnCreate(app);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  在方法中干了三件事</p>
+<ul>
+<li>创建Application对象(18)</li>
+<li>初始化Provider (本篇文章不关心)</li>
+<li>调用mInstrumentation.callApplicationOnCreate (21)</li>
+</ul>
+</li>
+<li><p>18 makeApplication</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** LoadedApk **&#x2F;</span><br><span class="line">public Application makeApplication(boolean forceDefaultAppClass,Instrumentation instrumentation) &#123;</span><br><span class="line">    if (mApplication !&#x3D; null) &#123;</span><br><span class="line">        return mApplication;</span><br><span class="line">    &#125;</span><br><span class="line">    String appClass &#x3D; mApplicationInfo.className;</span><br><span class="line">    java.lang.ClassLoader cl &#x3D; getClassLoader();</span><br><span class="line">    ContextImpl appContext &#x3D; ContextImpl.createAppContext(mActivityThread, this);</span><br><span class="line">    app &#x3D; mActivityThread.mInstrumentation.newApplication(cl, appClass, appContext);</span><br><span class="line">    appContext.setOuterContext(app);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  成员变量appClass为Application的全限定名，默认为android.app.Application。<br>  或者是在manifest中注册的自定义Application全限定名。<br>  在第8行中，为Application创建打了一个ContextImpl<br>  调用Instrumention的newApplication方法初始化Application</p>
+</li>
+<li><p>19 createAppContext</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public Application newApplication(ClassLoader cl, String className, Context context)&#123;</span><br><span class="line">    &#x2F;&#x2F;函数调用</span><br><span class="line">    return newApplication(cl.loadClass(className), context);</span><br><span class="line">&#125;</span><br><span class="line">static public Application newApplication(Class&lt;?&gt; clazz, Context context)&#123;</span><br><span class="line">    Application app &#x3D; (Application)clazz.newInstance();</span><br><span class="line">    app.attach(context);</span><br><span class="line">    return app;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  可以看到，newApplication函数中，创建了Application对象，并调用了attach方法。</p>
+<blockquote>
+<p>由此可知，在App层面，attach方法进程启动过程中所能接触到的最早的时机。</p>
+</blockquote>
+</li>
+</ul>
+<ul>
+<li><p>20 略</p>
+</li>
+<li><p>21 callApplicationOnCreate</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public void callApplicationOnCreate(Application app) &#123;</span><br><span class="line">    app.onCreate();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  很简单，调用了我们经常接触到的Application的onCreate方法</p>
+</li>
+<li><p>22 略</p>
+</li>
+<li><p>23 loop</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** Looper **&#x2F;</span><br><span class="line">public static void loop() &#123;</span><br><span class="line">    Looper me &#x3D; myLooper();</span><br><span class="line">    MessageQueue queue &#x3D; me.mQueue;</span><br><span class="line">    while (true) &#123;</span><br><span class="line">        Message msg &#x3D; queue.next(); &#x2F;&#x2F; might block</span><br><span class="line">        if (msg !&#x3D; null) &#123;</span><br><span class="line">             msg.target.dispatchMessage(msg);</span><br><span class="line">        &#125;</span><br><span class="line">        msg.recycle();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  可以看到，最后在UI线程中开启一个死循环，不断轮询消息，并做分发处理。</p>
+</li>
+</ul>
+<p>至此，应用进程启动过程分析完毕</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/02/07/android/droid_plugin_receiver/" rel="prev" title="插件化DroidPlugin-Receiver">
+      <i class="fa fa-chevron-left"></i> 插件化DroidPlugin-Receiver
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/03/08/android/art_dalvik/" rel="next" title="ART 与 Dalvik 区别">
+      ART 与 Dalvik 区别 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概要"><span class="nav-number">1.</span> <span class="nav-text">概要</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AMS启动进程处理"><span class="nav-number">1.1.</span> <span class="nav-text">AMS启动进程处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Zygote-处理"><span class="nav-number">1.2.</span> <span class="nav-text">Zygote 处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#应用端处理"><span class="nav-number">1.3.</span> <span class="nav-text">应用端处理</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

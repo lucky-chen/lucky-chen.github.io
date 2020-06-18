@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="概览 将上一节中UI线程生成了laytertree，交给GPU线程的rasterizer 调用LayerTree的Preroll、Paint2个方法，完成所有Layer的绘制前准备以及绘制操作 将纹理化的结果，上屏">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flutter渲染流程(二)-GPU线程工作">
+<meta property="og:url" content="https://lucky-chen.github.io/2020/03/15/flutter/flutter_render_pipline_1/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="概览 将上一节中UI线程生成了laytertree，交给GPU线程的rasterizer 调用LayerTree的Preroll、Paint2个方法，完成所有Layer的绘制前准备以及绘制操作 将纹理化的结果，上屏">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lucky-chen.github.io/image/flutter/flutter_layer_struct_native.svg">
+<meta property="og:image" content="https://lucky-chen.github.io/2020/03/15/flutter/out/plantuml/flutter_render_piplne3/flutter_render_piplne3.svg">
+<meta property="article:published_time" content="2020-03-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-09T06:12:02.835Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lucky-chen.github.io/image/flutter/flutter_layer_struct_native.svg">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2020/03/15/flutter/flutter_render_pipline_1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Flutter渲染流程(二)-GPU线程工作 | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2020/03/15/flutter/flutter_render_pipline_1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Flutter渲染流程(二)-GPU线程工作
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-15 00:00:00" itemprop="dateCreated datePublished" datetime="2020-03-15T00:00:00+08:00">2020-03-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-09 14:12:02" itemprop="dateModified" datetime="2020-06-09T14:12:02+08:00">2020-06-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Flutter/" itemprop="url" rel="index"><span itemprop="name">Flutter</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h1><ul>
+<li>将上一节中UI线程生成了<code>laytertree</code>，交给GPU线程的<code>rasterizer</code></li>
+<li>调用<code>LayerTree</code>的<code>Preroll</code>、<code>Paint</code>2个方法，完成所有<code>Layer</code>的绘制前准备以及绘制操作</li>
+<li>将纹理化的结果，上屏</li>
+</ul>
+<a id="more"></a>
+
+<h1 id="Layer类型"><a href="#Layer类型" class="headerlink" title="Layer类型"></a>Layer类型</h1><p>绘制流程的核心基本都是围绕<code>Layer</code>进行操作，所以，首先要搞清楚<code>Layer</code>设计的定位是什么，有什么作用，才能更好的理解整段逻辑。下面这张图是native定义的<code>Layer</code>类型和结构图。</p>
+<p><img src="/image/flutter/flutter_layer_struct_native.svg" alt=""></p>
+<p>大概有这么些个<code>Layer</code>,他们都是干什么的呢？我们先看基类<code>Layer</code>的说明</p>
+<blockquote>
+<p>A layer is the lowest-level rendering primitive. It represents an atomic painting command.</p>
+</blockquote>
+<p>直译过来就是: 图层是最低级别的渲染原语,它代表一个原子绘画命令。划重点，<strong>layer代表的是一个绘画命令，而不是字面意义上的绘制图层</strong></p>
+<p>比如以往命令式进行绘制</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">final ui.SceneBuilder sceneBuilder &#x3D; ui.SceneBuilder()</span><br><span class="line">    &#x2F;&#x2F;位移操作</span><br><span class="line">    ..pushOffset(centerX, centerY)</span><br><span class="line">    &#x2F;&#x2F;绘制图像</span><br><span class="line">    ..addPicture(ui.Offset.zero, picture)</span><br></pre></td></tr></table></figure>
+<p>对应使用<code>Layer</code>的写法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;创建一个位移命令的layer，对应pushOffset(centerX, centerY)</span><br><span class="line">OffsetLayer offsetLayer &#x3D; new OffsetLayer(offset: Offset(centerX, centerY));</span><br><span class="line">rootLayer.append(offsetLayer);</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;创建一个绘图命令的layer</span><br><span class="line">PictureLayer pictureLayer &#x3D; new PictureLayer(Rect.zero);</span><br><span class="line">pictureLayer.picture &#x3D; xxx;</span><br><span class="line">offsetLayer.append(pictureLayer);</span><br><span class="line"></span><br><span class="line">rootLayer.addToScene(sceneBuilder);</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;这里底层会调用各种layer的方法，达到和上面命令式一样的效果</span><br><span class="line">ui.window.render(sceneBuilder.build());</span><br></pre></td></tr></table></figure>
+<p>在看一眼layer里面的代码，就更清楚了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">void ClipPathLayer::Paint(PaintContext&amp; context) const &#123;</span><br><span class="line">  &#x2F;&#x2F;调用SkCanvas的clipPath方法</span><br><span class="line">  context.internal_nodes_canvas-&gt;clipPath(..);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以很明显,<strong>flutter把绘制指令分为了几类(Layer)，这些Layer中保存的实际上是对应skia绘制指令的调用</strong></p>
+<ul>
+<li>位移操作类<ul>
+<li>TransformLayer</li>
+</ul>
+</li>
+<li>透明操作类<ul>
+<li>OpacityLayer</li>
+</ul>
+</li>
+<li>阴影、蒙板操作类<ul>
+<li>PhysicalShapeLayer</li>
+<li>ShaderMaskLayer</li>
+</ul>
+</li>
+<li>裁剪操作类<ul>
+<li>ClipPathLayer</li>
+</ul>
+</li>
+<li>纹理操作<ul>
+<li>TextureLayer </li>
+</ul>
+</li>
+<li>平台显示相关<ul>
+<li>PlatformViewLayer </li>
+</ul>
+</li>
+</ul>
+<p>这一部分内容，可以参考<a href="https://juejin.im/post/5e7c8419e51d455c706ca00d" target="_blank" rel="noopener">Flutter完整开发实战详解(二十一、 Flutter 画面渲染的全面解析)</a>这篇文章中，关于layer的阐释，讲的非常清楚</p>
+<h1 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h1><p>ok，明白了layer的作用和定位，我们回过头来，继续看GPU线程的整体工作流程</p>
+<p><img src="../out/plantuml/flutter_render_piplne3/flutter_render_piplne3.svg" alt=""></p>
+<p>进入<code>rasterizer-&gt;Draw(pipeline);</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;rasterizer.cc</span><br><span class="line">void Rasterizer::Draw(fml::RefPtr&lt;Pipeline&lt;flutter::LayerTree&gt;&gt; pipeline) &#123;  </span><br><span class="line">      &#x2F;&#x2F;....</span><br><span class="line">      raster_status &#x3D; DoDraw(std::move(layer_tree));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">RasterStatus Rasterizer::DoDraw(...) &#123;</span><br><span class="line">    DrawToSurface(*layer_tree);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>跳来跳去，最终最终调用到核心函数<code>DrawToSurfacea</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;rasterizer.cc</span><br><span class="line">RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree&amp; layer_tree) &#123;</span><br><span class="line">  FML_DCHECK(surface_);</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;申请一个frame</span><br><span class="line">  auto frame &#x3D; surface_-&gt;AcquireFrame(layer_tree.frame_size());</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;获取frame上的canvas</span><br><span class="line">  auto root_surface_canvas &#x3D;</span><br><span class="line">      embedder_root_canvas ? embedder_root_canvas : frame-&gt;SkiaCanvas();</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;根据canvas等参数生成compositor_frame对象</span><br><span class="line">  auto compositor_frame &#x3D; compositor_context_-&gt;AcquireFrame(...,root_surface_canvas);</span><br><span class="line"></span><br><span class="line">  if (compositor_frame) &#123;</span><br><span class="line">    &#x2F;&#x2F;使用compositor_frame将layertree纹理化</span><br><span class="line">    RasterStatus raster_status &#x3D; compositor_frame-&gt;Raster(layer_tree, false);</span><br><span class="line">    &#x2F;&#x2F;上传给gpu</span><br><span class="line">    frame-&gt;Submit();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个函数是主要的流程函数</p>
+<ul>
+<li>向surface申请一块frame</li>
+<li>根据frame上的canvas生成compositor_frame对象</li>
+<li>使用compositor_frame对layertree进行纹理化操作</li>
+<li>最终调用<code>frame-&gt;Submit</code>将纹理化后的数据上屏</li>
+</ul>
+<h2 id="明确surface-和android-surface-对象类型"><a href="#明确surface-和android-surface-对象类型" class="headerlink" title="明确surface_和android_surface_对象类型"></a>明确surface_和android_surface_对象类型</h2><p>首先要明确这个<code>surface_</code>是什么，初始化触发点在<code>NotifyCreated</code>中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;platform_view.cc</span><br><span class="line">void PlatformView::NotifyCreated() &#123;</span><br><span class="line">  &#x2F;&#x2F;in gpu task</span><br><span class="line">    surface &#x3D; platform_view-&gt;CreateRenderingSurface();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;platform_view_android.cc</span><br><span class="line">std::unique_ptr&lt;Surface&gt; PlatformViewAndroid::CreateRenderingSurface() &#123;</span><br><span class="line">  return android_surface_-&gt;CreateGPUSurface();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>好了，又蹦出来个<code>android_surface_</code>,<code>android_surface_</code>对象会在<a href="">FlutterEngine启动</a>时，随着<code>PlatformViewAndroid</code>的初始化而创建</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;platform_view_android.cc  初始化android_surface_对象</span><br><span class="line"></span><br><span class="line">PlatformViewAndroid::PlatformViewAndroid(</span><br><span class="line">      android_surface_(AndroidSurface::Create(...)) &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>跟进去<code>Create</code>函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;android_surface.cc</span><br><span class="line">std::unique_ptr&lt;AndroidSurface&gt; AndroidSurface::Create(</span><br><span class="line">    bool use_software_rendering) &#123;</span><br><span class="line">  if (use_software_rendering) &#123;</span><br><span class="line">    auto software_surface &#x3D; std::make_unique&lt;AndroidSurfaceSoftware&gt;();</span><br><span class="line">    return software_surface-&gt;IsValid() ? std::move(software_surface) : nullptr;</span><br><span class="line">  &#125;</span><br><span class="line">#if SHELL_ENABLE_VULKAN</span><br><span class="line">  auto vulkan_surface &#x3D; std::make_unique&lt;AndroidSurfaceVulkan&gt;();</span><br><span class="line">  return vulkan_surface-&gt;IsValid() ? std::move(vulkan_surface) : nullptr;</span><br><span class="line">#else   &#x2F;&#x2F; SHELL_ENABLE_VULKAN</span><br><span class="line">  auto gl_surface &#x3D; std::make_unique&lt;AndroidSurfaceGL&gt;();</span><br><span class="line">  return gl_surface-&gt;IsOffscreenContextValid() ? std::move(gl_surface)</span><br><span class="line">                                               : nullptr;</span><br><span class="line">#endif  &#x2F;&#x2F; SHELL_ENABLE_VULKAN</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里有一堆宏定义，根据不同的宏来确定<code>AndroidSurface</code>具体的实现方式</p>
+<ul>
+<li>AndroidSurfaceVulkan 使用Vulkan api方式</li>
+<li>AndroidSurfaceSoftware 软解</li>
+<li>AndroidSurfaceGL  一般真机的默认选择</li>
+</ul>
+<p>确定了<code>android_surface_</code>的类型，继续看<code>CreateGPUSurface</code>方法返回的<code>surface_</code>是什么对象</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;android_surface_gl.cc</span><br><span class="line"></span><br><span class="line">std::unique_ptr&lt;Surface&gt; AndroidSurfaceGL::CreateGPUSurface() &#123;</span><br><span class="line">  &#x2F;&#x2F;上文中的surface_实际上是GPUSurfaceGL对象</span><br><span class="line">  auto surface &#x3D; std::make_unique&lt;GPUSurfaceGL&gt;(this, true);</span><br><span class="line">  return surface-&gt;IsValid() ? std::move(surface) : nullptr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ok，到目前为止，我们确定了在android真机环境下<code>surface_</code>和<code>android_surface_</code>的实际类型</p>
+<table>
+<thead>
+<tr>
+<th align="left">对象</th>
+<th align="left">实际</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">surface_</td>
+<td align="left">GPUSurfaceGL</td>
+</tr>
+<tr>
+<td align="left">android_surface_</td>
+<td align="left">AndroidSurfaceGL</td>
+</tr>
+</tbody></table>
+<h2 id="向surface申请一块frame"><a href="#向surface申请一块frame" class="headerlink" title="向surface申请一块frame"></a>向surface申请一块frame</h2><p>进入<code>GPUSurfaceGL.AcquireFrame</code>看一下实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;gpu_surface_gl.cc  </span><br><span class="line"></span><br><span class="line">std::unique_ptr&lt;SurfaceFrame&gt; GPUSurfaceGL::AcquireFrame(...) &#123;</span><br><span class="line"></span><br><span class="line">   sk_sp&lt;SkSurface&gt; surface &#x3D;</span><br><span class="line">      AcquireRenderSurface(size, root_surface_transformation);</span><br><span class="line"></span><br><span class="line">  SurfaceFrame::SubmitCallback submit_callback &#x3D;</span><br><span class="line">      [...](...) &#123;</span><br><span class="line">        return weak ? weak-&gt;PresentSurface(canvas) : false;</span><br><span class="line">      &#125;;</span><br><span class="line"></span><br><span class="line">  return std::make_unique&lt;SurfaceFrame&gt;(surface, submit_callback);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>实际上生成了一个<code>SurfaceFrame</code>对象，并且将创建的2个比较重要的对象挂载在<code>SurfaceFrame</code>上</p>
+<ul>
+<li>SkSurface (skia的surface对象)</li>
+<li>SubmitCallback</li>
+</ul>
+<h2 id="生成compositor-frame对象"><a href="#生成compositor-frame对象" class="headerlink" title="生成compositor_frame对象"></a>生成compositor_frame对象</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">std::unique_ptr&lt;ScopedFrame&gt; CompositorContext::AcquireFrame(..) &#123;</span><br><span class="line">  return std::make_unique&lt;ScopedFrame&gt;(</span><br><span class="line">      *this, gr_context, canvas, view_embedder, root_surface_transformation,</span><br><span class="line">      instrumentation_enabled, gpu_thread_merger);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>生成了一个ScopedFrame对象，保存了<code>gr_context</code>、<code>canvas</code>这些对象，不纠结具体实现，继续往下看</p>
+<h2 id="使用ScopedFrame对layertree进行纹理化操作"><a href="#使用ScopedFrame对layertree进行纹理化操作" class="headerlink" title="使用ScopedFrame对layertree进行纹理化操作"></a>使用ScopedFrame对layertree进行纹理化操作</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;compositor_context_.cc</span><br><span class="line"></span><br><span class="line">flutter::RasterStatus Raster(flutter::LayerTree&amp; layer_tree,...) &#123;</span><br><span class="line">  &#x2F;&#x2F;... this是ScopedFrame对象</span><br><span class="line">  layer_tree.Preroll(*this, ignore_raster_cache);</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  layer_tree.Paint(*this, ignore_raster_cache); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>函数<code>Raster</code>的作用主要是调用LayerTree的2个函数<code>Preroll</code>和<code>Paint</code>来完成纹理化的操作</p>
+<ul>
+<li>Preroll 做一些绘制前的准备工作</li>
+<li>Paint  执行layer的绘制方法（执行不同类别layer中对应的skia绘制指令）</li>
+</ul>
+<h3 id="LayerTree-Preroll"><a href="#LayerTree-Preroll" class="headerlink" title="LayerTree.Preroll"></a>LayerTree.Preroll</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">void LayerTree::Preroll(CompositorContext::ScopedFrame&amp; frame,</span><br><span class="line">                        bool ignore_raster_cache) &#123;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  root_layer_-&gt;Preroll(&amp;context, frame.root_surface_transformation());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用<code>root_layer_</code>的Preroll方法，layer类型有很多种.假设这里的root_layer_是<code>ContainerLayer</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">void ContainerLayer::Preroll(PrerollContext* context, const SkMatrix&amp; matrix) &#123;</span><br><span class="line">  SkRect child_paint_bounds &#x3D; SkRect::MakeEmpty();</span><br><span class="line">  &#x2F;&#x2F;调用子layer的Preroll方法</span><br><span class="line">  PrerollChildren(context, matrix, &amp;child_paint_bounds);</span><br><span class="line">  &#x2F;&#x2F;设置绘制边界</span><br><span class="line">  set_paint_bounds(child_paint_bounds);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>调用子layer的Preroll方法</li>
+<li>根据返回结果，设置当前layer的绘制比边界</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">void ContainerLayer::PrerollChildren(PrerollContext* context,</span><br><span class="line">                                     const SkMatrix&amp; child_matrix,</span><br><span class="line">                                     SkRect* child_paint_bounds) &#123;</span><br><span class="line">  for (auto&amp; layer : layers_) &#123;</span><br><span class="line">    layer-&gt;Preroll(context, child_matrix);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>遍历调用子layer的Preroll方法，假设其中有一个<code>PictureLayer</code>，看下具体实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;picture_layer.cc</span><br><span class="line">void PictureLayer::Preroll(PrerollContext* context, const SkMatrix&amp; matrix) &#123;</span><br><span class="line">  SkPicture* sk_picture &#x3D; picture();</span><br><span class="line"></span><br><span class="line">  if (auto* cache &#x3D; context-&gt;raster_cache) &#123;</span><br><span class="line">    SkMatrix ctm &#x3D; matrix;</span><br><span class="line">    &#x2F;&#x2F;矩阵Translate操作</span><br><span class="line">    ctm.postTranslate(offset_.x(), offset_.y());</span><br><span class="line">    cache-&gt;Prepare(context-&gt;gr_context, sk_picture, ctm,</span><br><span class="line">                   context-&gt;dst_color_space, is_complex_, will_change_);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  SkRect bounds &#x3D; sk_picture-&gt;cullRect().makeOffset(offset_.x(), offset_.y());</span><br><span class="line">  &#x2F;&#x2F;设置绘制边界</span><br><span class="line">  set_paint_bounds(bounds);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="LayerTree-Paint"><a href="#LayerTree-Paint" class="headerlink" title="LayerTree.Paint"></a>LayerTree.Paint</h3><p>在<code>Preroll</code>后，就会调用到<code>LayerTree</code>的<code>Paint</code>方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">void LayerTree::Paint(CompositorContext::ScopedFrame&amp; frame,</span><br><span class="line">                      bool ignore_raster_cache) const &#123;</span><br><span class="line">  if (root_layer_-&gt;needs_painting())</span><br><span class="line">    root_layer_-&gt;Paint(context);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>仍然以<code>PictureLayer</code>为例，看一下<code>Paint</code>方法做了什么</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">void PictureLayer::Paint(PaintContext&amp; context) const &#123;</span><br><span class="line">  &#x2F;&#x2F;leaf_nodes_canvas实际上是skia的SkCanvas指针</span><br><span class="line">  SkAutoCanvasRestore save(context.leaf_nodes_canvas, true);</span><br><span class="line"></span><br><span class="line">  context.leaf_nodes_canvas-&gt;translate(offset_.x(), offset_.y());</span><br><span class="line">  context.leaf_nodes_canvas-&gt;drawPicture(picture());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用SkCanvas的相关接口</p>
+<ul>
+<li>save操作</li>
+<li>translate偏移量操作</li>
+<li>drawPicture，绘制图像内容</li>
+</ul>
+<h2 id="frame提交纹理化后的数据上屏"><a href="#frame提交纹理化后的数据上屏" class="headerlink" title="frame提交纹理化后的数据上屏"></a>frame提交纹理化后的数据上屏</h2><p>将<code>LayerTree</code>纹理化(raster)后,调用<code>frame.Submit</code>进行纹理上传上屏操作</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">bool SurfaceFrame::Submit() </span><br><span class="line">  submitted_ &#x3D; PerformSubmit();</span><br><span class="line">  return submitted_;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">bool SurfaceFrame::PerformSubmit() &#123;</span><br><span class="line">    &#x2F;&#x2F;submit_callback_ &#x3D; PresentSurface</span><br><span class="line">  submit_callback_(*this, SkiaCanvas());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>submit_callback_其实是上面<code>GPUSurfaceGL::AcquireFrame</code>中生成<code>SurfaceFrame</code>时创建的callbak，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SurfaceFrame::SubmitCallback submit_callback &#x3D;[...](...) &#123;</span><br><span class="line">    return weak ? weak-&gt;PresentSurface(canvas) : false;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>继续看PresentSurface函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;gpu_surface_gl.cc </span><br><span class="line">bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) &#123;</span><br><span class="line">    &#x2F;&#x2F;将canvas上的数据flush到gpu上 （见SkCanva实现）</span><br><span class="line">    onscreen_surface_-&gt;getCanvas()-&gt;flush();</span><br><span class="line">    &#x2F;&#x2F;缓存交换</span><br><span class="line">    if (!delegate_-&gt;GLContextPresent()) &#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;交换surface对象，下一帧使用</span><br><span class="line">    auto new_onscreen_surface &#x3D;（...);</span><br><span class="line">    onscreen_surface_ &#x3D; std::move(new_onscreen_surface);</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="flush"><a href="#flush" class="headerlink" title="flush"></a>flush</h3><p>//将canvas上的数据flush到gpu上</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;SkCanvas</span><br><span class="line">void SkCanvas::flush() &#123;</span><br><span class="line">    this-&gt;onFlush();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void SkCanvas::onFlush() &#123;</span><br><span class="line">    SkBaseDevice* device &#x3D; this-&gt;getDevice();</span><br><span class="line">    if (device) &#123;</span><br><span class="line">        device-&gt;flush();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="GLContextPresent"><a href="#GLContextPresent" class="headerlink" title="GLContextPresent"></a>GLContextPresent</h3><p>交换缓存(内存-屏幕 内容)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;android_surface_gl.cc</span><br><span class="line">bool AndroidSurfaceGL::GLContextPresent() &#123;</span><br><span class="line">  return onscreen_context_-&gt;SwapBuffers();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;android_context_gl.cc</span><br><span class="line">bool AndroidContextGL::SwapBuffers() &#123;</span><br><span class="line">  return eglSwapBuffers(environment_-&gt;Display(), surface_);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/08/flutter/flutter_render_pipline/" rel="prev" title="Flutter渲染流程(一)-UI线程工作">
+      <i class="fa fa-chevron-left"></i> Flutter渲染流程(一)-UI线程工作
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/25/flutter/tools_androidx/" rel="next" title="FlutterEngine AndroidX/Support适配">
+      FlutterEngine AndroidX/Support适配 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概览"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Layer类型"><span class="nav-number">2.</span> <span class="nav-text">Layer类型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#流程"><span class="nav-number">3.</span> <span class="nav-text">流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#明确surface-和android-surface-对象类型"><span class="nav-number">3.1.</span> <span class="nav-text">明确surface_和android_surface_对象类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#向surface申请一块frame"><span class="nav-number">3.2.</span> <span class="nav-text">向surface申请一块frame</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生成compositor-frame对象"><span class="nav-number">3.3.</span> <span class="nav-text">生成compositor_frame对象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用ScopedFrame对layertree进行纹理化操作"><span class="nav-number">3.4.</span> <span class="nav-text">使用ScopedFrame对layertree进行纹理化操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LayerTree-Preroll"><span class="nav-number">3.4.1.</span> <span class="nav-text">LayerTree.Preroll</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LayerTree-Paint"><span class="nav-number">3.4.2.</span> <span class="nav-text">LayerTree.Paint</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#frame提交纹理化后的数据上屏"><span class="nav-number">3.5.</span> <span class="nav-text">frame提交纹理化后的数据上屏</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#flush"><span class="nav-number">3.5.1.</span> <span class="nav-text">flush</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GLContextPresent"><span class="nav-number">3.5.2.</span> <span class="nav-text">GLContextPresent</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

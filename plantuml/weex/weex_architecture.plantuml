@@ -1,0 +1,104 @@
+@startuml
+
+
+package JS{
+
+    package Business{
+        [HOME]
+        [SHOP]
+    }
+    
+    package JSFrameWork{
+        [VUE]
+        [RAX]
+    }
+
+    package WXJSFrameWork{
+        interface  DomApi
+        interface  RenderAction
+        interface  ModuleAction
+        [DomTree] #GreenYellow
+        interface JSApiBinding
+    }
+
+    Business <--> JSFrameWork
+    JSFrameWork <--> WXJSFrameWork
+}
+
+package JSEngine{
+    [JSRuntime]
+    package Engine{
+        [V8]
+        [JSC]
+    }
+    JSRuntime <-> Engine
+}
+
+ JSApiBinding <--> JSRuntime
+
+package WeeCore{
+
+    package JSSide{
+        () IPCBridge
+        [NativeTimer]
+        [InstanceManager]
+        [JSBinding] #Red
+        [VM]
+        [context/isolate]
+    }
+
+    JSBinding -up-> JSEngine
+
+
+    package IPC #IndianRed{
+        [Sender]
+        [Recevier]
+        [lock]
+    }
+    IPCBridge <-down->IPC
+    
+    package CoreSide{
+        () IPCBridgeOnMain
+        [RenderPage]
+        [RenderTree] #GreenYellow
+        [LayoutEngine]
+        [PlatformBridge]
+    }
+
+    IPC <--> CoreSide
+}
+
+package Platform{
+    package Android{
+        [ViewTree] #GreenYellow
+        [ModuleManager]
+        [GraphicActionManager]
+        [WXBridge]
+
+        note bottom of ModuleManager : call native api
+
+        note bottom of GraphicActionManager : add/rm element
+    }
+
+    package iOS{
+        [...] 
+    }
+}
+
+PlatformBridge <--down--> Platform
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+@enduml

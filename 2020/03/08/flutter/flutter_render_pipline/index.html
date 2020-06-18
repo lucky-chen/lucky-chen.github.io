@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="概览这一部分的主要工作是WidgetTree转化成LayerTree，主要分为下面几个阶段   Animate: 首先执行动画，这个过程可能会改变状态state Build:  重新build脏节点的widget（状态改变） Layout: 对脏节点进行重新的layout Paint: 脏节点重新绘制 更新layertree，提交给gpu线程  流程还是比较清晰、容易理解的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flutter渲染流程(一)-UI线程工作">
+<meta property="og:url" content="https://lucky-chen.github.io/2020/03/08/flutter/flutter_render_pipline/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="概览这一部分的主要工作是WidgetTree转化成LayerTree，主要分为下面几个阶段   Animate: 首先执行动画，这个过程可能会改变状态state Build:  重新build脏节点的widget（状态改变） Layout: 对脏节点进行重新的layout Paint: 脏节点重新绘制 更新layertree，提交给gpu线程  流程还是比较清晰、容易理解的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2018/8/8/16517c804ab5e799?imageView2/0/w/1280/h/960/format/webp/ignore-error/1">
+<meta property="og:image" content="https://lucky-chen.github.io/image/flutter/flutter_piple_line2_group.svg">
+<meta property="article:published_time" content="2020-03-07T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-09T06:14:47.567Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2018/8/8/16517c804ab5e799?imageView2/0/w/1280/h/960/format/webp/ignore-error/1">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2020/03/08/flutter/flutter_render_pipline/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Flutter渲染流程(一)-UI线程工作 | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2020/03/08/flutter/flutter_render_pipline/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Flutter渲染流程(一)-UI线程工作
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-08 00:00:00" itemprop="dateCreated datePublished" datetime="2020-03-08T00:00:00+08:00">2020-03-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-09 14:14:47" itemprop="dateModified" datetime="2020-06-09T14:14:47+08:00">2020-06-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Flutter/" itemprop="url" rel="index"><span itemprop="name">Flutter</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h1><p>这一部分的主要工作是<code>WidgetTree</code>转化成<code>LayerTree</code>，主要分为下面几个阶段</p>
+<p><img src="https://user-gold-cdn.xitu.io/2018/8/8/16517c804ab5e799?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt=""></p>
+<ul>
+<li>Animate: 首先执行动画，这个过程可能会改变状态state</li>
+<li>Build:  重新build脏节点的widget（状态改变）</li>
+<li>Layout: 对脏节点进行重新的layout</li>
+<li>Paint: 脏节点重新绘制</li>
+<li>更新layertree，提交给gpu线程</li>
+</ul>
+<p>流程还是比较清晰、容易理解的</p>
+<a id="more"></a>
+
+<h1 id="流程源码"><a href="#流程源码" class="headerlink" title="流程源码"></a>流程源码</h1><p><img src="/image/flutter/flutter_piple_line2_group.svg" alt=""></p>
+<h2 id="流程入口"><a href="#流程入口" class="headerlink" title="流程入口"></a>流程入口</h2><p>一般更新是通过<code>setState</code>函数触发，经过一系列流程之后，调用到<code>Window.cc</code>的<code>BeginFrame</code>,开始进行渲染</p>
+<ul>
+<li><code>setState</code>经过一些列调用,调用到<code>window.scheduleFrame</code></li>
+<li><code>scheduleFrame</code>会注册一个vsync</li>
+<li>在下次vsync到来后，进过一些列调用到<code>window.cc</code>上的BeginFrame方法</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;window.cc</span><br><span class="line">void Window::BeginFrame(fml::TimePoint frameTime) &#123;</span><br><span class="line"></span><br><span class="line">  tonic::DartInvokeField(library_.value(), &quot;_beginFrame&quot;,...);</span><br><span class="line"></span><br><span class="line">  UIDartState::Current()-&gt;FlushMicrotasksNow();</span><br><span class="line"></span><br><span class="line">  tonic::DartInvokeField(library_.value(), &quot;_drawFrame&quot;, &#123;&#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>_beginFrame</code>对应dart上<code>window</code>对象的<code>onBeginFrame</code>方法</li>
+<li><code>onDrawFrame</code>对应dart上<code>window</code>对象的<code>_handleBeginFrame</code>方法</li>
+</ul>
+<p>在<code>SchedulerBinding</code>初始化时，分别指向了<code>_handleBeginFrame</code>和<code>_handleDrawFrame</code>上。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;SchedulerBinding</span><br><span class="line">void ensureFrameCallbacksRegistered() &#123;</span><br><span class="line">  window.onBeginFrame ??&#x3D; _handleBeginFrame;</span><br><span class="line">  window.onDrawFrame ??&#x3D; _handleDrawFrame;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Animate过程"><a href="#Animate过程" class="headerlink" title="Animate过程"></a>Animate过程</h2><p>进入<code>handleBeginFrame</code>方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;SchedulerBinding</span><br><span class="line">void handleBeginFrame(Duration rawTimeStamp) &#123;</span><br><span class="line">      final Map&lt;int, _FrameCallbackEntry&gt; callbacks &#x3D; _transientCallbacks;</span><br><span class="line">      callbacks.forEach((int id, _FrameCallbackEntry callbackEntry) &#123;</span><br><span class="line">        &#x2F;&#x2F;执行动画回调</span><br><span class="line">        if (!_removedIds.contains(id))</span><br><span class="line">          _invokeFrameCallback(...);</span><br><span class="line">      &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>拿到所有注册的动画callbac，依次执行。这个过程中</p>
+<ul>
+<li>可能会修改widget的状态(state)</li>
+<li>可能会有一些future代码，挂载到Microtasks队列上</li>
+</ul>
+<p>在执行完<code>handleBeginFrame</code>方法后，<code>window.cc</code>中会执行<code>FlushMicrotasksNow</code>将产生的<code>Microtask</code>统统执行。</p>
+<h2 id="drawFrame核心流程函数"><a href="#drawFrame核心流程函数" class="headerlink" title="drawFrame核心流程函数"></a>drawFrame核心流程函数</h2><p>接着看<code>drawFrame</code>方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; lib&#x2F;src&#x2F;widgets&#x2F;binding.dart</span><br><span class="line">void drawFrame() &#123;</span><br><span class="line">  buildOwner.buildScope(renderViewElement);</span><br><span class="line">  &#x2F;&#x2F;执行&#96;RendererBinding&#96;核心的渲染流程函数&#96;drawFrame&#96;中</span><br><span class="line">  super.drawFrame();</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">  buildOwner.finalizeTree();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关注<code>RendererBinding</code>核心的渲染流程函数<code>drawFrame</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;RendererBinding</span><br><span class="line">void drawFrame() &#123;</span><br><span class="line">    pipelineOwner.flushLayout();</span><br><span class="line">    pipelineOwner.flushCompositingBits();</span><br><span class="line">    pipelineOwner.flushPaint();</span><br><span class="line">    renderView.compositeFrame(); &#x2F;&#x2F; this sends the bits to the GPU</span><br><span class="line">    pipelineOwner.flushSemantics(); &#x2F;&#x2F; this also sends the semantics to the OS.</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以，这里整个流程是这样的</p>
+<ul>
+<li>build阶段<ul>
+<li>buildOwner.buildScope</li>
+</ul>
+</li>
+<li>layout阶段<ul>
+<li>flushLayout 从新进行布局计算标记为dirty的renderobject</li>
+<li>flushCompositingBits 更新有dirty标记的renderobject的合成位</li>
+</ul>
+</li>
+<li>paint阶段<ul>
+<li>flushPaint 重绘标记为dirty的renderobject，这一步会生成layer</li>
+</ul>
+</li>
+<li>生成scene阶段，<ul>
+<li>compositeFrame layertree会转成Scene并且发送给gpu</li>
+<li>flushSemantics 更新dirty的renderboject的语义</li>
+</ul>
+</li>
+<li>回收阶段<ul>
+<li>buildOwner.finalizeTree </li>
+</ul>
+</li>
+</ul>
+<h2 id="Build阶段"><a href="#Build阶段" class="headerlink" title="Build阶段"></a>Build阶段</h2><h3 id="主流程函数"><a href="#主流程函数" class="headerlink" title="主流程函数"></a>主流程函数</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;framework.dart</span><br><span class="line">void buildScope(Element context,...)&#123;</span><br><span class="line">  int dirtyCount &#x3D; _dirtyElements.length;</span><br><span class="line">  int index &#x3D; 0;</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;重新构建dirty的element</span><br><span class="line">  while (index &lt; dirtyCount) &#123;</span><br><span class="line">    _dirtyElements[index].rebuild();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;清楚dirty标记位</span><br><span class="line">  for (final Element element in _dirtyElements) &#123;</span><br><span class="line">    element._inDirtyList &#x3D; false;</span><br><span class="line">    _dirtyElements.clear();</span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>执行dirty节点的<code>rebuild</code>函数，构建一个新的<code>Widget</code></li>
+<li>构建完后，清除dirty节点标记。</li>
+</ul>
+<h3 id="标记Diry时机"><a href="#标记Diry时机" class="headerlink" title="标记Diry时机"></a>标记Diry时机</h3><p>节点是在什么时候被标记为dirty呢？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;framework.dart</span><br><span class="line">setState(...)&#123;</span><br><span class="line">    _element.markNeedsBuild();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而<code>markNeedsBuild</code>会调用到<code>BuildOwner</code>的<code>scheduleBuildFor</code>方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;BuildOwner</span><br><span class="line">void scheduleBuildFor(Element element) &#123;</span><br><span class="line">    &#x2F;&#x2F;dirty 标记。</span><br><span class="line">    _dirtyElements.add(element); </span><br><span class="line">    element._inDirtyList &#x3D; true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Rebuild过程"><a href="#Rebuild过程" class="headerlink" title="Rebuild过程"></a>Rebuild过程</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;framework.dart</span><br><span class="line">class Element&#123;</span><br><span class="line">  void rebuild() &#123;</span><br><span class="line">     performRebuild();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  void performRebuild() &#123;</span><br><span class="line">    Widget built;</span><br><span class="line">    &#x2F;&#x2F;重新执行了widget</span><br><span class="line">    built &#x3D; build();</span><br><span class="line">    _child &#x3D; updateChild(_child, built, slot);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>build函数即是我们在<code>Widget</code>中经常打交道的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Widget build(BuildContext context) &#123;</span><br><span class="line">  &#x2F;&#x2F;...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到,由于状态的改变，重新构建了一个新的<code>Widget</code></p>
+<h2 id="Layout阶段"><a href="#Layout阶段" class="headerlink" title="Layout阶段"></a>Layout阶段</h2><h3 id="flushLayout"><a href="#flushLayout" class="headerlink" title="flushLayout"></a>flushLayout</h3><p>build阶段后，会执行到<code>RendererBinding</code>的<code>drawFrame函数</code>，触发<code>flushLayout</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;pipelineOwner</span><br><span class="line">void flushLayout() &#123;</span><br><span class="line">  &#x2F;&#x2F;对应工具链Layout阶段耗时</span><br><span class="line">  Timeline.startSync(&#39;Layout&#39;, ...);</span><br><span class="line">  </span><br><span class="line">  while (_nodesNeedingLayout.isNotEmpty) &#123;</span><br><span class="line">    for (RenderObject node in dirtyNodes) &#123;</span><br><span class="line">      if (node._needsLayout &amp;&amp; node.owner &#x3D;&#x3D; this)</span><br><span class="line">        node._layoutWithoutResize();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;RenderObject</span><br><span class="line">void _layoutWithoutResize() &#123;</span><br><span class="line">    &#x2F;&#x2F;进行lalyout操作</span><br><span class="line">    performLayout();</span><br><span class="line">    &#x2F;&#x2F;标记需要更新语义</span><br><span class="line">    markNeedsSemanticsUpdate();</span><br><span class="line">    _needsLayout &#x3D; false;</span><br><span class="line">    &#x2F;&#x2F;标记需要重绘</span><br><span class="line">    markNeedsPaint();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以<code>RenderFlex</code>为例，看下<code>performLayout</code>实际的工作</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;flex.dart</span><br><span class="line">void performLayout() &#123;</span><br><span class="line">  if (flex &gt; 0) &#123;</span><br><span class="line">    totalFlex +&#x3D; childParentData.flex;</span><br><span class="line">    lastFlexChild &#x3D; child;</span><br><span class="line">  &#125;else&#123;</span><br><span class="line">      BoxConstraints innerConstraints;</span><br><span class="line">        if (crossAxisAlignment &#x3D;&#x3D; CrossAxisAlignment.stretch) &#123;</span><br><span class="line">          switch (_direction) &#123;</span><br><span class="line">            case Axis.horizontal:</span><br><span class="line">              break;</span><br><span class="line">            case Axis.vertical:</span><br><span class="line">              break;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">          switch (_direction) &#123;</span><br><span class="line">            case Axis.horizontal:</span><br><span class="line">              break;</span><br><span class="line">            case Axis.vertical:</span><br><span class="line">              break;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        child.layout(innerConstraints, parentUsesSize: true);</span><br><span class="line">  &#125;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>不用去细究具体的实现，从代码关键字中可以看出来，这是在按照<a href="http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html" target="_blank" rel="noopener">Flex 布局</a>的规范，对节点进行布局计算，其它的组件也是类似。</p>
+<h3 id="flushCompositingBits"><a href="#flushCompositingBits" class="headerlink" title="flushCompositingBits"></a>flushCompositingBits</h3><p>在执行完<code>performLayout</code>后，继续执行<code>flushCompositingBits</code>函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;pipelineOwner</span><br><span class="line">void flushCompositingBits() &#123;</span><br><span class="line">    &#x2F;&#x2F;对应工具链 compositing bits阶段耗时</span><br><span class="line"></span><br><span class="line">    Timeline.startSync(&#39;Compositing bits&#39;);</span><br><span class="line">    &#x2F;&#x2F;遍历需要更新的节点，进行位合成</span><br><span class="line">    for (RenderObject node in _nodesNeedingCompositingBitsUpdate) &#123;</span><br><span class="line">      if (node._needsCompositingBitsUpdate &amp;&amp; node.owner &#x3D;&#x3D; this)</span><br><span class="line">        node._updateCompositingBits();</span><br><span class="line">    &#125;</span><br><span class="line">    _nodesNeedingCompositingBitsUpdate.clear();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>_layoutWithoutResize</code>方法中，会调用<code>markNeedsSemanticsUpdate</code>标记<code>_needsSemanticsUpdate</code>标志，这里会遍历标记的的<code>RenderObject</code>,进行更新<code>_updateCompositingBits</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;RenderObject</span><br><span class="line">void _updateCompositingBits() &#123;</span><br><span class="line">   &#x2F;&#x2F;遍历自节点，更新标志位</span><br><span class="line">    visitChildren((RenderObject child) &#123;</span><br><span class="line">      child._updateCompositingBits();</span><br><span class="line">      &#x2F;&#x2F;如果自节点为true，当前节点也设置为true</span><br><span class="line">      if (child.needsCompositing)</span><br><span class="line">        _needsCompositing &#x3D; true;</span><br><span class="line">    &#125;);</span><br><span class="line">    &#x2F;&#x2F;如果有这2个标志，也设置为true</span><br><span class="line">    if (isRepaintBoundary || alwaysNeedsCompositing)</span><br><span class="line">      _needsCompositing &#x3D; true;</span><br><span class="line"> </span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>needsCompositing</code>这个标志，有什么作用呢？<strong>如果<code>needsCompositing</code>为true，都会创建一个新的<code>Layer</code></strong>。</p>
+<p>以<code>TransformLayer</code>为例，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">TransformLayer pushTransform(bool needsCompositing...) &#123;</span><br><span class="line"></span><br><span class="line">    if (needsCompositing) &#123;</span><br><span class="line">      final TransformLayer layer &#x3D; oldLayer ?? TransformLayer();</span><br><span class="line">      pushLayer(layer,...);</span><br><span class="line">      return layer;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      canvas</span><br><span class="line">        ..save()</span><br><span class="line">        ..transform(effectiveTransform.storage);</span><br><span class="line">      canvas.restore();</span><br><span class="line">      return null;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个标志位如果位true，会生成一个新的<code>Layer</code>进行操作，否则直接调用<code>Canvas</code>api操作。</p>
+<h2 id="Paint阶段"><a href="#Paint阶段" class="headerlink" title="Paint阶段"></a>Paint阶段</h2><p>在<code>_layoutWithoutResize</code>函数中，对dirty节点进行了<code>markNeedsPaint</code>操作，表示当前节点需要重绘。之后流程调用到<code>flushPaint</code>函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">void flushPaint() &#123;</span><br><span class="line">    &#x2F;&#x2F;对应工具链中paint过程耗时</span><br><span class="line">    Timeline.startSync(&#39;Paint&#39;, arguments: timelineWhitelistArguments);</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;遍历dirynode，如果在树上，进行重绘，否则跳过</span><br><span class="line">    for (RenderObject node in dirtyNodes) &#123;</span><br><span class="line">        if (node._needsPaint &amp;&amp; node.owner &#x3D;&#x3D; this) &#123;</span><br><span class="line">          if (node._layer.attached) &#123;</span><br><span class="line">            PaintingContext.repaintCompositedChild(node);</span><br><span class="line">          &#125; else &#123;</span><br><span class="line">            node._skippedPaintingOnLayer();</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>遍历dirtyNodes，调用<code>repaintCompositedChild</code>进行重绘</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;PaintingContext</span><br><span class="line">static void _repaintCompositedChild(RenderObject child,...&#125;) &#123;</span><br><span class="line">    OffsetLayer childLayer &#x3D; child._layer;</span><br><span class="line">    if (childLayer &#x3D;&#x3D; null) &#123;</span><br><span class="line">      child._layer &#x3D; childLayer &#x3D; OffsetLayer();</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      childLayer.removeAllChildren();</span><br><span class="line">    &#125;</span><br><span class="line">    child._paintWithContext(childContext, Offset.zero);</span><br><span class="line">&#125;</span><br><span class="line">void _paintWithContext(PaintingContext context, Offset offset) &#123;</span><br><span class="line">  paint(context, offset);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>重绘前，清空<code>_layer</code>上的子节点，辗转调用到<code>RenderObject</code>的<code>paint</code>方法。为了说明问题，我们以<code>image</code>为例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;image.dart</span><br><span class="line">@override</span><br><span class="line">void paint(PaintingContext context, Offset offset) &#123;</span><br><span class="line">    paintImage(</span><br><span class="line">      canvas: context.canvas,</span><br><span class="line">      rect: offset &amp; size,</span><br><span class="line">      image: _image,</span><br><span class="line">      scale: _scale,</span><br><span class="line">      colorFilter: _colorFilter,</span><br><span class="line">      fit: _fit,</span><br><span class="line">      alignment: _resolvedAlignment,</span><br><span class="line">      centerSlice: _centerSlice,</span><br><span class="line">      repeat: _repeat,</span><br><span class="line">      flipHorizontally: _flipHorizontally,</span><br><span class="line">      invertColors: invertColors,</span><br><span class="line">      filterQuality: _filterQuality,</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>看各种参数基本可以猜出来，最终会调用<code>canvas</code>的方法，根据各种参数<code>rect</code>、<code>filterQuality</code>将<code>image</code>绘制出来。</p>
+<blockquote>
+<p>canvas.drawImg(…);</p>
+</blockquote>
+<h2 id="生成scene"><a href="#生成scene" class="headerlink" title="生成scene"></a>生成scene</h2><p>继续执行<code>renderView.compositeFrame()</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;view.dart</span><br><span class="line">void compositeFrame() &#123;</span><br><span class="line">    &#x2F;&#x2F;对应工具链 Compositing 阶段耗时</span><br><span class="line">    Timeline.startSync(&#39;Compositing&#39;, ...);</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;将layer转换成scene</span><br><span class="line">    &#x2F;&#x2F;会在dart和engine层(c++)创建对应的 builder和scene</span><br><span class="line">    final ui.SceneBuilder builder &#x3D; ui.SceneBuilder();</span><br><span class="line">    final ui.Scene scene &#x3D; layer.buildScene(builder);</span><br><span class="line"> </span><br><span class="line">    &#x2F;&#x2F;调用render接口，将scene发送给gpu线程</span><br><span class="line">    _window.render(scene);</span><br><span class="line">    scene.dispose();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>第1步，将layer转化成scene</li>
+<li>第2步，将scene发送给<code>_window</code>对象</li>
+</ul>
+<h3 id="Layer转化成scene"><a href="#Layer转化成scene" class="headerlink" title="Layer转化成scene"></a>Layer转化成scene</h3><p><code>RenderView</code>继承自<code>RenderObject</code>,layer是<code>RenderObject</code>上的<code>_layer</code>对象</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class RenderObject&#123;</span><br><span class="line">  ContainerLayer _layer;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>跟进<code>ContainerLayer</code>的<code>buildScene</code>方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;ContainerLayer</span><br><span class="line">ui.Scene buildScene(ui.SceneBuilder builder) &#123;</span><br><span class="line"> </span><br><span class="line">  addToScene(builder);</span><br><span class="line">  final ui.Scene scene &#x3D; builder.build();</span><br><span class="line">  return scene;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>继续跟进<code>addToScene</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;ContainerLayer</span><br><span class="line">void addToScene(...) &#123;</span><br><span class="line">    addChildrenToScene(builder, layerOffset);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void addChildrenToScene(ui.SceneBuilder builder, [ Offset childOffset &#x3D; Offset.zero ]) &#123;</span><br><span class="line">    Layer child &#x3D; firstChild;</span><br><span class="line">    while (child !&#x3D; null) &#123;</span><br><span class="line">      if (childOffset &#x3D;&#x3D; Offset.zero) &#123;</span><br><span class="line">        child._addToSceneWithRetainedRendering(builder);</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">        child.addToScene(builder, childOffset);</span><br><span class="line">      &#125;</span><br><span class="line">      child &#x3D; child.nextSibling;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>花里胡哨写了一大堆，，其实就是在遍历<code>ContainerLayer</code>上的子<code>Layer</code>，调用子<code>Layer</code>的<code>addToScene方法</code>.</p>
+<p>我们以<code>PictureLayer</code>为例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;PictureLayer</span><br><span class="line">void addToScene(ui.SceneBuilder builder, [ Offset layerOffset &#x3D; Offset.zero ]) &#123;</span><br><span class="line">    builder.addPicture(layerOffset, picture, isComplexHint: isComplexHint, willChangeHint: willChangeHint);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>addPicture</code>方法，最终会辗转调用到native的<code>scene_builde.cc</code>上的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;scene_builder.cc</span><br><span class="line">void SceneBuilder::addPicture(double dx,</span><br><span class="line">                              double dy,</span><br><span class="line">                              Picture* picture,</span><br><span class="line">                              int hints) &#123;</span><br><span class="line">  auto layer &#x3D; std::make_unique&lt;flutter::PictureLayer&gt;(</span><br><span class="line">      offset, UIDartState::CreateGPUObject(picture-&gt;picture()), ...);</span><br><span class="line">  current_layer_-&gt;Add(std::move(layer));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>创建了一个<code>PictureLayer</code>,添加到<code>scene_builder</code>持有的<code>current_layer_</code>自节点上。</p>
+<p>其它操作类似</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;scene_builder.cc</span><br><span class="line">#define FOR_EACH_BINDING(V)                         \</span><br><span class="line">  V(SceneBuilder, pushOffset)                       \</span><br><span class="line">  V(SceneBuilder, pushTransform)                    \</span><br><span class="line">  V(SceneBuilder, pushClipRect)                     \</span><br><span class="line">  V(SceneBuilder, pushClipRRect)                    \</span><br><span class="line">  V(SceneBuilder, pushClipPath)                     \</span><br><span class="line">  V(SceneBuilder, pushOpacity)                      \</span><br><span class="line">  V(SceneBuilder, pushColorFilter)                  \</span><br><span class="line">  V(SceneBuilder, pushBackdropFilter)               \</span><br><span class="line">  V(SceneBuilder, pushShaderMask)                   \</span><br><span class="line">  V(SceneBuilder, pushPhysicalShape)                \</span><br><span class="line">  V(SceneBuilder, pop)                              \</span><br><span class="line">  V(SceneBuilder, addPlatformView)                  \</span><br><span class="line">  V(SceneBuilder, addRetained)                      \</span><br><span class="line">  V(SceneBuilder, addPicture)                       \</span><br><span class="line">  V(SceneBuilder, addTexture)                       \</span><br><span class="line">  V(SceneBuilder, build)</span><br></pre></td></tr></table></figure>
+
+<p>到这一步后，会将所有生成的<code>xxLayer</code>挂载到native对象<code>SceneBuilder</code>上的<code>current_layer_</code>对象中。</p>
+<h3 id="将scene发送给-window对象"><a href="#将scene发送给-window对象" class="headerlink" title="将scene发送给_window对象"></a>将scene发送给<code>_window</code>对象</h3><p>继续执行<code>window.render(scene)</code>方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;window.cc</span><br><span class="line">void Render(Dart_NativeArguments args) &#123;</span><br><span class="line">  &#x2F;&#x2F;获取上面创建的scene在native的指针</span><br><span class="line">  Scene* scene &#x3D;</span><br><span class="line">      tonic::DartConverter&lt;Scene*&gt;::FromArguments(args, 1, exception);</span><br><span class="line">  &#x2F;&#x2F;client 实际上是engine</span><br><span class="line">  UIDartState::Current()-&gt;window()-&gt;client()-&gt;Render(scene);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;engine.cc</span><br><span class="line">void Engine::Render(std::unique_ptr&lt;flutter::LayerTree&gt; layer_tree) &#123;</span><br><span class="line">  animator_-&gt;Render(std::move(layer_tree));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;Animator.cc</span><br><span class="line">void Animator::Render(std::unique_ptr&lt;flutter::LayerTree&gt; layer_tree) &#123;</span><br><span class="line">  producer_continuation_.Complete(std::move(layer_tree));</span><br><span class="line">  &#x2F;&#x2F;delegate_实际指向的是shell</span><br><span class="line">  delegate_.OnAnimatorDraw(layer_tree_pipeline_);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一路辗转调用，最终执行到<code>shell</code>的<code>OnAnimatorDraw</code>方法上，方法很简单，将生成<code>LayerTree</code>抛给GPU线程进行栅格化上屏操作(下一节关注)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;shell.cc</span><br><span class="line">&#x2F;&#x2F; |Animator::Delegate|</span><br><span class="line">void Shell::OnAnimatorDraw(fml::RefPtr&lt;Pipeline&lt;flutter::LayerTree&gt;&gt; pipeline) &#123;</span><br><span class="line">  task_runners_.GetGPUTaskRunner()-&gt;PostTask([...]() &#123;</span><br><span class="line">        if (rasterizer) &#123;</span><br><span class="line">           &#x2F;&#x2F;gpu线程进行栅格化操作</span><br><span class="line">          rasterizer-&gt;Draw(pipeline);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="flushSemantics"><a href="#flushSemantics" class="headerlink" title="flushSemantics"></a>flushSemantics</h3><p><code>drawFrame</code>函数借着执行<code>flushSemantics</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;rendering.object.dart</span><br><span class="line">void flushSemantics() &#123;</span><br><span class="line">    &#x2F;&#x2F;对应工具链Semantics部分</span><br><span class="line">    Timeline.startSync(&#39;Semantics&#39;);</span><br><span class="line">    </span><br><span class="line">    for (RenderObject node in nodesToProcess) &#123;</span><br><span class="line">        &#x2F;&#x2F;遍历更新需要重新语义化的RenderObject</span><br><span class="line">        if (node._needsSemanticsUpdate &amp;&amp; node.owner &#x3D;&#x3D; this)</span><br><span class="line">          node._updateSemantics();</span><br><span class="line">    &#125;</span><br><span class="line">    _semanticsOwner.sendSemanticsUpdate();   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="finalizeTree阶段"><a href="#finalizeTree阶段" class="headerlink" title="finalizeTree阶段"></a>finalizeTree阶段</h2><p>继续看最后一步<code>finalizeTree</code>函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;BuildOwner  framework.dart</span><br><span class="line">void finalizeTree() &#123;</span><br><span class="line">    Timeline.startSync(&#39;Finalize tree&#39;, ...);</span><br><span class="line">  </span><br><span class="line">    &#x2F;&#x2F;遍历调用element的unmount函数</span><br><span class="line">    _inactiveElements._unmountAll(); &#x2F;&#x2F; this unregisters the GlobalKeys</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;_InactiveElements</span><br><span class="line">void _unmountAll() &#123;</span><br><span class="line">    elements.reversed.forEach(_unmount);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void _unmount(Element element) &#123;</span><br><span class="line">  element.visitChildren((Element child) &#123;</span><br><span class="line">    _unmount(child);</span><br><span class="line">  &#125;);</span><br><span class="line">  element.unmount();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其实就是遍历<code>Element</code>，调用他们的<code>unmount</code>函数,解注册对应<code>Widget</code>上的key</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">void unmount() &#123;</span><br><span class="line">   final Key key &#x3D; _widget.key;</span><br><span class="line">   if (key is GlobalKey) &#123;</span><br><span class="line">     key._unregister(this);</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>第一部分ui线程工作完毕</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/12/25/flutter/flutter_hybrid/" rel="prev" title="Flutter混合栈的实现原理">
+      <i class="fa fa-chevron-left"></i> Flutter混合栈的实现原理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/15/flutter/flutter_render_pipline_1/" rel="next" title="Flutter渲染流程(二)-GPU线程工作">
+      Flutter渲染流程(二)-GPU线程工作 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概览"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#流程源码"><span class="nav-number">2.</span> <span class="nav-text">流程源码</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#流程入口"><span class="nav-number">2.1.</span> <span class="nav-text">流程入口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Animate过程"><span class="nav-number">2.2.</span> <span class="nav-text">Animate过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#drawFrame核心流程函数"><span class="nav-number">2.3.</span> <span class="nav-text">drawFrame核心流程函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Build阶段"><span class="nav-number">2.4.</span> <span class="nav-text">Build阶段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主流程函数"><span class="nav-number">2.4.1.</span> <span class="nav-text">主流程函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#标记Diry时机"><span class="nav-number">2.4.2.</span> <span class="nav-text">标记Diry时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rebuild过程"><span class="nav-number">2.4.3.</span> <span class="nav-text">Rebuild过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Layout阶段"><span class="nav-number">2.5.</span> <span class="nav-text">Layout阶段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#flushLayout"><span class="nav-number">2.5.1.</span> <span class="nav-text">flushLayout</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#flushCompositingBits"><span class="nav-number">2.5.2.</span> <span class="nav-text">flushCompositingBits</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Paint阶段"><span class="nav-number">2.6.</span> <span class="nav-text">Paint阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生成scene"><span class="nav-number">2.7.</span> <span class="nav-text">生成scene</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Layer转化成scene"><span class="nav-number">2.7.1.</span> <span class="nav-text">Layer转化成scene</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#将scene发送给-window对象"><span class="nav-number">2.7.2.</span> <span class="nav-text">将scene发送给_window对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#flushSemantics"><span class="nav-number">2.7.3.</span> <span class="nav-text">flushSemantics</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#finalizeTree阶段"><span class="nav-number">2.8.</span> <span class="nav-text">finalizeTree阶段</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#最后"><span class="nav-number">3.</span> <span class="nav-text">最后</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

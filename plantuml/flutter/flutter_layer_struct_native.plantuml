@@ -1,0 +1,48 @@
+@startuml
+
+Title: Layer结构图 (flutter/flow/layers/)
+
+class LayerTree{
+    - root_layer_
+}
+
+together {
+    class BackdropFilterLayer
+    class ClipPathLayer
+    class ColorFilterLayer
+    class OpacityLayer
+    class PhysicalShapeLayer
+    class ShaderMaskLayer
+    class TransformLayer
+}
+
+together {
+    class PerformanceOverlayLayer
+    class ChildSceneLayer
+    class ColorFilterLayer
+    class PictureLayer
+    class PlatformViewLayer
+    class TextureLayer
+}
+
+
+
+LayerTree *-- Layer
+Layer <|-- ContainerLayer
+Layer <|-- PerformanceOverlayLayer
+Layer <|-- ChildSceneLayer
+Layer <|-- PictureLayer
+Layer <|-- PlatformViewLayer
+Layer <|-- TextureLayer
+
+ContainerLayer <|-- BackdropFilterLayer
+ContainerLayer <|-- ClipPathLayer
+ContainerLayer <|-- ClipRectLayer
+ContainerLayer <|-- ColorFilterLayer
+ContainerLayer <|-- OpacityLayer
+ContainerLayer <|-- PhysicalShapeLayer
+ContainerLayer <|-- ShaderMaskLayer
+ContainerLayer <|-- TransformLayer
+
+
+@enduml

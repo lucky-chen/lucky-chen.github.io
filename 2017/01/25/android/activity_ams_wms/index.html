@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="要点 Activity启动过程 Activity与AMS联系 Activity与WMS联系">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android源码之Activity与AMS、WMS联系">
+<meta property="og:url" content="https://lucky-chen.github.io/2017/01/25/android/activity_ams_wms/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="要点 Activity启动过程 Activity与AMS联系 Activity与WMS联系">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/pfhnelln1m2ds6a25m2n0gjb/20140701194427750.png">
+<meta property="og:image" content="https://lucky-chen.github.io/image/android/activity_start_sesquence.svg">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/ec8vtvm1nxrii56j2s1rspjx/Activity_Start.svg">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/nf03z9v3wj1s6ng0s24gselw/20140630161945343.png">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/r3lfpoyfpyvu3zaiudch6qz6/20140630165258140.png">
+<meta property="og:image" content="https://lucky-chen.github.io/image/android/ancivity_handle_resume.svg">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/asl6ny1z9dekr3mguhn1vmof/20140630171741143.png">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/j93ra0h646jhiybeqvt99wx5/20140630184739343.png">
+<meta property="article:published_time" content="2017-01-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-08T07:39:39.754Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://static.zybuluo.com/qh438406812/pfhnelln1m2ds6a25m2n0gjb/20140701194427750.png">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2017/01/25/android/activity_ams_wms/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android源码之Activity与AMS、WMS联系 | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2017/01/25/android/activity_ams_wms/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android源码之Activity与AMS、WMS联系
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-01-25 00:00:00" itemprop="dateCreated datePublished" datetime="2017-01-25T00:00:00+08:00">2017-01-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-08 15:39:39" itemprop="dateModified" datetime="2020-06-08T15:39:39+08:00">2020-06-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="要点"><a href="#要点" class="headerlink" title="要点"></a>要点</h1><ul>
+<li>Activity启动过程</li>
+<li>Activity与AMS联系</li>
+<li>Activity与WMS联系</li>
+</ul>
+<a id="more"></a>
+
+
+<p>先放一张概览图，出处:<a href="http://blog.csdn.net/yangwen123/article/details/35987609" target="_blank" rel="noopener">图片出处</a> </p>
+<p><img src="http://static.zybuluo.com/qh438406812/pfhnelln1m2ds6a25m2n0gjb/20140701194427750.png" alt=""></p>
+<blockquote>
+<p>代码以API 21为准</p>
+</blockquote>
+<h2 id="Activity启动过程"><a href="#Activity启动过程" class="headerlink" title="Activity启动过程"></a>Activity启动过程</h2><p>放一张Actvity启动过程的时序图</p>
+<p><img src="/image/android/activity_start_sesquence.svg" alt=""></p>
+<h3 id="startActivity"><a href="#startActivity" class="headerlink" title="startActivity"></a>startActivity</h3><p>通常调用方法Context.startActivity,最后会调用到AMS的startActivity方法，调用链如下：<br><img src="http://static.zybuluo.com/qh438406812/ec8vtvm1nxrii56j2s1rspjx/Activity_Start.svg" alt="Activity_Start.svg-4.5kB"></p>
+<p>通过binder调用到AMS.startActivity方法后，最终会调到ActivityStackSupervisor的realStartActivityLocked方法，进入AMS进程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** ActivityStackSupervisor **&#x2F;</span><br><span class="line">final boolean realStartActivityLocked(ActivityRecord r,ProcessRecord app, boolean andResume, boolean checkConfig)throws RemoteException &#123;</span><br><span class="line">    &#x2F;&#x2F;将进程描述符记录在Activity描述符中</span><br><span class="line">    r.app &#x3D; app;</span><br><span class="line">    int idx &#x3D; app.activities.indexOf(r);</span><br><span class="line">    &#x2F;&#x2F;将Activity添加到进程启动的Activity列表中</span><br><span class="line">    if (idx &lt; 0) app.activities.add(r);</span><br><span class="line">    &#x2F;&#x2F;通知应用进程加载Activity</span><br><span class="line">    app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,参数)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>app.thread是IAppliconThread的远程代理对象,实例对象存在与应用进程中。</li>
+<li>r.appToken在AMS是IApplicationToken的Bindr实例对象</li>
+</ul>
+<p>通过过binder通信，进入App进程:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** ActivityThread **&#x2F;</span><br><span class="line">public final void scheduleLaunchActivity(Intent intent, IBinder token,参数)&#123;</span><br><span class="line">    ActivityClientRecord r &#x3D; new ActivityClientRecord();</span><br><span class="line">    r.token &#x3D; token;</span><br><span class="line">    ...</span><br><span class="line">    &#x2F;&#x2F;将记录发送给ActivityThread上的Handler,异步启动 </span><br><span class="line">    queueOrSendMessage(H.LAUNCH_ACTIVITY, r);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>将数据发送给ActivityThread上的mH对象，看实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">private class H extends Handler &#123;  </span><br><span class="line">    public void handleMessage(Message msg) &#123;  </span><br><span class="line">        switch (msg.what) &#123;  </span><br><span class="line">            case LAUNCH_ACTIVITY: &#123;  </span><br><span class="line">                ActivityClientRecord r &#x3D; (ActivityClientRecord)msg.obj;  </span><br><span class="line">                &#x2F;&#x2F;获得Activity所属包的信息</span><br><span class="line">                r.packageInfo &#x3D; getPackageInfoNoCheck(r.activityInfo.applicationInfo, r.compatInfo);  </span><br><span class="line">                handleLaunchActivity(r, null);  </span><br><span class="line">            &#125; break;  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Handler将逻辑转发到ActivityThread的handleLaunchActivity方法，继续看实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) &#123;</span><br><span class="line">    &#x2F;&#x2F;1. 初始化Activity</span><br><span class="line">    Activity a &#x3D; performLaunchActivity(r, customIntent);</span><br><span class="line">    &#x2F;&#x2F;2. 执行Activity的onResume函数</span><br><span class="line">    handleResumeActivity(r.token, false, r.isForward,</span><br><span class="line">                    !r.activity.mFinished &amp;&amp; !r.startsNotResumed);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>先看performLaunchActivity函数实现，handleResumeActivity牵扯WMS,放在后面第三节分析。</p>
+<h3 id="performLaunchActivity"><a href="#performLaunchActivity" class="headerlink" title="performLaunchActivity"></a>performLaunchActivity</h3><p>先看performLaunchActivity函数实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) &#123;</span><br><span class="line">    &#x2F;&#x2F;1. 实例化Activity对象</span><br><span class="line">    Activity activity &#x3D; null;</span><br><span class="line">    java.lang.ClassLoader cl &#x3D; r.packageInfo.getClassLoader();</span><br><span class="line">    activity &#x3D; mInstrumentation.newActivity(cl, component.getClassName(), r.intent);</span><br><span class="line">    &#x2F;&#x2F;2. 为Activity创建Application对象</span><br><span class="line">    Application app &#x3D; r.packageInfo.makeApplication(false, mInstrumentation);</span><br><span class="line">    &#x2F;&#x2F;3. 为Activity创建ContextImpl对象</span><br><span class="line">    Context appContext &#x3D; createBaseContextForActivity(r, activity);</span><br><span class="line">    &#x2F;&#x2F;4. 将Activity与创建的对象关联</span><br><span class="line">    activity.attach(appContext,..., r.token,app,...参数 );</span><br><span class="line">    &#x2F;&#x2F;5. 调用Activity的onCreate方法</span><br><span class="line">    mInstrumentation.callActivityOnCreate(activity, r.state);</span><br><span class="line">    &#x2F;&#x2F;6. 记录Activity信息</span><br><span class="line">    mActivities.put(r.token, r);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p>实例化Activity对象<br> 从r.packageInfo(LoadedApk)上记录的ClassLoader上加载class,并实例化</p>
+</li>
+<li><p>为Activity创建Application对象</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public Application makeApplication(boolean forceDefaultAppClass,</span><br><span class="line">    Instrumentation instrumentation) &#123;</span><br><span class="line">    &#x2F;&#x2F;mApplication为单例，整个进程有且存在一个</span><br><span class="line">    if (mApplication !&#x3D; null) &#123;</span><br><span class="line">        return mApplication;</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;创建Application对象</span><br><span class="line">    Application app &#x3D; null;</span><br><span class="line">    java.lang.ClassLoader cl &#x3D; getClassLoader();</span><br><span class="line">    ContextImpl appContext &#x3D; ContextImpl.createAppContext(mActivityThread, this);</span><br><span class="line">    app &#x3D; mActivityThread.mInstrumentation.newApplication(cl, appClass, appContext);</span><br><span class="line">    appContext.setOuterContext(app);</span><br><span class="line">    retrun app;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>为Activity创建ContextImpl对象</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">private Context createBaseContextForActivity(ActivityClientRecord r, final Activity activity)     &#123;</span><br><span class="line">    ContextImpl appContext &#x3D; ContextImpl.createActivityContext(</span><br><span class="line">            this, r.packageInfo, displayId, r.overrideConfig);</span><br><span class="line">    appContext.setOuterContext(activity);</span><br><span class="line">    retrun appContext;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>调用Activity的attach方法,将数据和Activity绑定</p>
+</li>
+<li><p>通过Instrumentaion调用Activity的onCreate方法</p>
+</li>
+<li><p>记录Activity信息</p>
+</li>
+</ol>
+<p>到此，Activity启动过程的主要路径分析完毕，<br>下面探究Activity初始化过程</p>
+<hr>
+<h2 id="Activity初始化"><a href="#Activity初始化" class="headerlink" title="Activity初始化"></a>Activity初始化</h2><h3 id="Activity-attach"><a href="#Activity-attach" class="headerlink" title="Activity.attach"></a>Activity.attach</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Activity-&gt;PhoneWindow: new</span><br><span class="line">Activity-&gt;ContextImpl: getSystemService</span><br><span class="line">ContextImpl-&gt;SystemServiceRegistry: getSystemService</span><br><span class="line">Activity-&gt;PhoneWindow: setWindowManager</span><br><span class="line">PhoneWindow-&gt;WindowManagerImpl: createLocalWindowManager</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** Activity **&#x2F;</span><br><span class="line">final void attach(Context context,ActivityThread aThread,..., IBinder token,...,Application application ...) &#123;</span><br><span class="line">    attachBaseContext(context);</span><br><span class="line">    &#x2F;&#x2F;创建窗口</span><br><span class="line">    mWindow &#x3D; new PhoneWindow(this);</span><br><span class="line">    mUiThread &#x3D; Thread.currentThread();  </span><br><span class="line">    mMainThread &#x3D; aThread;</span><br><span class="line">    &#x2F;&#x2F;用于和AMS服务通信的IApplicationToken.Proxy代理对象</span><br><span class="line">    mToken &#x3D; token;</span><br><span class="line">    &#x2F;&#x2F;设置窗口管理器</span><br><span class="line">    mWindow.setWindowManager((WindowManager)context.getSystemService(Context.WINDOW_SERVICE),mToken, ...);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ContextImpl.getSystemService</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * Gets a system service from a given context.</span><br><span class="line">*&#x2F;</span><br><span class="line">public static Object getSystemService(ContextImpl ctx, String name) &#123;</span><br><span class="line">    ServiceFetcher&lt;?&gt; fetcher &#x3D; SYSTEM_SERVICE_FETCHERS.get(name);</span><br><span class="line">    return fetcher !&#x3D; null ? fetcher.getService(ctx) : null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以String为key从ServiceFetcher上找，看注册时的实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">registerService(Context.WINDOW_SERVICE, WindowManager.class,new CachedServiceFetcher&lt;WindowManager&gt;() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public WindowManager createService(ContextImpl ctx) &#123;</span><br><span class="line">        return new WindowManagerImpl(ctx.getDisplay());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>最后返回的是一个WindowManagerImpl对象。<br>接着看mWindow.setWindowManager方法实现：<br>android.view.window</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public void setWindowManager(WindowManager wm, IBinder appToken, String appName,</span><br><span class="line">            boolean hardwareAccelerated) &#123;</span><br><span class="line">    mWindowManager &#x3D; ((WindowManagerImpl)wm).createLocalWindowManager(this);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>android.view.WindowManagerImpl</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public WindowManagerImpl createLocalWindowManager(Window parentWindow) &#123;</span><br><span class="line">    return new WindowManagerImpl(mDisplay, parentWindow);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明</strong></p>
+<ul>
+<li>WindowManagerImpl为重量级的窗口管理器，应用程序进程中有且只有一个WindowManagerImpl实例(ServiceFetcher中缓存的对象)，它管理了应用程序进程中创建的所有PhoneWindow窗口。</li>
+<li>Activity并没有直接引用WindowManagerImpl实例，Android系统为每一个启动的Activity创建了一个轻量级的窗口管理器LocalWindowManager( createLocalWindowManager方法产生 )，</li>
+<li>每个Activity通过LocalWindowManager来访问WindowManagerImpl</li>
+</ul>
+<p>Activity、LocalWindowManage、WindowManagerImpl三者之间的关系如下图所示：</p>
+<p><img src="http://static.zybuluo.com/qh438406812/nf03z9v3wj1s6ng0s24gselw/20140630161945343.png" alt="20140630161945343.png-25.6kB"></p>
+<p>到此,attach过程完毕，继续看onCrate中做了哪些事情</p>
+<h3 id="Activity-onCreate"><a href="#Activity-onCreate" class="headerlink" title="Activity.onCreate"></a>Activity.onCreate</h3><p>先上一张onCreate过程中的函数调用时序图</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Activity-&gt;Activity: onCreate</span><br><span class="line">Activity-&gt;PhoneWindow: setContentView</span><br><span class="line">PhoneWindow-&gt;PhoneWindow: installDecor</span><br><span class="line">PhoneWindow-&gt;DecorView: newInstance</span><br><span class="line">PhoneWindow-&gt;PhoneWindow: generateLayout</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public void onCreate(Bundle savedInstanceState) &#123;  </span><br><span class="line">    super.onCreate(savedInstanceState);  </span><br><span class="line">    setContentView(R.layout.main_activity);  </span><br><span class="line">    ...  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在程序中，一般通过函数setContentView设置需要显示的View.<br>而真正的实现是在PhoneWindow的setContentView函数中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** PhoneWindow **&#x2F;</span><br><span class="line">public void setContentView(int layoutResID) &#123;  </span><br><span class="line">    &#x2F;&#x2F;如果窗口顶级视图对象为空，则创建窗口视图对象  </span><br><span class="line">    if (mContentParent &#x3D;&#x3D; null) &#123;  </span><br><span class="line">        installDecor();  </span><br><span class="line">    &#125; else &#123;&#x2F;&#x2F;否则只是移除该视图对象中的其他视图  </span><br><span class="line">        mContentParent.removeAllViews();  </span><br><span class="line">    &#125;  </span><br><span class="line">    &#x2F;&#x2F;加载布局文件，并将布局文件中的所有视图对象添加到mContentParent容器中  </span><br><span class="line">    mLayoutInflater.inflate(layoutResID, mContentParent);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第5行函数生成了一个根View: <code>DecorView</code><br>DecorView中包括了标题栏以、自定义显示区域mContentParent、动作条等等内容<br>第10行函数将自定义的View记载到自定义显示区域mContentParent上<br><img src="http://static.zybuluo.com/qh438406812/r3lfpoyfpyvu3zaiudch6qz6/20140630165258140.png" alt="20140630165258140.png-9.9kB"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">private void installDecor() &#123;  </span><br><span class="line">    if (mDecor &#x3D;&#x3D; null) &#123;  </span><br><span class="line">        &#x2F;&#x2F;返回DecorView,继承自FrameLayout</span><br><span class="line">        mDecor &#x3D; generateDecor();  </span><br><span class="line">        mContentParent &#x3D; generateLayout(mDecor);</span><br><span class="line">    &#125;  </span><br><span class="line">    if (mContentParent &#x3D;&#x3D; null) &#123;  </span><br><span class="line">        mContentParent &#x3D; generateLayout(mDecor);  </span><br><span class="line">        &#x2F;&#x2F;应用程序窗口标题栏  </span><br><span class="line">        &#x2F;&#x2F;应用程序窗口动作条  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><ol>
+<li>Activity窗口对象的创建，通过attach函数来完成；</li>
+<li>Activity视图对象的创建，通过setContentView函数来完成</li>
+</ol>
+<h2 id="Activity关联Window"><a href="#Activity关联Window" class="headerlink" title="Activity关联Window"></a>Activity关联Window</h2><p>老规矩，献上一张时序图<br><img src="/image/android/ancivity_handle_resume.svg" alt=""></p>
+<p>先看handleResumeActivity函数实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** ActivityThread **&#x2F;</span><br><span class="line">final void handleResumeActivity(IBinder token,boolean clearHide, boolean isForward, boolean reallyResume) &#123;</span><br><span class="line">    &#x2F;&#x2F;根据token从之前记录的信息中获取Activity信息</span><br><span class="line">    ActivityClientRecord r &#x3D; performResumeActivity(token, clearHide);</span><br><span class="line">    final Activity a &#x3D; r.activity;</span><br><span class="line">    &#x2F;&#x2F;获取Activity的window信息</span><br><span class="line">    r.window &#x3D; r.activity.getWindow();</span><br><span class="line">    View decor &#x3D; r.window.getDecorView();</span><br><span class="line">    ViewManager wm &#x3D; a.getWindowManager();</span><br><span class="line">    &#x2F;&#x2F;将视图对象保存到Activity的成员变量mDecor中  </span><br><span class="line">    a.mDecor &#x3D; decor;</span><br><span class="line">    &#x2F;&#x2F;将视图decor添加到Activity所在窗口管理器中</span><br><span class="line">    wm.addView(decor, l);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>WindowManagerImpl</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public final void addView(View view, ViewGroup.LayoutParams params) &#123;</span><br><span class="line">    applyDefaultToken(params);</span><br><span class="line">    mGlobal.addView(view, params, mDisplay, mParentWindow);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>WindowManagerGlobal</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">public void addView(View view, ViewGroup.LayoutParams params,Display display, Window parentWindow) &#123;</span><br><span class="line">    ViewRootImpl root;</span><br><span class="line">    int index &#x3D; findViewLocked(view, false);</span><br><span class="line">    if (index &gt;&#x3D; 0) &#123;</span><br><span class="line">        &#x2F;&#x2F;如果已经存在，异常退出</span><br><span class="line">        throw new IllegalStateException(&quot;View &quot; + view</span><br><span class="line">            + &quot; has already been added to the window manager.&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F; 为Activity创建一个ViewRootImpl对象</span><br><span class="line">    root &#x3D; new ViewRootImpl(view.getContext(), display);</span><br><span class="line">    &#x2F;&#x2F;记录</span><br><span class="line">    mViews.add(view);</span><br><span class="line">    mRoots.add(root);</span><br><span class="line">    mParams.add(wparams);</span><br><span class="line">    &#x2F;&#x2F;添加view</span><br><span class="line">    root.setView(view, wparams, panelParentView);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="http://static.zybuluo.com/qh438406812/asl6ny1z9dekr3mguhn1vmof/20140630171741143.png" alt="20140630171741143.png-30.7kB"></p>
+<h3 id="ViewRootImpl构造过程"><a href="#ViewRootImpl构造过程" class="headerlink" title="ViewRootImpl构造过程"></a>ViewRootImpl构造过程</h3><p>ViewRootImpl</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">final Surface mSurface &#x3D; new Surface();</span><br><span class="line">final class ViewRootHandler extends Handler &#123;</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">&#125;</span><br><span class="line">public ViewRootImpl(Context context, Display display) &#123;</span><br><span class="line">    &#x2F;&#x2F;返回缓存的WindowSession</span><br><span class="line">    mWindowSession &#x3D; WindowManagerGlobal.getWindowSession();</span><br><span class="line">    mWindow &#x3D; new W(this);</span><br><span class="line">    mAttachInfo &#x3D; new View.AttachInfo(mWindowSession, mWindow, display, this, mHandler, this);</span><br><span class="line">    mChoreographer &#x3D; Choreographer.getInstance();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>通过WindowManagerGlobal.getWindowSession()得到IWindowSession的代理对象，用于和WMS通信</li>
+<li>创建了一个W本地Binder对象，用于WMS通知应用程序进程</li>
+<li>采用单例模式创建了一个Choreographer对象，用于统一调度窗口绘图</li>
+<li>创建ViewRootHandler对象，用于处理当前视图消息</li>
+<li>构造一个AttachInfo对象</li>
+<li>创建Surface对象，用于绘制当前视图,该Surface对象的真正创建是由WMS来完成</li>
+</ol>
+<p><img src="http://static.zybuluo.com/qh438406812/j93ra0h646jhiybeqvt99wx5/20140630184739343.png" alt="20140630184739343.png-36.5kB"></p>
+<h3 id="视图View的添加过程"><a href="#视图View的添加过程" class="headerlink" title="视图View的添加过程"></a>视图View的添加过程</h3><p>ViewRootImpl</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public void setView(View view, WindowManager.LayoutParams attrs, View panelParentView) &#123;</span><br><span class="line">    if (mView &#x3D;&#x3D; null) &#123;</span><br><span class="line">        mView &#x3D; view;</span><br><span class="line">        mAttachInfo.mRootView &#x3D; view;</span><br><span class="line">        &#x2F;&#x2F; 在添加窗口前进行UI布局  </span><br><span class="line">        requestLayout();</span><br><span class="line">        &#x2F;&#x2F;将窗口添加到WMS服务中</span><br><span class="line">        res &#x3D; sWindowSession.add(mWindow, 参数);  </span><br><span class="line">        &#x2F;&#x2F;建立消息通道</span><br><span class="line">        if (mInputChannel !&#x3D; null) &#123;</span><br><span class="line">            &#x2F;&#x2F;...</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="窗口布局-绘制过程"><a href="#窗口布局-绘制过程" class="headerlink" title="窗口布局-绘制过程"></a>窗口布局-绘制过程</h3><p>ViewRootImpl</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public void requestLayout() &#123; </span><br><span class="line">    scheduleTraversals();  </span><br><span class="line">&#125; </span><br><span class="line">void scheduleTraversals() &#123;</span><br><span class="line">    &#x2F;&#x2F;向Choreographer注册回调</span><br><span class="line">    mChoreographer.postCallback(Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);</span><br><span class="line">    scheduleConsumeBatchedInput();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>TraversalRunnable 的run方法执行了doTraversal()函数，而doTraversal又调用performTraversals()函数.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">private void performTraversals() &#123; </span><br><span class="line">    &#x2F;&#x2F;1.执行窗口测量 </span><br><span class="line">    measureHierarchy(host, lp, res,  desiredWindowWidth, desiredWindowHeight); </span><br><span class="line">    &#x2F;&#x2F;2. 向WMS服务添加窗口</span><br><span class="line">    relayoutWindow(params, viewVisibility, insetsPending)</span><br><span class="line">    &#x2F;&#x2F;3. View测量</span><br><span class="line">    performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);  </span><br><span class="line">    &#x2F;&#x2F;3. View布局</span><br><span class="line">    performLayout(); </span><br><span class="line">    &#x2F;&#x2F;4. View绘制</span><br><span class="line">    performDraw();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>relayoutWindow</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">private int relayoutWindow(WindowManager.LayoutParams params, 参数) throws RemoteException &#123;  </span><br><span class="line">    mWindowSession.relayout(mWindow, mSeq, params,参数,mSurface);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>performMeasure</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;mView &#x3D; DecorView</span><br><span class="line">mView.measure(childWidthMeasureSpec, childHeightMeasureSpec);</span><br></pre></td></tr></table></figure>
+<p>performLayout</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">private void performLayout() &#123; </span><br><span class="line">    &#x2F;&#x2F;host &#x3D; view</span><br><span class="line">     host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>performDraw</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">private void performDraw() &#123;</span><br><span class="line">    draw(fullRedrawNeeded);  </span><br><span class="line">&#125;</span><br><span class="line">private void draw(boolean fullRedrawNeeded) &#123;</span><br><span class="line">    &#x2F;&#x2F;硬件渲染</span><br><span class="line">    if(...)&#123;</span><br><span class="line">          mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        &#x2F;&#x2F;软件渲染</span><br><span class="line">        drawSoftware(surface, mAttachInfo, xOffset, yOffset, scalingRequired, dirty)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="窗口添加过程"><a href="#窗口添加过程" class="headerlink" title="窗口添加过程"></a>窗口添加过程</h3><p>Session.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public int add(IWindow window,...) &#123;  </span><br><span class="line">    return mService.addWindow(this, window,...);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>WindowManagerService</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public int addWindow(Session session,IWindow client, ...) &#123;  </span><br><span class="line">    &#x2F;&#x2F;判断窗口是否已经存在  </span><br><span class="line">    if (mWindowMap.containsKey(client.asBinder())) &#123;  </span><br><span class="line">        return WindowManagerImpl.ADD_DUPLICATE_ADD;  </span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;根据attrs.token从mWindowMap中取出应用程序窗口在WMS服务中的描述符WindowState  </span><br><span class="line">    attachedWindow &#x3D; windowForClientLocked(null, attrs.token, false);  </span><br><span class="line">    &#x2F;&#x2F;根据attrs.token从mTokenMap中取出应用程序窗口在WMS服务中的 WindowToken</span><br><span class="line">    WindowToken token &#x3D; mTokenMap.get(attrs.token); </span><br><span class="line">    &#x2F;&#x2F;为Activity窗口创建WindowState对象  </span><br><span class="line">    win &#x3D; new WindowState(this, session, client, token,  attachedWindow, seq, attrs, viewVisibility);</span><br><span class="line">    &#x2F;&#x2F;设置消息通道</span><br><span class="line">    win.setInputChannel(inputChannels[0]);  </span><br><span class="line">    &#x2F;&#x2F;保存</span><br><span class="line">    mTokenMap.put(attrs.token, token); </span><br><span class="line">    win.attach(); </span><br><span class="line">    mWindowMap.put(client.asBinder(), win); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>WMS保存了Window的信息，如下：<br>|Map类型|key|value|<br>|:—|:—|:—|<br>|mWindowMap|IWindow.Proxy|WindowState|<br>|mTokenMap|IWindow.Proxy/Token|WindowToken|</p>
+<p>之后，调用WindowState的attach函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">void attach() &#123;  </span><br><span class="line">    mSession.windowAddedLocked();  </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void windowAddedLocked() &#123;  </span><br><span class="line">    &#x2F;&#x2F;WMS增加一个Window记录</span><br><span class="line">    if (mSurfaceSession &#x3D;&#x3D; null) &#123;  </span><br><span class="line">        mSurfaceSession &#x3D; new SurfaceSession();  </span><br><span class="line">        mService.mSessions.add(this);  </span><br><span class="line">    &#125;  </span><br><span class="line">    mNumWindow++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>WMS服务端都创建的对象</p>
+<ol>
+<li>WindowState对象，是应用程序窗口在WMS服务端的描述符；</li>
+<li>Session对象，应用程序进程与WMS服务会话通道</li>
+<li>SurfaceSession对象，应用程序进程与SurfaceFlinger的会话通道；</li>
+</ol>
+<hr>
+<p>参考:<br><a href="http://blog.csdn.net/yangwen123/article/details/35987609" target="_blank" rel="noopener">Android应用程序窗口设计框架介绍</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/01/20/android/droid_plugin_service/" rel="prev" title="插件化DroidPlugin-Service">
+      <i class="fa fa-chevron-left"></i> 插件化DroidPlugin-Service
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/02/01/android/droid_plugin_provider/" rel="next" title="插件化DroidPlugin-Provider">
+      插件化DroidPlugin-Provider <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#要点"><span class="nav-number">1.</span> <span class="nav-text">要点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Activity启动过程"><span class="nav-number">1.1.</span> <span class="nav-text">Activity启动过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#startActivity"><span class="nav-number">1.1.1.</span> <span class="nav-text">startActivity</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#performLaunchActivity"><span class="nav-number">1.1.2.</span> <span class="nav-text">performLaunchActivity</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Activity初始化"><span class="nav-number">1.2.</span> <span class="nav-text">Activity初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Activity-attach"><span class="nav-number">1.2.1.</span> <span class="nav-text">Activity.attach</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Activity-onCreate"><span class="nav-number">1.2.2.</span> <span class="nav-text">Activity.onCreate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">1.2.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Activity关联Window"><span class="nav-number">1.3.</span> <span class="nav-text">Activity关联Window</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ViewRootImpl构造过程"><span class="nav-number">1.3.1.</span> <span class="nav-text">ViewRootImpl构造过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#视图View的添加过程"><span class="nav-number">1.3.2.</span> <span class="nav-text">视图View的添加过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#窗口布局-绘制过程"><span class="nav-number">1.3.3.</span> <span class="nav-text">窗口布局-绘制过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#窗口添加过程"><span class="nav-number">1.3.4.</span> <span class="nav-text">窗口添加过程</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

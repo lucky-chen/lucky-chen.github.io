@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="主要思想 host预先申请若干stubProvider hook ams，插件查询provider时，返回stubProVider 在 stubProvider 中操控插件的providr对象">
+<meta property="og:type" content="article">
+<meta property="og:title" content="插件化DroidPlugin-Provider">
+<meta property="og:url" content="https://lucky-chen.github.io/2017/02/01/android/droid_plugin_provider/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="主要思想 host预先申请若干stubProvider hook ams，插件查询provider时，返回stubProVider 在 stubProvider 中操控插件的providr对象">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-01-31T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-08T07:06:27.475Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2017/02/01/android/droid_plugin_provider/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>插件化DroidPlugin-Provider | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2017/02/01/android/droid_plugin_provider/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          插件化DroidPlugin-Provider
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-02-01 00:00:00" itemprop="dateCreated datePublished" datetime="2017-02-01T00:00:00+08:00">2017-02-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-08 15:06:27" itemprop="dateModified" datetime="2020-06-08T15:06:27+08:00">2020-06-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="主要思想"><a href="#主要思想" class="headerlink" title="主要思想"></a>主要思想</h2><ol>
+<li>host预先申请若干stubProvider</li>
+<li>hook ams，插件查询provider时，返回stubProVider</li>
+<li>在 stubProvider 中操控插件的providr对象</li>
+</ol>
+<a id="more"></a>
+
+<h2 id="Provider-查询"><a href="#Provider-查询" class="headerlink" title="Provider 查询"></a>Provider 查询</h2><ol>
+<li><p>源码关键路径分析</p>
+<p> getContext().getContentResolver().XXX最终会调用到ActivityThread的acquireProvider方法</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public final IContentProvider acquireProvider( Context c, String auth ...）&#123;</span><br><span class="line">    final IContentProvider provider &#x3D; acquireExistingProvider(c, auth, userId, stable);</span><br><span class="line">    if (provider !&#x3D; null) &#123;</span><br><span class="line">        return provider;</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;查询AMS</span><br><span class="line">    holder &#x3D; ActivityManagerNative.getDefault().getContentProvider(</span><br><span class="line">                getApplicationThread(), auth, userId, stable);</span><br><span class="line">    return holder.provider;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 系统先到调用acquireExistingProvider方法查询，如果有返回。没有，查询AMS。很明显，acquireExistingProvider方法应该是查了缓存</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public final IContentProvider acquireExistingProvider(）&#123;</span><br><span class="line">    &#x2F;&#x2F;果然只查了个缓存。</span><br><span class="line">    final ProviderClientRecord pr &#x3D; mProviderMap.get(key);</span><br><span class="line">    if (pr &#x3D;&#x3D; null) return null;</span><br><span class="line">    IContentProvider provider &#x3D; pr.mProvider;</span><br><span class="line">    return provider;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这里有两种hook方案，一种是DroidPlugin的方法，hook掉AMS的getContentProvider方法，另外是把插件的provider信息直接放到缓存mProviderMap中。<br> 以hook掉AMS的getContentProvider方法为准</p>
+</blockquote>
+</li>
+<li><p>hook AMS getContentProvider</p>
+<p> 在IActivityManagerHookHandle类中登记hook方法:</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">protected void init() &#123;</span><br><span class="line">    sHookedMethodHandlers.put(&quot;getContentProvider&quot;, new getContentProvider(mHostContext));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 看hook方案的实现</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">protected boolean beforeInvoke(Object receiver, Method method, Object[] args)&#123;</span><br><span class="line">    String authority&#x3D;(String) args[1];</span><br><span class="line">    &#x2F;&#x2F;找到插件的provider记录</span><br><span class="line">    mTargetProvider &#x3D; PluginManager.getInstance().resolveContentProvider(PluginProcessManager.getCurrentVUid(), name, 0);</span><br><span class="line">    &#x2F;&#x2F;分配一个provider坑</span><br><span class="line">    mStubProvider &#x3D; PluginManager.getInstance().selectStubProviderInfo(mTargetProvider, name);</span><br><span class="line">    &#x2F;&#x2F;替换参数中的，让系统启动 stubProvider</span><br><span class="line">    args[index] &#x3D; mStubProvider.authority;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="stubProvider-实现"><a href="#stubProvider-实现" class="headerlink" title="stubProvider 实现"></a>stubProvider 实现</h2></li>
+<li><p>onCreate</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">先看增删改查的出处理</span><br><span class="line">&#x2F;** AbstractContentProviderStub **&#x2F;</span><br><span class="line">public Cursor query(Uri uri, String[] projection,</span><br><span class="line">                    String selection, String[] selectionArgs, String sortOrder) &#123;</span><br><span class="line">    String targetAuthority &#x3D; uri.getQueryParameter(Env.EXTRA_TARGET_AUTHORITY);</span><br><span class="line">    &#x2F;&#x2F;拿到插件provider的对象</span><br><span class="line">    ContentProviderClient client &#x3D; getContentProviderClient(targetAuthority);</span><br><span class="line">    &#x2F;&#x2F;返回插件provider的执行结果</span><br><span class="line">    return client.query(buildNewUri(uri, targetAuthority), projection, selection, selectionArgs, sortOrder);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 继续看getContentProviderClient函数</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">private synchronized ContentProviderClient getContentProviderClient(final String     targetAuthority) &#123;</span><br><span class="line">    ContentProviderClient client &#x3D; sClients.get(targetAuthority);</span><br><span class="line">    if (client !&#x3D; null) &#123;</span><br><span class="line">        return client;</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;..</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> sClient是一个map,很明显，这又是一个cache。cache中存储了插件provider的信息。继续看存储信息的时机。</p>
+</li>
+<li><p>加载provider信息<br> 在PluginProcessManager类中，有个preLoadApk方法</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">private static void preLoadApk(Context hostContext, String packageName) &#123;</span><br><span class="line">    Application application &#x3D; applicationMap.get(packageName);</span><br><span class="line">    installContentProviders(hostContext, application, packageName);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 根据插件的packageName拿到插件的Application，继续看installContentProviders方法</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">private static void installContentProviders(Context hostContext, Application app, String packageName) &#123;</span><br><span class="line">    &#x2F;&#x2F;获得stubProvider引用</span><br><span class="line">    AbstractContentProviderStub proxy &#x3D; AbstractContentProviderStub.getProxyInstance();</span><br><span class="line">    &#x2F;&#x2F;插件pkgInfo</span><br><span class="line">    PackageInfo pkgInfo &#x3D; PluginManager.getInstance().getPackageInfo(packageName, PackageManager.GET_PROVIDERS);</span><br><span class="line">    for (ProviderInfo providerInfo : pkgInfo.providers) &#123;</span><br><span class="line">        &#x2F;&#x2F;获取满足条件的插件的providr</span><br><span class="line">        ContentProviderClient localProvider &#x3D; app.getContentResolver().acquireContentProviderClient(providerInfo.authority);</span><br><span class="line">        &#x2F;&#x2F;绑定stubProvider</span><br><span class="line">        proxy.installClient(providerInfo, localProvider);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> AbstractContentProviderStub.getProxyInstance()返回的是stubProvider的引用</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** AbstractContentProviderStub **&#x2F;</span><br><span class="line">public boolean onCreate() &#123;</span><br><span class="line">    sProxy &#x3D; this;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static AbstractContentProviderStub getProxyInstance() &#123;</span><br><span class="line">    return sProxy;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 最后，看proxy.installClient方法，方法只将插件的provider放到缓存中</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public void installClient(ProviderInfo info, ContentProviderClient provider) &#123;</span><br><span class="line">    sClients.put(info.authority, provider);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 至此，provider插件化分析完毕</p>
+</li>
+</ol>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ol>
+<li>在插件加载时，程序缓存了插件pkg信息</li>
+<li>插件查询provider时，返回一个预先申请好的stubProvider</li>
+<li>将stubProvider与插件的provider绑定在一起，由stubProvider操控插件的provider</li>
+</ol>
+<hr>
+<p>参考：</p>
+<ol>
+<li><a href="http://weishu.me/2016/07/12/understand-plugin-framework-content-provider" target="_blank" rel="noopener">Android插件化原理解析——ContentProvider的插件化</a></li>
+<li><a href="http://blog.csdn.net/luoshengyang/article/details/6963418" target="_blank" rel="noopener">老罗-Android应用程序组件Content Provider的启动过程源代码分析</a></li>
+<li><a href="https://github.com/Qihoo360/DroidPlugin" target="_blank" rel="noopener">DroidPlugin Github</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/01/25/android/activity_ams_wms/" rel="prev" title="Android源码之Activity与AMS、WMS联系">
+      <i class="fa fa-chevron-left"></i> Android源码之Activity与AMS、WMS联系
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/02/07/android/droid_plugin_receiver/" rel="next" title="插件化DroidPlugin-Receiver">
+      插件化DroidPlugin-Receiver <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#主要思想"><span class="nav-number">1.</span> <span class="nav-text">主要思想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Provider-查询"><span class="nav-number">2.</span> <span class="nav-text">Provider 查询</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#stubProvider-实现"><span class="nav-number">3.</span> <span class="nav-text">stubProvider 实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

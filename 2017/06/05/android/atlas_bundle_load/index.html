@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="概述对应官网文档地址 将流程分为三大部分    部分 说明 对应步骤    第一部分 加载时机的触发逻辑 1-7   第二部分 bundle加载过程 8-15   第三部分 bundle代码初始化 16-19">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android动态化容器框架Atlas之bundle加载过程">
+<meta property="og:url" content="https://lucky-chen.github.io/2017/06/05/android/atlas_bundle_load/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="概述对应官网文档地址 将流程分为三大部分    部分 说明 对应步骤    第一部分 加载时机的触发逻辑 1-7   第二部分 bundle加载过程 8-15   第三部分 bundle代码初始化 16-19">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lucky-chen.github.io/image/android/bundle_load_img.svg">
+<meta property="og:image" content="https://lucky-chen.github.io/image/android/bundle_load_part_2_img.svg">
+<meta property="article:published_time" content="2017-06-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-09T08:07:50.881Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lucky-chen.github.io/image/android/bundle_load_img.svg">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2017/06/05/android/atlas_bundle_load/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android动态化容器框架Atlas之bundle加载过程 | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2017/06/05/android/atlas_bundle_load/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android动态化容器框架Atlas之bundle加载过程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-06-05 00:00:00" itemprop="dateCreated datePublished" datetime="2017-06-05T00:00:00+08:00">2017-06-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-09 16:07:50" itemprop="dateModified" datetime="2020-06-09T16:07:50+08:00">2020-06-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p><a href="https://alibaba.github.io/atlas/code_read/atlas_gradle_apk/atlas_atlas_gradle_apk.html" target="_blank" rel="noopener">对应官网文档地址</a></p>
+<p>将流程分为三大部分</p>
+<table>
+<thead>
+<tr>
+<th>部分</th>
+<th>说明</th>
+<th>对应步骤</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>第一部分</td>
+<td>加载时机的触发逻辑</td>
+<td>1-7</td>
+</tr>
+<tr>
+<td>第二部分</td>
+<td>bundle加载过程</td>
+<td>8-15</td>
+</tr>
+<tr>
+<td>第三部分</td>
+<td>bundle代码初始化</td>
+<td>16-19</td>
+</tr>
+</tbody></table>
+<a id="more"></a>
+
+
+<ul>
+<li>class</li>
+<li>resource</li>
+</ul>
+<p><img src="/image/android/bundle_load_img.svg" alt=""></p>
+<p>注意图中的箭头</p>
+<ul>
+<li>实线箭头表示运行在主线程</li>
+<li>虚线箭头表示运行在HandlerThread中</li>
+</ul>
+<p>将流程分为三大部分</p>
+<table>
+<thead>
+<tr>
+<th>部分</th>
+<th>说明</th>
+<th>对应步骤</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>第一部分</td>
+<td>加载时机的触发逻辑</td>
+<td>1-7</td>
+</tr>
+<tr>
+<td>第二部分</td>
+<td>bundle加载过程</td>
+<td>8-15</td>
+</tr>
+<tr>
+<td>第三部分</td>
+<td>bundle代码初始化</td>
+<td>16-19</td>
+</tr>
+</tbody></table>
+<h1 id="第一部分-触发时机"><a href="#第一部分-触发时机" class="headerlink" title="第一部分 触发时机"></a>第一部分 触发时机</h1><h2 id="入口"><a href="#入口" class="headerlink" title="入口"></a>入口</h2><p>以在MainActivity中点击secondebundle为例</p>
+<p>MainActivity.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">case R.id.navigation_dashboard:</span><br><span class="line">	switchToActivity(&quot;second&quot;,&quot;com.taobao.secondbundle.SecondBundleActivity&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>switchActivity 辗调用，会执行到第2步<code>execStartChildActivityInternal</code>方法中</p>
+<h2 id="execStartChildActivityInternal"><a href="#execStartChildActivityInternal" class="headerlink" title="execStartChildActivityInternal"></a>execStartChildActivityInternal</h2><p>ActivityGroupDelegate.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public void execStartChildActivityInternal(ViewGroup container,String key, Intent intent)&#123;</span><br><span class="line">	String bundleName &#x3D; AtlasBundleInfoManager.instance().getBundleForComponet(componentName);</span><br><span class="line">	if(!TextUtils.isEmpty(bundleName))&#123;</span><br><span class="line">		BundleImpl impl &#x3D; (BundleImpl) Atlas.getInstance().getBundle(bundleName);</span><br><span class="line">		if(impl!&#x3D;null&amp;&amp;impl.checkValidate()) &#123;	&#125;else &#123;</span><br><span class="line">		&#x2F;&#x2F;...</span><br><span class="line">		asyncStartActivity(container,key,bundleName,intent);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>首先，根据componentName即<code>com.taobao.secondbundle.SecondBundleActivity</code>,查询bundle的名称。在<a href="atlas_start_2.md">atlas启动过程(下)</a>中，我们知道AtlasBundleInfoManager中存储了几乎所有bundle的信息，所以返回 bundleName 就是 <code>com.taobao.secondbundle</code>。</li>
+<li>然后，根据bundlename，去查询bundle加载后的结构体- <code>BundleImpl</code>。由于secondbundle之前并没有加载进来，所以会执行到第3步<code>asyncStartActivity</code>方法。</li>
+</ul>
+<p>asyncStartActivity最终调用了BundleUtil的方法，我们直接看第4步 <code>checkBundleStateAsync</code></p>
+<h2 id="checkBundleStateAsync"><a href="#checkBundleStateAsync" class="headerlink" title="checkBundleStateAsync"></a>checkBundleStateAsync</h2><p>BundleUtil.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">public static boolean checkBundleArrayStateAsync(final String[] bundlesName, final Runnable bundleActivated, final Runnable bundleDisabled)&#123;</span><br><span class="line">	BundleInstaller installer &#x3D; BundleInstallerFetcher.obtainInstaller();</span><br><span class="line">	installer.installTransitivelyAsync(bundlesName, new BundleInstaller.InstallListener() &#123;</span><br><span class="line">		@Override</span><br><span class="line">		public void onFinished() &#123;</span><br><span class="line">			boolean success &#x3D; true;</span><br><span class="line">			BundleImpl tmp;</span><br><span class="line">			for(String bundleName : bundlesName)&#123;</span><br><span class="line">				if((tmp&#x3D;((BundleImpl) Atlas.getInstance().getBundle(bundleName)))&#x3D;&#x3D;null || !tmp.checkValidate())&#123;</span><br><span class="line">					success &#x3D; false;</span><br><span class="line">				&#125;else&#123;</span><br><span class="line">					tmp.startBundle();</span><br><span class="line">				&#125;</span><br><span class="line">          &#125;</span><br><span class="line">       &#125;);</span><br><span class="line">	return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这一步中，开始异步加载bundle，成功后，在主线程中回调<code>onFinished</code>(后面会提及),调用BundleImpl对象的startBundl方法，开始 <strong>第三部分</strong> 的初始化过程。 </p>
+<h2 id="deliveryTask"><a href="#deliveryTask" class="headerlink" title="deliveryTask"></a>deliveryTask</h2><p>第5、6步，主要是各种逻辑判断，之后辗转调用到7步。直接看第7步<code>deliveryTask</code>的函数实现。</p>
+<p>BundleUtil.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">deliveryTask</span><span class="params">(<span class="keyword">boolean</span> sync)</span></span>&#123;</span><br><span class="line">	Runnable installTask = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">synchronized</span> (BundleInstaller.<span class="keyword">this</span>) &#123;</span><br><span class="line">             	<span class="keyword">try</span>&#123;</span><br><span class="line">             		call();</span><br><span class="line">             	&#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">             		e.printStackTrace();</span><br><span class="line">             	&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">             		<span class="keyword">if</span> (mListener != <span class="keyword">null</span>) &#123;</span><br><span class="line">             			<span class="keyword">new</span> Handler(Looper.getMainLooper()).post(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">             				<span class="meta">@Override</span></span><br><span class="line">             				<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">             					mListener.onFinished();</span><br><span class="line">             				&#125;</span><br><span class="line">         		<span class="comment">//..</span></span><br><span class="line">        &#125;;</span><br><span class="line">        sBundleHandler.post(installTask);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数首先创建了一个异步任务 <code>installTask</code>,之后将任务提交给<code>sBundleHandler</code>。而<code>sBundleHandler</code>实际上关联的是一个HandlerThread,所以，<code>installTask</code>是运行在单独的线程中的。</p>
+<p>在 <code>installTask</code> 中</p>
+<ul>
+<li>调用了<code>call</code>函数</li>
+<li>向ui线程提交一个任务，用于回调<code>onFinished</code></li>
+</ul>
+<p>到目前为止，第一部分分析完毕，我们进入第二部分 <strong>加载过程</strong> </p>
+<h1 id="第二部分-加载过程"><a href="#第二部分-加载过程" class="headerlink" title="第二部分 加载过程"></a>第二部分 加载过程</h1><p>需要注意的是，<strong>第二部分整体是运行在 HandlerThread 中的。</strong></p>
+<p>回顾一下第二部分的运行时序</p>
+<p><img src="/image/android/bundle_load_part_2_img.svg" alt=""></p>
+<h2 id="call"><a href="#call" class="headerlink" title="call"></a>call</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">call()&#123;</span><br><span class="line">	&#x2F;&#x2F;...</span><br><span class="line">	if (FileUtils.getUsableSpace(Environment.getDataDirectory()) &gt;&#x3D; 5) &#123;</span><br><span class="line">		&#x2F;&#x2F;has enough space</span><br><span class="line">		if(AtlasBundleInfoManager.instance().isInternalBundle(bundleName)) &#123;</span><br><span class="line">			bundle &#x3D; installBundleFromApk(bundleName);</span><br><span class="line">			if (bundle !&#x3D; null) &#123;</span><br><span class="line">				((BundleImpl) bundle).optDexFile();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		throw new LowDiskException(&quot;no enough space&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	&#x2F;&#x2F;...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里有两个判断条件</p>
+<ul>
+<li>剩余存储空间满足</li>
+<li>是内置bundle</li>
+</ul>
+<p>当两个条件都满足时，执行bundle的安装和optDexFile操作。</p>
+<p>installBundleFromApk 又调用了 installNewBundle方法，直接看第9步 - installNewBundle 的实现。</p>
+<h2 id="installNewBundle"><a href="#installNewBundle" class="headerlink" title="installNewBundle"></a>installNewBundle</h2><p>Framework.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">static BundleImpl installNewBundle(final String location, final InputStream in)throws BundleException &#123;</span><br><span class="line">	&#x2F;&#x2F;...</span><br><span class="line">	BundleListing.BundleInfo info &#x3D; AtlasBundleInfoManager.instance().getBundleInfo(location);</span><br><span class="line">	BundleImpl bundle &#x3D; new BundleImpl(bundleDir, location, new BundleContext(), null, file,version,true,-1);</span><br><span class="line">	return bundle;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数很简单，获取bundle的信息，之后构造一个BundleImpl对象。</p>
+<p>有两个参数需要注意一下</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>bundleDir</td>
+<td>/data/data/com.taobao.demo/files/storage/com.taobao.secondbundle</td>
+</tr>
+<tr>
+<td>in</td>
+<td>指向 lib/armeabi/libcom_taobao_secondbundle.so</td>
+</tr>
+</tbody></table>
+<h2 id="BundleImpl"><a href="#BundleImpl" class="headerlink" title="BundleImpl"></a>BundleImpl</h2><p>来看BundleImpl的构造函数</p>
+<p>BundleImpl.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">BundleImpl(final File bundleDir, final String location, final BundleContext context, final InputStream stream,...) throws BundleException, IOException&#123;</span><br><span class="line">		if (stream !&#x3D; null) &#123;</span><br><span class="line">            this.archive &#x3D; new BundleArchive(location,bundleDir, stream,version, dexPatchVersion);</span><br><span class="line">        &#125; </span><br><span class="line">        </span><br><span class="line">        if (autoload) &#123;</span><br><span class="line">            resolveBundle();</span><br><span class="line">            Framework.bundles.put(location, this);</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先创建了一个BundleArchive对象，bundleArchive持有bundleDir和InputStream的引用，用来做dexOpt的( <strong>? todo</strong> )，暂时不关注，往下走</p>
+<h2 id="resolveBundle"><a href="#resolveBundle" class="headerlink" title="resolveBundle"></a>resolveBundle</h2><p>BundleImpl.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">resolveBundle</span><span class="params">()</span> <span class="keyword">throws</span> BundleException </span>&#123;</span><br><span class="line">	<span class="comment">//...</span></span><br><span class="line">	<span class="keyword">if</span> ( <span class="keyword">this</span>.classloader == <span class="keyword">null</span>)&#123;</span><br><span class="line">     <span class="comment">// create the bundle classloader</span></span><br><span class="line">        List&lt;String&gt; dependencies = AtlasBundleInfoManager.instance().getDependencyForBundle(location);</span><br><span class="line">        String nativeLibDir = getArchive().getCurrentRevision().getRevisionDir().getAbsolutePath()+<span class="string">"/lib"</span>+<span class="string">":"</span></span><br><span class="line">                + RuntimeVariables.androidApplication.getApplicationInfo().nativeLibraryDir+<span class="string">":"</span></span><br><span class="line">                +System.getProperty(<span class="string">"java.library.path"</span>);</span><br><span class="line">        <span class="keyword">if</span>(dependencies!=<span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">for</span> (String str : dependencies) &#123;</span><br><span class="line">                BundleImpl impl = (BundleImpl) Atlas.getInstance().getBundle(str);</span><br><span class="line">                <span class="keyword">if</span> (impl != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    nativeLibDir += <span class="string">":"</span>;</span><br><span class="line">                    File dependencyLibDir = <span class="keyword">new</span> File(impl.getArchive().getCurrentRevision().getRevisionDir(), <span class="string">"lib"</span>);</span><br><span class="line">                    nativeLibDir += dependencyLibDir;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">     <span class="keyword">this</span>.classloader = <span class="keyword">new</span> BundleClassLoader(<span class="keyword">this</span>,dependencies,nativeLibDir);</span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">// notify the listeners</span></span><br><span class="line">    Framework.notifyBundleListeners(<span class="number">0</span> <span class="comment">/*LOADED*/</span>, <span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为bundle创建一个classloader，在创建classloader的过程中</p>
+<ul>
+<li>指定bundle自身依赖so的路径</li>
+<li>指定依赖bundle所依赖so的路径</li>
+</ul>
+<p>比如在demo中 ，nativeLibDir的 值为 /data/user/0/com.taobao.demo/files/storage/com.taobao.secondbundle/version.1/lib:/data/app/com.taobao.demo-1/lib/x86:/vendor/lib:/system/lib</p>
+<p>创建完BundlerClassLoader后，在最后一行进行回调，这里的回调实现类是 BundleLifecycleHandler</p>
+<p>BundleLifecycleHandler.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> public void bundleChanged(final BundleEvent event)&#123;</span><br><span class="line">        switch (event.getType()) &#123;</span><br><span class="line">            case 0:&#x2F;* LOADED *&#x2F;</span><br><span class="line">                loaded(event.getBundle());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="loaded"><a href="#loaded" class="headerlink" title="loaded"></a>loaded</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">private void loaded(Bundle bundle) &#123; long time &#x3D; System.currentTimeMillis();</span><br><span class="line">        BundleImpl b &#x3D; (BundleImpl) bundle;</span><br><span class="line">        DelegateResources.addBundleResources(</span><br><span class="line">        	b.getArchive().getArchiveFile().getAbsolutePath()</span><br><span class="line">        );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>todo</strong> 资源处理实现说明</p>
+<p>回到第10步</p>
+<p>BundleImpl.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">BundleImpl(final File bundleDir, final String location...) &#123;</span><br><span class="line">	&#x2F;&#x2F;...</span><br><span class="line">	resolveBundle();</span><br><span class="line">	Framework.bundles.put(location, this);    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在resolveBundle函数执行周期内，主要完成了两件事</p>
+<ul>
+<li>为bundle创建了独立的ClassLoader</li>
+<li>将bundle中的资源添加到Resource上</li>
+</ul>
+<p>第二行函数将bundle的信息加入到已加载的列表中。</p>
+<p>完成之后，回到第8步，执行optDexFile方法。</p>
+<h3 id="optDexFile"><a href="#optDexFile" class="headerlink" title="optDexFile"></a>optDexFile</h3><p>。。。</p>
+<h1 id="第三部分-初始化过程"><a href="#第三部分-初始化过程" class="headerlink" title="第三部分 初始化过程"></a>第三部分 初始化过程</h1><p><strong>整个第三部分运行在 UI 线程中</strong></p>
+<p>bundle加载完成后，第7步，在UI线程中回调了完成的接口，调用了<code>startbundle</code>方法又经过辗转调用，到了BundleLifecycleHandler的<code>startd</code>方法中。</p>
+<p>BundleLifecycleHandler.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">started</span><span class="params">(Bundle bundle)</span></span>&#123;</span><br><span class="line">	BundleImpl b = (BundleImpl) bundle;</span><br><span class="line">	BundleListing.BundleInfo info = AtlasBundleInfoManager.instance().getBundleInfo(b.getLocation());</span><br><span class="line">	<span class="comment">//...</span></span><br><span class="line">	String appClassName = info.getApplicationName();</span><br><span class="line">	Application app = newApplication(appClassName, b.getClassLoader());</span><br><span class="line">	app.onCreate();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在第6行构造出bundle中注册的application对象，之后执行application的onCreate方法。对于appliation来说，似乎还差一个关键的<code>attachBaseContext</code>的入口函数调用，我们接着看构造过程。</p>
+<p>BundleLifecycleHandler.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">protected static Application newApplication(String applicationClassName, ClassLoader cl) throws ApplicationInitException &#123;</span><br><span class="line">	final Class&lt;?&gt; applicationClass &#x3D; cl.loadClass(applicationClassName);</span><br><span class="line">	Application app &#x3D; (Application) applicationClass.newInstance();</span><br><span class="line">	AtlasHacks.Application_attach.invoke(app, RuntimeVariables.androidApplication);</span><br><span class="line">	return app;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先，根据类名加载对应的class，之后反射执行applciation的attach方法。</p>
+<p>在<a href="atlas_start_2.md">atlas启动过程(下)</a>下中，解释过，application的attach方法最终会调用到<code>attachBaseContext</code>方法。</p>
+<p>最后，大概看一下DelegateClassLoader加载bundle中class的过程。</p>
+<p>DelegateClassLoader.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">protected Class&lt;?&gt; findClass(String className) throws ClassNotFoundException &#123;</span><br><span class="line">	Class&lt;?&gt; clazz &#x3D; loadFromInstalledBundles(className,false);</span><br><span class="line">	&#x2F;&#x2F;...</span><br><span class="line">	return clazz;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static Class&lt;?&gt; loadFromInstalledBundles(String className,boolean safe)</span><br><span class="line">            throws ClassNotFoundException &#123;</span><br><span class="line">	String bundleName &#x3D; AtlasBundleInfoManager.instance().getBundleForComponet(className);</span><br><span class="line">	BundleImpl bundle &#x3D; (BundleImpl) Atlas.getInstance().getBundle(bundleName);</span><br><span class="line">	&#x2F;&#x2F;...</span><br><span class="line">	ClassLoader classloader &#x3D; bundle.getClassLoader();</span><br><span class="line">	Class&lt;?&gt;  clazz &#x3D; classloader.loadClass(className);</span><br><span class="line">	return clazz;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，classloader先从bundle上去找的。而<code>loadFromInstalledBundles</code>逻辑如下:</p>
+<ol>
+<li>从<code>AtlasBundleInfoManager</code>上已加载的列表中找到对应bunde(在第在第10步中添加)</li>
+<li>从对应bundle上的classloader上加载对应的class。</li>
+</ol>
+<hr>
+<p>到这里为止，整个bundle的加载、初始化过程分析完毕。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/05/21/android/atlas_start_2/" rel="prev" title="Android动态化容器框架Atlas启动过程(下)">
+      <i class="fa fa-chevron-left"></i> Android动态化容器框架Atlas启动过程(下)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/11/21/weex_rn/weex_architecture/" rel="next" title="Weex架构设计思想和原理">
+      Weex架构设计思想和原理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第一部分-触发时机"><span class="nav-number">2.</span> <span class="nav-text">第一部分 触发时机</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#入口"><span class="nav-number">2.1.</span> <span class="nav-text">入口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#execStartChildActivityInternal"><span class="nav-number">2.2.</span> <span class="nav-text">execStartChildActivityInternal</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#checkBundleStateAsync"><span class="nav-number">2.3.</span> <span class="nav-text">checkBundleStateAsync</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deliveryTask"><span class="nav-number">2.4.</span> <span class="nav-text">deliveryTask</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第二部分-加载过程"><span class="nav-number">3.</span> <span class="nav-text">第二部分 加载过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#call"><span class="nav-number">3.1.</span> <span class="nav-text">call</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#installNewBundle"><span class="nav-number">3.2.</span> <span class="nav-text">installNewBundle</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BundleImpl"><span class="nav-number">3.3.</span> <span class="nav-text">BundleImpl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#resolveBundle"><span class="nav-number">3.4.</span> <span class="nav-text">resolveBundle</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#loaded"><span class="nav-number">3.5.</span> <span class="nav-text">loaded</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#optDexFile"><span class="nav-number">3.5.1.</span> <span class="nav-text">optDexFile</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第三部分-初始化过程"><span class="nav-number">4.</span> <span class="nav-text">第三部分 初始化过程</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

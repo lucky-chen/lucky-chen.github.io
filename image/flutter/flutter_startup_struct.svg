@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="631px" preserveAspectRatio="none" style="width:862px;height:631px;" version="1.1" viewBox="0 0 862 631" width="862px" zoomAndPan="magnify"><defs><filter height="300%" id="fg6ahy4bqjd2" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[1d765a825a3b75b16c8eb4b8cbcc0692]
+entity FlutterEngine--><rect fill="#FEFECE" filter="url(#fg6ahy4bqjd2)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="118" x="359" y="8"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="98" x="369" y="30.9951">FlutterEngine</text><!--MD5=[b5123df0105f0e29b5586f7d97b4bfe9]
+entity FlutterJNI--><rect fill="#FEFECE" filter="url(#fg6ahy4bqjd2)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="87" x="81.5" y="104"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="67" x="91.5" y="126.9951">FlutterJNI</text><!--MD5=[30877241ffc649ff3b0a4de6a30dd987]
+entity AndroidShellHolder--><rect fill="#FEFECE" filter="url(#fg6ahy4bqjd2)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="158" x="46" y="200"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="138" x="56" y="222.9951">AndroidShellHolder</text><!--MD5=[a1aed9a82d6d1dbac36c5afc89027842]
+entity Shell--><rect fill="#FEFECE" filter="url(#fg6ahy4bqjd2)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="55" x="97.5" y="296"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="35" x="107.5" y="318.9951">Shell</text><!--MD5=[7e628bf4528e72e9c40afdf5156dded1]
+entity RuntimeConller--><rect fill="#FEFECE" filter="url(#fg6ahy4bqjd2)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="132" x="6" y="488"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="112" x="16" y="510.9951">RuntimeConller</text><!--MD5=[89b32fd22c7afa88e0ae1984250e1822]
+entity Engine--><rect fill="#FEFECE" filter="url(#fg6ahy4bqjd2)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="69" x="37.5" y="392"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="49" x="47.5" y="414.9951">Engine</text><!--MD5=[7e63192e0ef75a1eb0d790119757ed04]
+entity DartVM--><rect fill="#FEFECE" filter="url(#fg6ahy4bqjd2)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="74" x="142" y="392"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="54" x="152" y="414.9951">DartVM</text><!--MD5=[4d162fddb5be70ddf2a3bcdf1e7a8f06]
+entity DartIsolate--><rect fill="#FEFECE" filter="url(#fg6ahy4bqjd2)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="100" x="22" y="584"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="80" x="32" y="606.9951">DartIsolate</text><!--MD5=[856552e8a03319c48d7439478c80348e]
+entity FlutterRender--><rect fill="#FEFECE" filter="url(#fg6ahy4bqjd2)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="121" x="203.5" y="104"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="101" x="213.5" y="126.9951">FlutterRender</text><!--MD5=[776933277490ef239efb63d81ee42b82]
+entity DartExecutor--><rect fill="#FEFECE" filter="url(#fg6ahy4bqjd2)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="116" x="360" y="104"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="96" x="370" y="126.9951">DartExecutor</text><!--MD5=[b8b275bf127f615f08e2b2e6c1c20577]
+entity XXXChannel--><rect fill="#FEFECE" filter="url(#fg6ahy4bqjd2)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="108" x="511" y="104"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="88" x="521" y="126.9951">XXXChannel</text><!--MD5=[d65bd33f8f1460de882fa943d698ae3e]
+entity PlatformViewsController--><rect fill="#FEFECE" filter="url(#fg6ahy4bqjd2)" height="36.2969" style="stroke: #000000; stroke-width: 1.5;" width="197" x="654.5" y="104"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="177" x="664.5" y="126.9951">PlatformViewsController</text><!--MD5=[6ecc8e99c7f51cabc38a9103e9b8af61]
+reverse link FlutterEngine to FlutterJNI--><path d="M352.28,48.084 C296.206,66.074 217.162,91.433 168.597,107.013 " fill="none" id="FlutterEngine&lt;-FlutterJNI" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="364.94,44.023,358.0049,42.0472,353.5137,47.6889,360.4488,49.6647,364.94,44.023" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[b9348cd8727a4ebc9d9445c4ec1cf8b9]
+reverse link FlutterEngine to FlutterRender--><path d="M378.683,50.999 C351.574,67.546 316.193,89.142 291.941,103.945 " fill="none" id="FlutterEngine&lt;-FlutterRender" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="390.112,44.023,382.9067,43.7349,379.8694,50.2751,387.0747,50.5633,390.112,44.023" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[5c9aaab6a27c1ad499cffddb97c6940d]
+reverse link FlutterEngine to DartExecutor--><path d="M418,57.387 C418,72.785 418,90.912 418,103.868 " fill="none" id="FlutterEngine&lt;-DartExecutor" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="418,44.241,414,50.241,418,56.241,422,50.241,418,44.241" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[91e9a3ede198df746473d977d1a8328e]
+reverse link FlutterEngine to XXXChannel--><path d="M455.842,51.198 C481.585,67.66 515.031,89.047 538.081,103.786 " fill="none" id="FlutterEngine&lt;-XXXChannel" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="444.621,44.023,447.521,50.6253,454.7308,50.4877,451.8308,43.8854,444.621,44.023" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[53b574443b2d464ef048ecd92f58d95b]
+reverse link FlutterEngine to PlatformViewsController--><path d="M489.966,47.193 C550.238,64.106 635.302,87.974 692.21,103.942 " fill="none" id="FlutterEngine&lt;-PlatformViewsController" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="477.12,43.589,481.816,49.0614,488.6736,46.8315,483.9776,41.359,477.12,43.589" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[883f100c57bd543c12a760d863cdfbbe]
+reverse link FlutterJNI to AndroidShellHolder--><path d="M125,153.387 C125,168.785 125,186.912 125,199.868 " fill="none" id="FlutterJNI&lt;-AndroidShellHolder" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="125,140.241,121,146.241,125,152.241,129,146.241,125,140.241" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[a13a36ab5ade425b1a8371c9d093160d]
+reverse link AndroidShellHolder to Shell--><path d="M125,249.387 C125,264.785 125,282.912 125,295.868 " fill="none" id="AndroidShellHolder&lt;-Shell" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="125,236.241,121,242.241,125,248.241,129,242.241,125,236.241" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[aa6ce84361b97a63a6eb9c3a7b4a2609]
+reverse link Shell to Engine--><path d="M108.66,343.981 C99.8138,359.67 89.1883,378.515 81.6594,391.868 " fill="none" id="Shell&lt;-Engine" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="115.279,332.241,108.8477,335.5027,109.385,342.6938,115.8162,339.4321,115.279,332.241" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[75b374842b2bf01e5417a7a07a62d298]
+reverse link Shell to DartVM--><path d="M141.382,343.516 C150.447,359.296 161.411,378.383 169.158,391.868 " fill="none" id="Shell&lt;-DartVM" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="134.904,332.241,134.4246,339.4362,140.8819,342.646,141.3613,335.4509,134.904,332.241" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[b67effb125a3508776b2fc17753d8aad]
+reverse link Engine to RuntimeConller--><path d="M72,441.387 C72,456.785 72,474.912 72,487.868 " fill="none" id="Engine&lt;-RuntimeConller" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="72,428.241,68,434.241,72,440.241,76,434.241,72,428.241" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[547bbb5cd2a533d951abd2425dac493b]
+reverse link RuntimeConller to DartIsolate--><path d="M72,537.3873 C72,552.7845 72,570.9118 72,583.8683 " fill="none" id="RuntimeConller&lt;-DartIsolate" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="72,524.241,68,530.241,72,536.241,76,530.241,72,524.241" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[58dced52d1bc7eb4bbc6c905f82ca6ed]
+@startuml
+rectangle FlutterEngine
+
+rectangle FlutterJNI
+
+rectangle AndroidShellHolder
+
+rectangle Shell
+
+rectangle RuntimeConller
+
+rectangle Engine
+
+rectangle DartVM
+
+rectangle DartIsolate
+
+
+rectangle FlutterRender
+
+rectangle DartExecutor
+
+rectangle XXXChannel
+
+rectangle PlatformViewsController
+
+
+
+FlutterEngine *-down- FlutterJNI
+
+FlutterEngine *-down- FlutterRender
+FlutterEngine *-down- DartExecutor
+FlutterEngine *-down- XXXChannel
+FlutterEngine *-down- PlatformViewsController
+
+FlutterJNI *-down- AndroidShellHolder
+
+AndroidShellHolder *-down- Shell
+
+Shell *-down- Engine
+
+Shell *-down- DartVM
+
+Engine *-down- RuntimeConller
+
+RuntimeConller *-down- DartIsolate
+@enduml
+
+PlantUML version 1.2020.10(Sun May 17 09:35:57 UTC 2020)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 14.0.1+7
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

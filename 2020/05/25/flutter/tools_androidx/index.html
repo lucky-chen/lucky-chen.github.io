@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="概要Flutter 1.17 | 2020 首个稳定版发布！ 全线迁移到AndroidX,现有app迁移成本巨大(几乎不可能迁移)  改造Flutter engine、工具链，1.17支持support库 跟一下工具链flutter create的源码实现方式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FlutterEngine AndroidX&#x2F;Support适配">
+<meta property="og:url" content="https://lucky-chen.github.io/2020/05/25/flutter/tools_androidx/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="概要Flutter 1.17 | 2020 首个稳定版发布！ 全线迁移到AndroidX,现有app迁移成本巨大(几乎不可能迁移)  改造Flutter engine、工具链，1.17支持support库 跟一下工具链flutter create的源码实现方式">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic1.zhimg.com/v2-b97521ab2a1df3b22a3f4a555cf56386_r.jpg">
+<meta property="article:published_time" content="2020-05-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-08T12:55:49.908Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic1.zhimg.com/v2-b97521ab2a1df3b22a3f4a555cf56386_r.jpg">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2020/05/25/flutter/tools_androidx/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>FlutterEngine AndroidX/Support适配 | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2020/05/25/flutter/tools_androidx/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          FlutterEngine AndroidX/Support适配
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-25 00:00:00" itemprop="dateCreated datePublished" datetime="2020-05-25T00:00:00+08:00">2020-05-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-08 20:55:49" itemprop="dateModified" datetime="2020-06-08T20:55:49+08:00">2020-06-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Flutter/" itemprop="url" rel="index"><span itemprop="name">Flutter</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h1><p><a href="https://mp.weixin.qq.com/s/VXNbqxpoVDJeOPkBt5_88A" target="_blank" rel="noopener">Flutter 1.17 | 2020 首个稳定版发布！</a> 全线迁移到AndroidX,现有app迁移成本巨大(几乎不可能迁移)</p>
+<ul>
+<li>改造Flutter engine、工具链，1.17支持support库</li>
+<li>跟一下工具链<code>flutter create</code>的源码实现方式</li>
+</ul>
+<a id="more"></a>
+
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>前不久,Google发布了<a href="https://mp.weixin.qq.com/s/VXNbqxpoVDJeOPkBt5_88A" target="_blank" rel="noopener">Flutter 1.17 | 2020 首个稳定版发布！</a>。按照Google的说法，<strong>更快速流畅的动画、更小巧的应用尺寸，以及更低的内存占用</strong>。列几个比较重要的特性:</p>
+<ul>
+<li>移动端性能和文件体积优化<ul>
+<li>在应用体积上做出了可观的改进。比如 Flutter Gallery 范例应用，9.6MB(1.17)-&gt;8.1MB(1.12)，体积减少了 18.5%</li>
+<li>快速滚动大型图片时内存占用减少了 70%</li>
+<li>在默认的导航场景下 (不包含透明图层内容的导航路径) 1.17 版的速度提升了 20%-37%。简单 iOS 动画的 CPU/GPU 占用可减少高达 40%</li>
+</ul>
+</li>
+<li>Metal 将 iOS 性能提升 50% </li>
+<li>相比 1.12，解决了 6,339 个 Issue,，这是史无前例的大进展，意味着更加稳定成熟。</li>
+</ul>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>因此，升级到1.17无疑是一个非常有诱惑力的选择.但是在尝试过程中碰到一个非常严重的问题:</p>
+<ul>
+<li><strong>新版本Flutter包括engine到工具链，全线使用AndroidX,不再兼容support</strong>，</li>
+<li>现有app几乎是不可能因为flutter升级到androidx的，风险太大，又没啥收益。</li>
+</ul>
+<p>本篇文章就是阐述如何 <strong>解决Flutter全线使用AndroidX导致现有应用无法兼容(support库)的问题</strong>。</p>
+<h1 id="先说结论"><a href="#先说结论" class="headerlink" title="先说结论"></a>先说结论</h1><p>通过修改FlutterEngine、FlutterFrameWrok的工具链，<strong>我们已经支持编译出支持support库的1.17版本的Flutter产物，业务方不需要任何修改</strong>，切换到新分支即可使用。</p>
+<h1 id="修改原理"><a href="#修改原理" class="headerlink" title="修改原理"></a>修改原理</h1><p>原理很简单，细节是魔鬼: 把AndroidX依赖改成supprot。</p>
+<p>先看一下flutter的架构图</p>
+<p><img src="https://pic1.zhimg.com/v2-b97521ab2a1df3b22a3f4a555cf56386_r.jpg" alt=""></p>
+<p>这是一张运行时分层的图，实际上还有一部分编译工具链的部分。由于只是涉及AndroidX,所以本次只需要修改2个地方</p>
+<ul>
+<li>Embedder(Engine仓库中)</li>
+<li>工具链(Flutter Framework仓库中)</li>
+</ul>
+<h2 id="修改FlutterEngine-Embedder"><a href="#修改FlutterEngine-Embedder" class="headerlink" title="修改FlutterEngine(Embedder)"></a>修改FlutterEngine(Embedder)</h2><p>与预想中的不同，Engine的修改是比较简单的，只需要回滚AndroidX的提交，处理一小部分冲突即可。</p>
+<ul>
+<li>commitid <code>025e2d82</code>，</li>
+<li>log<code>Migrate embedding to AndroidX (#17075)</code></li>
+</ul>
+<p>涉及30-40个文件，看起来改了一大堆，实际上逻辑很简单</p>
+<ul>
+<li>换包名，把”import androidx.xxx.”换成”import android.support.xxx”</li>
+<li>修改生成的依赖文件，即<code>flutter_embedding_xxx.pom</code>中声明的依赖</li>
+</ul>
+<h2 id="修改工具链"><a href="#修改工具链" class="headerlink" title="修改工具链"></a>修改工具链</h2><p>工具链修改反而是比较麻烦的,主要是无法直接revert对应提交，全是冲突.因此只能根据提交手动反向改.</p>
+<ul>
+<li>commitid <code>4049889d9eecc8fb3eda316a5c371eeb636b2ae5</code></li>
+<li>log <code>Make --androidx flag a noop in flutter create (#52340)</code></li>
+</ul>
+<p>有经验的老司机一看到有<code>build.gradle.tmpl</code>、<code>Flutter.java.tmpl</code>以及<code>create.dart</code>、<code>plugins.dart</code>这种关键字基本就明白了:<strong>Flutter的工程结构是从模版生成的</strong>，</p>
+<p>趁着这次改动，我们可以进步探究下工具链的源码是实现:</p>
+<ul>
+<li>flutter工程是怎么创建的</li>
+<li>工程结构是从哪里来的(.android .ios)</li>
+</ul>
+<h1 id="Flutter工具链创建工程结构源码分析"><a href="#Flutter工具链创建工程结构源码分析" class="headerlink" title="Flutter工具链创建工程结构源码分析"></a>Flutter工具链创建工程结构源码分析</h1><p>flutter的创建命令如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flutter create module&#x2F;plugin&#x2F;....</span><br></pre></td></tr></table></figure>
+
+<p>create对应的命令<code>CreateCommand</code>，注册在<code>executable.dart</code>的<code>main</code>函数中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;executable.dart</span><br><span class="line">Future&lt;void&gt; main(List&lt;String&gt; args) async &#123;</span><br><span class="line"></span><br><span class="line">   &#x2F;&#x2F;注册命令</span><br><span class="line">  await runner.run(args, &lt;FlutterCommand&gt;[</span><br><span class="line">    BuildCommand(verboseHelp: verboseHelp),</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;create命令，来自create.dart</span><br><span class="line">    CreateCommand(),</span><br><span class="line">  ];</span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当运行命令时，会找到<code>CreateCommand</code>,并运行它的<code>runCommand</code>方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;create.dart</span><br><span class="line">Future&lt;FlutterCommandResult&gt; runCommand() async &#123;</span><br><span class="line">  switch (template) &#123;</span><br><span class="line">      case FlutterProjectType.app:</span><br><span class="line">        generatedFileCount +&#x3D; await _generateApp(relativeDir, templateContext, overwrite: overwrite);</span><br><span class="line">        break;</span><br><span class="line">      case FlutterProjectType.module:</span><br><span class="line">        generatedFileCount +&#x3D; await _generateModule(relativeDir, templateContext, overwrite: overwrite);</span><br><span class="line">        break;</span><br><span class="line">      case FlutterProjectType.package:</span><br><span class="line">        generatedFileCount +&#x3D; await _generatePackage(relativeDir, templateContext, overwrite: overwrite);</span><br><span class="line">        break;</span><br><span class="line">      case FlutterProjectType.plugin:</span><br><span class="line">        generatedFileCount +&#x3D; await _generatePlugin(relativeDir, templateContext, overwrite: overwrite);</span><br><span class="line">        break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，这里分发了几个类型的创建命令</p>
+<ul>
+<li>app</li>
+<li>module</li>
+<li>package</li>
+<li>plugin</li>
+</ul>
+<p>以<code>_generatePlugin</code>为例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;int&gt; _generatePlugin(...) async &#123;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F;1.生成plugin的工程结构</span><br><span class="line">    generatedCount +&#x3D; await _renderTemplate(&#39;plugin&#39;, directory, templateContext, overwrite: overwrite);</span><br><span class="line">  </span><br><span class="line">    &#x2F;&#x2F;2.设置各种模版变量</span><br><span class="line">    templateContext[&#39;androidIdentifier&#39;] &#x3D; _createAndroidIdentifier(organization, exampleProjectName);</span><br><span class="line">    templateContext[&#39;iosIdentifier&#39;] &#x3D; _createUTIIdentifier(organization, exampleProjectName);</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F;3.生成plugin中demo app的工程结构</span><br><span class="line">    generatedCount +&#x3D; await _generateApp(project.example.directory, templateContext, overwrite: overwrite);</span><br><span class="line">    return generatedCount;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>继续看_renderTemplate方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;int&gt; _renderTemplate(...) async &#123;</span><br><span class="line">     &#x2F;&#x2F;读取模版</span><br><span class="line">    final Template template &#x3D; await Template.fromName(templateName, fileSystem: globals.fs);</span><br><span class="line">    &#x2F;&#x2F;根据模版和参数生成具体的工程文件</span><br><span class="line">    return template.render(directory, context, overwriteExisting: overwrite);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>我们ls看一下<code>flutter/packages/flutter_tools/templates</code>模版文件夹下面的目录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── app</span><br><span class="line">│   ├── README.md.tmpl</span><br><span class="line">│   ├── android-java.tmpl</span><br><span class="line">│   ├── android-kotlin.tmpl</span><br><span class="line">│   ├── android.tmpl</span><br><span class="line">│   ├── ios-objc.tmpl</span><br><span class="line">│   ├── ios-swift.tmpl</span><br><span class="line">│   ├── ios.tmpl</span><br><span class="line">│   ├── lib</span><br><span class="line">│   ├── linux.tmpl</span><br><span class="line">│   ├── macos.tmpl</span><br><span class="line">│   ├── projectName.iml.tmpl</span><br><span class="line">│   ├── pubspec.yaml.tmpl</span><br><span class="line">│   ├── test</span><br><span class="line">│   ├── web</span><br><span class="line">│   └── windows.tmpl</span><br><span class="line">├── cocoapods</span><br><span class="line">│   ├── Podfile-ios-objc</span><br><span class="line">│   ├── Podfile-ios-swift</span><br><span class="line">│   └── Podfile-macos</span><br><span class="line">├── driver</span><br><span class="line">│   └── main_test.dart.tmpl</span><br><span class="line">├── module</span><br><span class="line">│   ├── README.md</span><br><span class="line">│   ├── android</span><br><span class="line">│   ├── common</span><br><span class="line">│   └── ios</span><br><span class="line">├── package</span><br><span class="line">│   ├── CHANGELOG.md.tmpl</span><br><span class="line">│   ├── LICENSE.tmpl</span><br><span class="line">│   ├── README.md.tmpl</span><br><span class="line">│   ├── lib</span><br><span class="line">│   ├── projectName.iml.tmpl</span><br><span class="line">│   ├── pubspec.yaml.tmpl</span><br><span class="line">│   └── test</span><br><span class="line">└── plugin</span><br><span class="line">    ├── CHANGELOG.md.tmpl</span><br><span class="line">    ├── LICENSE.tmpl</span><br><span class="line">    ├── README.md.tmpl</span><br><span class="line">    ├── android-java.tmpl</span><br><span class="line">    ├── android-kotlin.tmpl</span><br><span class="line">    ├── android.tmpl</span><br><span class="line">    ├── ios-objc.tmpl</span><br><span class="line">    ├── ios-swift.tmpl</span><br><span class="line">    ├── ios.tmpl</span><br><span class="line">    ├── lib</span><br><span class="line">    ├── linux.tmpl</span><br><span class="line">    ├── macos.tmpl</span><br><span class="line">    ├── projectName.iml.tmpl</span><br><span class="line">    ├── pubspec.yaml.tmpl</span><br><span class="line">    ├── test</span><br><span class="line">    └── windows.tmpl</span><br></pre></td></tr></table></figure>
+<p>非常明显, <strong>我们创建的module、plugin，android、iOS工程都是由<code>templates</code>目录下的工程模版结构生成而来</strong> ,挑一个<code>plugin/android-java.tmpl/src/main/java/androidIdentifier/pluginClass.java.tmpl</code>,大概扫一下内容，是不是似曾相识？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">package &#123;&#123;androidIdentifier&#125;&#125;;</span><br><span class="line"></span><br><span class="line">&#123;&#123;#useAndroidEmbeddingV2&#125;&#125;</span><br><span class="line">&#123;&#123;#androidX&#125;&#125;</span><br><span class="line">import androidx.annotation.NonNull;</span><br><span class="line">&#123;&#123;&#x2F;androidX&#125;&#125;</span><br><span class="line">&#123;&#123;^androidX&#125;&#125;</span><br><span class="line">import android.support.annotation.NonNull;</span><br><span class="line">&#123;&#123;&#x2F;androidX&#125;&#125;</span><br><span class="line"></span><br><span class="line">import io.flutter.embedding.engine.plugins.FlutterPlugin;</span><br><span class="line">import io.flutter.plugin.common.MethodCall;</span><br><span class="line">import io.flutter.plugin.common.MethodChannel;</span><br><span class="line">import io.flutter.plugin.common.MethodChannel.MethodCallHandler;</span><br><span class="line">import io.flutter.plugin.common.MethodChannel.Result;</span><br><span class="line">import io.flutter.plugin.common.PluginRegistry.Registrar;</span><br><span class="line"></span><br><span class="line">&#x2F;** &#123;&#123;pluginClass&#125;&#125; *&#x2F;</span><br><span class="line">public class &#123;&#123;pluginClass&#125;&#125; implements FlutterPlugin, MethodCallHandler &#123;</span><br><span class="line">  private MethodChannel channel;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) &#123;</span><br><span class="line">    channel &#x3D; new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), &quot;&#123;&#123;projectName&#125;&#125;&quot;);</span><br><span class="line">    channel.setMethodCallHandler(this);</span><br><span class="line">  &#125;</span><br><span class="line">  public static void registerWith(Registrar registrar) &#123;</span><br><span class="line">    final MethodChannel channel &#x3D; new MethodChannel(registrar.messenger(), &quot;&#123;&#123;projectName&#125;&#125;&quot;);</span><br><span class="line">    channel.setMethodCallHandler(new &#123;&#123;pluginClass&#125;&#125;());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) &#123;</span><br><span class="line">    if (call.method.equals(&quot;getPlatformVersion&quot;)) &#123;</span><br><span class="line">      result.success(&quot;Android &quot; + android.os.Build.VERSION.RELEASE);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      result.notImplemented();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @Override</span><br><span class="line">  public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) &#123;</span><br><span class="line">    channel.setMethodCallHandler(null);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#123;&#123;&#x2F;useAndroidEmbeddingV2&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>很明显，<code>pluginClass.java.tmpl</code>就是plugin工程中为我们生成的<code>XXXPlugin.java</code>的模版代码,其它如<code>build.gradle</code>、<code>pubspct.yaml</code>也是类似</p>
+<p>有了模版，那肯定有模版生成为具体的文件的代码。</p>
+<ul>
+<li><code>flutter/packages/flutter_tools/lib/src/template.dart</code> 处理模版文件</li>
+<li>渲染用的是<code>mustache_template</code>这个库中<code>render.dart</code></li>
+</ul>
+<p>看一下<code>template.dart</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">class Template &#123;</span><br><span class="line">    static const String templateExtension &#x3D; &#39;.tmpl&#39;;</span><br><span class="line">    static const String copyTemplateExtension &#x3D; &#39;.copy.tmpl&#39;;</span><br><span class="line">    static const String imageTemplateExtension &#x3D; &#39;.img.tmpl&#39;;</span><br><span class="line">    </span><br><span class="line">    int render()&#123;</span><br><span class="line">        &#x2F;&#x2F;如果是.tmpl结尾的文件，将存储的变量context(包名、版本号之类)和模版内容templateContents(pluginClass.java.tmpl)传给render，</span><br><span class="line">        &#x2F;&#x2F;生成最终的目标文件(XXXPlugin.java)</span><br><span class="line">        if (sourceFile.path.endsWith(templateExtension)) &#123;</span><br><span class="line">            final String templateContents &#x3D; sourceFile.readAsStringSync();</span><br><span class="line">            final String renderedContents &#x3D; globals.templateRenderer.renderString(templateContents, context);</span><br><span class="line"></span><br><span class="line">            &#x2F;&#x2F;将生成的内容，写入创建的工程文件中</span><br><span class="line">            finalDestinationFile.writeAsStringSync(renderedContents);</span><br><span class="line">            return;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>没什么复杂的，只是一个模版生成而已。了解这部分原理后，其实我们可以改动很多东西。</p>
+<ul>
+<li>初级玩法：比如可以修改<code>build.gradle.tmpl</code>，将私有仓库的地址直接写到里面，加快编译速度以及解决私有lib找不到的问题</li>
+<li>进阶玩法：修改结构，加一些脚本，配合公司的打包平台，进行定制化。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;在模版中添加私有仓库地址</span><br><span class="line">&#x2F;&#x2F;templates&#x2F;plugin&#x2F;android-java.tmpl&#x2F;build.gradle.tmpl</span><br><span class="line"></span><br><span class="line">buildscript &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        maven &#123; url &quot;私有仓库地址&quot; &#125;</span><br><span class="line">        google()</span><br><span class="line">        jcenter()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dependencies &#123;</span><br><span class="line">        classpath &#39;com.android.tools.build:gradle:3.5.0&#39;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">rootProject.allprojects &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">         maven &#123; url &quot;私有仓库地址&quot; &#125;</span><br><span class="line">        google()</span><br><span class="line">        jcenter()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ul>
+<li>1.17 兼容support，改动虽多，但并不复杂，逻辑上也没有修改</li>
+<li>flutter tools是通过模版生成最终的工程结构</li>
+<li>flutter tools 其它命令实现也有迹可循，框架就在这里。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/15/flutter/flutter_render_pipline_1/" rel="prev" title="Flutter渲染流程(二)-GPU线程工作">
+      <i class="fa fa-chevron-left"></i> Flutter渲染流程(二)-GPU线程工作
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概要"><span class="nav-number">1.</span> <span class="nav-text">概要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#背景"><span class="nav-number">2.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#问题"><span class="nav-number">3.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#先说结论"><span class="nav-number">4.</span> <span class="nav-text">先说结论</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#修改原理"><span class="nav-number">5.</span> <span class="nav-text">修改原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#修改FlutterEngine-Embedder"><span class="nav-number">5.1.</span> <span class="nav-text">修改FlutterEngine(Embedder)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改工具链"><span class="nav-number">5.2.</span> <span class="nav-text">修改工具链</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Flutter工具链创建工程结构源码分析"><span class="nav-number">6.</span> <span class="nav-text">Flutter工具链创建工程结构源码分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

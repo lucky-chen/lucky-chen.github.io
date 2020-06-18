@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="主要思想 申请多个activity坑 欺骗AMS,在准备启动Activity时，启动一个坑Activity数据给AMS。 AMS准备好回调到APP中启动activity时，替换成真正需要的Activity.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="插件化DroidPlugin-Activity">
+<meta property="og:url" content="https://lucky-chen.github.io/2017/01/05/android/droid_plugin_activity/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="主要思想 申请多个activity坑 欺骗AMS,在准备启动Activity时，启动一个坑Activity数据给AMS。 AMS准备好回调到APP中启动activity时，替换成真正需要的Activity.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/8774alebtxufg0pyjfnchvc0/pluginc_activity.svg">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/79lwyxjkrppjqrtqvyi6dspc/image_1b896344mtkguo1g8cn7u1gbm12.png">
+<meta property="article:published_time" content="2017-01-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-08T12:25:01.567Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://static.zybuluo.com/qh438406812/8774alebtxufg0pyjfnchvc0/pluginc_activity.svg">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2017/01/05/android/droid_plugin_activity/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>插件化DroidPlugin-Activity | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2017/01/05/android/droid_plugin_activity/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          插件化DroidPlugin-Activity
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-01-05 00:00:00" itemprop="dateCreated datePublished" datetime="2017-01-05T00:00:00+08:00">2017-01-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-08 20:25:01" itemprop="dateModified" datetime="2020-06-08T20:25:01+08:00">2020-06-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="主要思想"><a href="#主要思想" class="headerlink" title="主要思想"></a>主要思想</h1><ol>
+<li>申请多个activity坑</li>
+<li>欺骗AMS,在准备启动Activity时，启动一个坑Activity数据给AMS。</li>
+<li>AMS准备好回调到APP中启动activity时，替换成真正需要的Activity.</li>
+</ol>
+<a id="more"></a>
+
+<p><img src="http://static.zybuluo.com/qh438406812/8774alebtxufg0pyjfnchvc0/pluginc_activity.svg" alt=""></p>
+<hr>
+<h2 id="两个核心hook点"><a href="#两个核心hook点" class="headerlink" title="两个核心hook点"></a>两个核心hook点</h2><ol>
+<li>启动点：hook AM的startActivity方法</li>
+<li>app准备加载activity: activityThread mH</li>
+</ol>
+<h2 id="Activity启动流程分析"><a href="#Activity启动流程分析" class="headerlink" title="Activity启动流程分析"></a>Activity启动流程分析</h2><ol>
+<li><p>启动context.startActivity(intent)<br> context实现类为ContextImpl,查看代码：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** ContextImpl**&#x2F;</span><br><span class="line">@Override</span><br><span class="line">public void startActivity(Intent intent) &#123;</span><br><span class="line">    mMainThread.getInstrumentation().execStartActivity(一堆参数);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 继续看Instrumentation的execStartActivity方法：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public ActivityResult execStartActivity(</span><br><span class="line">    ActivityManagerNative.getDefault().startActivity(一堆参数);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 在第二行，ActivityManagerNative.getDefault()方法获取了AMS在App中的的远程代理对象,调用startActivity方法进入AMS。</p>
+<blockquote>
+<p><strong>在这里hook AM，替换为stubActivity即可</strong>。</p>
+</blockquote>
+</li>
+<li><p>进入AMS中，一系列调用，盗用一张图</p>
+<p> <img src="http://static.zybuluo.com/qh438406812/79lwyxjkrppjqrtqvyi6dspc/image_1b896344mtkguo1g8cn7u1gbm12.png" alt=""></p>
+<p> 只关心最后一个函数realStartActivityLocked()</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">final boolean realStartActivityLocked(ActivityRecord r,ProcessRecord app,boolean andResume,   boolean checkConfig)&#123;</span><br><span class="line">   app.thread.scheduleLaunchActivity(一堆参数);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 经过这步之后，AMS已经建立了名称为Stub的ActivityRecord，并在第二行中回调至App中加载Activity类，执行生命周期方法。</p>
+</li>
+<li><p>scheduleLaunchActivity</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** ActivityThread.ApplicationThread **&#x2F;</span><br><span class="line">    public final void scheduleLaunchActivity(一堆参数) &#123;</span><br><span class="line">    sendMessage(H.LAUNCH_ACTIVITY, r);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">private void sendMessage(int what, Object obj, int arg1, int arg2, boolean async) &#123;</span><br><span class="line">    Message msg &#x3D; Message.obtain();</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">    mH.sendMessage(msg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 给mH Handler发送了一个H.LAUNCH_ACTIVITY消息，看看mH的实现</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">private class H extends Handler &#123;</span><br><span class="line">    public static final int LAUNCH_ACTIVITY         &#x3D; 100;</span><br><span class="line">    public void handleMessage(Message msg) &#123;</span><br><span class="line">        switch (msg.what) &#123;</span><br><span class="line">            case LAUNCH_ACTIVITY: </span><br><span class="line">                final ActivityClientRecord r &#x3D; (ActivityClientRecord) msg.obj;</span><br><span class="line">                handleLaunchActivity(r, null);</span><br><span class="line">                break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 到这里，处理了AMS传过来了的数据，开始启动Activity</p>
+<blockquote>
+<p><strong>所以hook mH,可以在这里将stubActivity替换为真正的Activity</strong></p>
+</blockquote>
+</li>
+<li><p>下看启动逻辑 handleLaunchActivity</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) &#123;</span><br><span class="line">    Activity a &#x3D; performLaunchActivity(r, customIntent);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 执行performLaunchActivity函数，从classLoader加载activity，并初始化。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) &#123;</span><br><span class="line">    ComponentName component &#x3D; r.intent.getComponent();</span><br><span class="line">    java.lang.ClassLoader cl &#x3D; r.packageInfo.getClassLoader();</span><br><span class="line">    activity &#x3D; mInstrumentation.newActivity(cl, component.getClassName(), r.intent);</span><br><span class="line">    activity.attach(appContext, this, getInstrumentation(), r.token,一堆参数);</span><br><span class="line">    &#x2F;&#x2F;这里面调用了activity的onCreate()生命周期函数</span><br><span class="line">    mInstrumentation.callActivityOnCreate()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 至此，activity启动过程完毕。在此过程中，只需要把告知AMS要启动activity的信息替换为stub,在真正启动时替换回真正的activit,就可以达到activity插件化的目的。</p>
+</li>
+</ol>
+<h2 id="DroidPlugin-的hook实现"><a href="#DroidPlugin-的hook实现" class="headerlink" title="DroidPlugin 的hook实现"></a>DroidPlugin 的hook实现</h2><ol>
+<li><p>hook ams<br> IActivityManagerHook类,在onInstall函数中通过动态代理的方式，hook了ActivithThrad实例中的ams远程代理对象</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">public void onInstall(ClassLoader classLoader) throws Throwable &#123;</span><br><span class="line">    Class cls &#x3D; ActivityManagerNativeCompat.Class();</span><br><span class="line">    &#x2F;&#x2F;获取ams代理</span><br><span class="line">    Object obj &#x3D; FieldUtils.readStaticField(cls, &quot;gDefault&quot;);</span><br><span class="line">    if (IActivityManagerCompat.isIActivityManager(obj)) &#123;</span><br><span class="line">        setOldObj(obj);</span><br><span class="line">        Class&lt;?&gt; objClass &#x3D; mOldObj.getClass();</span><br><span class="line">        List&lt;Class&lt;?&gt;&gt; interfaces &#x3D; Utils.getAllInterfaces(objClass);</span><br><span class="line">        Class[] ifs &#x3D; interfaces !&#x3D; null &amp;&amp; interfaces.size() &gt; 0 ? interfaces.toArray(new Class[interfaces.size()]) : new Class[0];</span><br><span class="line">        &#x2F;&#x2F;生成动态代理对象</span><br><span class="line">        Object proxiedActivityManager &#x3D; MyProxy.newProxyInstance(objClass.getClassLoader(), ifs, this);</span><br><span class="line">        &#x2F;&#x2F;替换原始对象</span><br><span class="line">        FieldUtils.writeStaticField(cls, &quot;gDefault&quot;, proxiedActivityManager);</span><br><span class="line">    &#125; else if (SingletonCompat.isSingleton(obj)) &#123;</span><br><span class="line">        &#x2F;&#x2F;android5.0后 singleton hook方式</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>登记对startActivity方法的hook方法</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">protected void init() &#123;</span><br><span class="line">    sHookedMethodHandlers.put(&quot;startActivity&quot;, new startActivity(mHostContext));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 在程序调用startActivity方法时，由于动态代理，会调用到beforeInvoke，在这个方法中对intent中activity信息进行处理</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">protected boolean beforeInvoke(Object receiver, Method method, Object[] args) &#123;</span><br><span class="line">    if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.JELLY_BEAN_MR2) &#123;</span><br><span class="line">        doReplaceIntentForStartActivityAPILow(args);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        doReplaceIntentForStartActivityAPIHigh(args);</span><br><span class="line">    &#125;</span><br><span class="line">    return super.beforeInvoke(receiver, method, args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 以doReplaceIntentForStartActivityAPILow方法为例，查看替换操作</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">protected void doReplaceIntentForStartActivityAPILow(Object[] args)&#123;</span><br><span class="line">    int intentOfArgIndex &#x3D; findFirstIntentIndexInArgs(args);</span><br><span class="line">    if (args !&#x3D; null &amp;&amp; args.length &gt; 1 &amp;&amp; intentOfArgIndex &gt;&#x3D; 0) &#123;</span><br><span class="line">        Intent intent &#x3D; (Intent) args[intentOfArgIndex];</span><br><span class="line">        &#x2F;&#x2F;找到一个activit坑</span><br><span class="line">        ActivityInfo proxyActivityInfo &#x3D; selectProxyActivityInfo(activityInfo, intent, token, requestCode);</span><br><span class="line">        ComponentName component &#x3D; new ComponentName(proxyActivityInfo.packageName, proxyActivityInfo.name);</span><br><span class="line">        &#x2F;&#x2F;intent替换为坑组件</span><br><span class="line">        Intent newIntent &#x3D; new Intent();</span><br><span class="line">        newIntent.setComponent(component);</span><br><span class="line">        setExtraClassLoaderForAdapter(new ComponentName(activityInfo.packageName, activityInfo.name), intent);</span><br><span class="line">        &#x2F;&#x2F;加上原始activity信息</span><br><span class="line">        newIntent.putExtra(Env.EXTRA_TARGET_INTENT, intent);</span><br><span class="line">        newIntent.putExtra(Env.EXTRA_TARGET_INFO_OBJECT, activityInfo);</span><br><span class="line">        newIntent.addFlags(proxyActivityInfo.launchMode);</span><br><span class="line">        newIntent.setAction(activityInfo.name);</span><br><span class="line">        &#x2F;&#x2F;替换参数中原始intent为处理过的intent</span><br><span class="line">        args[intentOfArgIndex] &#x3D; newIntent;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 至此，droidplugin对activit的hook实现脉络分析完成。接下来看真正启动activity的时机和反替换操作</p>
+</li>
+</ol>
+<h3 id="hook-mH"><a href="#hook-mH" class="headerlink" title="hook mH"></a>hook mH</h3><p>在启动路径中，可只，在AMS准备好后回调到APP中，经过一系列调用，会向activitThread的mH handler发送一个LAUNCH_ACTIVITY的消息，并在消息中携带activit的信息。因此，通过hook mH,就可以在真正启动activit前，将坑activity数据替换回真正的activity，达到启动插件activity的目的。</p>
+<ol>
+<li><p>hook activityThread上的mH</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** PluginCallbackHook **/</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onInstall</span><span class="params">(ClassLoader classLoader)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">    Object target = ActivityThreadCompat.currentActivityThread();</span><br><span class="line">    Class ActivityThreadClass = ActivityThreadCompat.activityThreadClass();</span><br><span class="line">    <span class="comment">/*替换ActivityThread.mH.mCallback，拦截组件调度消息*/</span></span><br><span class="line">    Field mHField = FieldUtils.getField(ActivityThreadClass, <span class="string">"mH"</span>);</span><br><span class="line">    Handler handler = (Handler) FieldUtils.readField(mHField, target);</span><br><span class="line">    Field mCallbackField = FieldUtils.getField(Handler.class, "mCallback");</span><br><span class="line">    <span class="comment">//*这里读取出旧的callback并处理*/</span></span><br><span class="line">    Object mCallback = FieldUtils.readField(mCallbackField, handler);</span><br><span class="line">    PluginCallback value = PluginCallback.getInstance(mHostContext, handler, mCallback != <span class="keyword">null</span> ? (Handler.Callback) mCallback : <span class="keyword">null</span>);</span><br><span class="line">    value.setEnable(isEnable());</span><br><span class="line">    FieldUtils.writeField(mCallbackField, handler, value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>对启动activity的地方进行消息拦截，进行处理。逻辑在PluginCallback类中.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public boolean handleMessage(Message msg) &#123;</span><br><span class="line">    if (msg.what &#x3D;&#x3D; LAUNCH_ACTIVITY) &#123;</span><br><span class="line">        return handleLaunchActivity(msg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>拿到intent中携带的插件actiivty信息，替换intetnt上组件为插件的组件信息，替换intent上pkg对象的classLoader为插件的classLoader,之后按照正常流程执行对activity的调用。</p>
+</li>
+<li><p>handleLaunchActivity</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">private boolean handleLaunchActivity(Message message) &#123;</span><br><span class="line">    Object&#x2F;*ActivityClientRecord*&#x2F; _activityClientRecord &#x3D;  message.obj;</span><br><span class="line">    Intent stubIntent &#x3D; (Intent) ActivityThread.ActivityClientRecord.intent.get(_activityClientRecord);</span><br><span class="line">    IntentMaker intentMaker &#x3D; IntentMaker.fromActivityIntent(stubIntent);</span><br><span class="line">    Intent targetIntent &#x3D; intentMaker.intent;</span><br><span class="line">    &#x2F;&#x2F;获取插件组件信息</span><br><span class="line">    ComponentName targetComponentName &#x3D; targetIntent.resolveActivity(mHostContext.getPackageManager());</span><br><span class="line">    &#x2F;&#x2F;获取插件activity信息</span><br><span class="line">    ActivityInfo targetActivityInfo &#x3D; PluginManager.getInstance().getActivityInfo(targetComponentName, 0);</span><br><span class="line">    targetIntent.setClassName(targetComponentName.getPackageName(), targetComponentName.getPackageName() + targetComponentName.getClassName());</span><br><span class="line">    FieldUtils.writeDeclaredField(message.obj, &quot;intent&quot;, targetIntent);</span><br><span class="line">    FieldUtils.writeDeclaredField(message.obj, &quot;activityInfo&quot;, targetActivityInfo);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 函数一堆替换，实际上就是将ActivityClintRecord上的intent替换回插件发送的pluginIntent，而pluginIntent上携带需要启动的activity信息。<br> 接着，进入源码</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** ActivityThread **&#x2F;</span><br><span class="line">private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) &#123;</span><br><span class="line">    ComponentName component &#x3D; r.intent.getComponent();</span><br><span class="line">    java.lang.ClassLoader cl &#x3D; r.packageInfo.getClassLoader();</span><br><span class="line">    activity &#x3D; mInstrumentation.newActivity(</span><br><span class="line">                cl, component.getClassName(), r.intent);</span><br><span class="line">    activity.attach(appContext, this, 参数);</span><br><span class="line">    mInstrumentation.callActivityOnCreate(activity, r.state);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 由于intent是插件发送的intent,所以 component.getClassName()是插件activity。而r.packageInfo.getClassLoader()实际上返回的是插件的classLoader,所以系统可以正确的找到插件的class，执行onCreate()一系列函数。</p>
+</li>
+<li><p>替换classLoader<br> 上一步中说过r.packageInfo.getClassLoader()返回的是插件的classLoader，为什么呢？先看系统的创建Activity的源码</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** LoadedApk **&#x2F;</span><br><span class="line">public ClassLoader getClassLoader() &#123;</span><br><span class="line">    if (mClassLoader !&#x3D; null) &#123;</span><br><span class="line">        return mClassLoader;</span><br><span class="line">    &#125;</span><br><span class="line">    zipPaths.add(mAppDir);</span><br><span class="line">    libPaths.add(mLibDir);</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">    mClassLoader &#x3D; ApplicationLoaders.getDefault().getClassLoader(zip, lib,</span><br><span class="line">                    mBaseClassLoader);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> classLoader是从LoadApk上去找，要么返回缓存，要么重新创建一个。实际上，在加载插件的时候，就已经将mClassLoader替换成插件的，所以永远返回的是插件的classLoader。</p>
+<blockquote>
+<p>实际上这一步有更好的方案，只需将LoadedApk上的mAppDir等路径修改为插件的路径，由系统自己创建classLoader，兼容性会更好。</p>
+</blockquote>
+<p> 继续看源码中替换classLoader的操作</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** PluginProcessManager **&#x2F;</span><br><span class="line">private static void preLoadApk(Context hostContext, String packageName)&#123;</span><br><span class="line">    &#x2F;&#x2F;获取插件的上下文</span><br><span class="line">    Context context &#x3D; createPackageContext(hostContext, packageName);</span><br><span class="line">    Object loadedApk &#x3D; ContextImpl.mPackageInfo.get(context);</span><br><span class="line">    &#x2F;&#x2F;创建插件的classLoader</span><br><span class="line">    classloader &#x3D; new PathClassLoader(applicationInfo.sourceDir, applicationInfo.nativeLibraryDir, parentClassloader);</span><br><span class="line">    &#x2F;&#x2F;换classLoader</span><br><span class="line">    LoadedApk.mClassLoader.set(loadedApk, classloader);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 很简单，就是将LoadedApk上的classLodaer换成插件的。<br> 至此，Activity插件化分析完毕。</p>
+</li>
+</ol>
+<hr>
+<p>参考：</p>
+<ol>
+<li><a href="http://weishu.me/2016/03/21/understand-plugin-framework-activity-management/" target="_blank" rel="noopener">Android 插件化原理解析——Activity生命周期管理</a></li>
+<li><a href="http://blog.csdn.net/luoshengyang/article/details/6720261" target="_blank" rel="noopener">老罗-Android应用程序在新的进程中启动新的Activity的方法和过程分析</a></li>
+<li><a href="https://github.com/Qihoo360/DroidPlugin" target="_blank" rel="noopener">DroidPlugin Github</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/11/27/java/jvm_class_load/" rel="prev" title="《深入理解JVM虚拟机》读书笔记——第7章 虚拟机类加载机制">
+      <i class="fa fa-chevron-left"></i> 《深入理解JVM虚拟机》读书笔记——第7章 虚拟机类加载机制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/01/20/android/droid_plugin_service/" rel="next" title="插件化DroidPlugin-Service">
+      插件化DroidPlugin-Service <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#主要思想"><span class="nav-number">1.</span> <span class="nav-text">主要思想</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#两个核心hook点"><span class="nav-number">1.1.</span> <span class="nav-text">两个核心hook点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Activity启动流程分析"><span class="nav-number">1.2.</span> <span class="nav-text">Activity启动流程分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DroidPlugin-的hook实现"><span class="nav-number">1.3.</span> <span class="nav-text">DroidPlugin 的hook实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#hook-mH"><span class="nav-number">1.3.1.</span> <span class="nav-text">hook mH</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

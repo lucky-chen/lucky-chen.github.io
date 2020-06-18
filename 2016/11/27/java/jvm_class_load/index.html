@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="主要内容： 类加载时机 类加载过程 类加载器(ClassLoader)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《深入理解JVM虚拟机》读书笔记——第7章 虚拟机类加载机制">
+<meta property="og:url" content="https://lucky-chen.github.io/2016/11/27/java/jvm_class_load/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="主要内容： 类加载时机 类加载过程 类加载器(ClassLoader)">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/90ncqj9nj4zpoett29bxnidl/image_1b8ocreet1vun1vqg89g1a6uj449.png">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/bket3ekssq7kzj5w40kgj8hf/image_1b8ol9qsf184v1bfk18o7raa198jm.png">
+<meta property="article:published_time" content="2016-11-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-08T07:13:45.751Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://static.zybuluo.com/qh438406812/90ncqj9nj4zpoett29bxnidl/image_1b8ocreet1vun1vqg89g1a6uj449.png">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2016/11/27/java/jvm_class_load/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>《深入理解JVM虚拟机》读书笔记——第7章 虚拟机类加载机制 | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2016/11/27/java/jvm_class_load/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《深入理解JVM虚拟机》读书笔记——第7章 虚拟机类加载机制
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-11-27 00:00:00" itemprop="dateCreated datePublished" datetime="2016-11-27T00:00:00+08:00">2016-11-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-08 15:13:45" itemprop="dateModified" datetime="2020-06-08T15:13:45+08:00">2020-06-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="主要内容："><a href="#主要内容：" class="headerlink" title="主要内容："></a>主要内容：</h1><ul>
+<li>类加载时机</li>
+<li>类加载过程</li>
+<li>类加载器(ClassLoader)</li>
+</ul>
+<a id="more"></a>
+
+<h2 id="类加载时机"><a href="#类加载时机" class="headerlink" title="类加载时机"></a>类加载时机</h2><p>7个阶段: 加载、验证、准备、解析、初始化、使用、卸载<br><img src="http://static.zybuluo.com/qh438406812/90ncqj9nj4zpoett29bxnidl/image_1b8ocreet1vun1vqg89g1a6uj449.png" alt="image_1b8ocreet1vun1vqg89g1a6uj449.png-74.5kB"></p>
+<ul>
+<li>加载-验证-准备-初始化-卸载5个阶段顺序是固定的</li>
+<li>为了支持Java的动态绑定，解析有可能会在初始化阶段之后进行。</li>
+</ul>
+<h3 id="触发加载阶段时机"><a href="#触发加载阶段时机" class="headerlink" title="触发加载阶段时机"></a>触发加载阶段时机</h3><p>JVM规范中没有强制规范在何种情况下开始加载这一个阶段，由虚拟机具体实现。</p>
+<h3 id="触发初始化阶段时机"><a href="#触发初始化阶段时机" class="headerlink" title="触发初始化阶段时机"></a>触发初始化阶段时机</h3><ol>
+<li>遇到new、getstaic、putstaic和invokestaic 4条字节码指令，对应new关键字实例化对象、读取或设置一个类的静态字段、调用一个类的静态方法。</li>
+<li>使用java.lang.reflect反射包方法对类进行反射调用</li>
+<li>初始化一个类时,父类若未初始化，则先触发父类的初始化</li>
+<li>虚拟机启动时，初始化执行的主类</li>
+<li>jdk1.7 ,java.lang.MethodHandle实例解析结果REF_getStaic、REF_putStaic、REF_invokeStaic的方法句柄，冰洁句柄对应的类未初始化，则触发初始化操作</li>
+</ol>
+<p>以上五种被称为对一个类的主动引用，其余引用类的方式称为被动引用，不触发初始化，例子：</p>
+<blockquote>
+</blockquote>
+<ol>
+<li>通过子类引用父类的静态字段，不会导致子类的初始化</li>
+<li>通过数组定义引用类，不会触发此类的初始化 <code>Class[] array = new Class[10]</code></li>
+<li>引用类的常量。常量在编译其间存入类的常量池中，本质上没有直接引用到定义常量的类，不触发初始化<br> <code>public staic final String HELLO_WORD=&quot;hello word&quot;;</code></li>
+</ol>
+<h2 id="类加载过程"><a href="#类加载过程" class="headerlink" title="类加载过程"></a>类加载过程</h2><h3 id="加载阶段"><a href="#加载阶段" class="headerlink" title="加载阶段"></a>加载阶段</h3><ol>
+<li>通过一个类的全限定名来获取定义此类的二进制字节流</li>
+<li>将这个字节流所代表的静态存储结构转化为方法区的运行时数据结构</li>
+<li>在内存中生成一个代表此类的java.lang.Class对象，作为方法区这个类的各种数据的入口</li>
+</ol>
+<h3 id="验证阶段"><a href="#验证阶段" class="headerlink" title="验证阶段"></a>验证阶段</h3><p>验证阶段是链接阶段的第一步，是为了确保Class文件的字节流符合当前虚拟机的要求。<br><strong>验证阶段的工作量在虚拟机类加载系统中占据了相当大的一部分</strong><br>可以使用 -Xverfy:none参数关闭验证阶段</p>
+<ol>
+<li><p>文件格式验证</p>
+<blockquote>
+<p>验证Class文件格式规范，并能被当前虚拟机处理,如果验证不过，抛出java.lang.VerifyError异常</p>
+</blockquote>
+<ul>
+<li>是否以魔数0xCAFEBABE开头</li>
+<li>主次版本是否在当前虚拟机处理范围</li>
+<li>常量池的常量中是否由不被支持的常量类型</li>
+<li>指向常量的索引值中是否有指向不存在活着不符合类型的常量<br>…</li>
+</ul>
+</li>
+<li><p>元数据验证</p>
+<blockquote>
+<p>对字节码信息进行语义分析，保证符合Java语言规范</p>
+</blockquote>
+<ul>
+<li>是否有父类</li>
+<li>是否继承final类</li>
+<li>类中字段、方法是否与父类产生矛盾<br>…</li>
+</ul>
+</li>
+<li><p>字节码验证</p>
+<blockquote>
+<p>分析数据流和控制流，确定程序语义是合法、符合逻辑的</p>
+</blockquote>
+<ul>
+<li>保证跳转指令不会跳到方法体以外的指令上</li>
+<li>保证方法体中的类型转换是有效的<br>…</li>
+</ul>
+</li>
+<li><p>符号引用验证</p>
+<blockquote>
+<p>对类自身以外(常量池中的符号引用)的信息及进行匹配校验。发生在虚拟机将符号引用转化为直接引用的时候，转化动作在解析阶段发生。</p>
+</blockquote>
+<ul>
+<li>符号引用中通过字符串描述的全限定名是否能找到对应的类</li>
+<li>指定类中是否存在符合方法的字段描述符及简单名称所描述的方法和字段</li>
+<li>符合引用中的类、字段、方法的访问行是否能被当前类访问<br>…<br>若验证不过，抛出java.lang.IncompatibleClassChangeError的子类，如：IlleglaAccessErroe、NoSuchFieldErroe、NoSuchMethodErroe等</li>
+</ul>
+</li>
+</ol>
+<h3 id="准备阶段"><a href="#准备阶段" class="headerlink" title="准备阶段"></a>准备阶段</h3><p>准备阶段是正式为类变量分配内存并设置类变量初始值的阶段。</p>
+<ul>
+<li>这一阶段进行内存分配的仅包括类变量(static 修饰的变量)。</li>
+<li>这些变量所使用的内存在方法区进行分配。</li>
+</ul>
+<p>初始值分配的两种情况</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;1. 通常情况</span><br><span class="line">public static int value &#x3D;123 </span><br><span class="line">&#x2F;&#x2F;2. 字段的属性表中存在ConstantValue属性</span><br><span class="line">public static final int value &#x3D;123</span><br></pre></td></tr></table></figure>
+<p>在此阶段后</p>
+<ol>
+<li>value的值为0，将value赋值为123的动作在初始化阶段执行。</li>
+<li>value的值为123</li>
+</ol>
+<h3 id="解析阶段"><a href="#解析阶段" class="headerlink" title="解析阶段"></a>解析阶段</h3><p>解析阶段是虚拟机将常量池内的符号引用替换为直接引用的过程。</p>
+<ul>
+<li>符号引用：以一组符号来描述所引用的目标，符合可以是任何形式的字面量。符号引用与虚拟机实现的内存布局无关,引用的目标不一定已经加载到内存中</li>
+<li>直接引用：可以是直接指向目标的指针、相对偏移量挥着能间接定位到目标的句柄。直接引用和虚拟机的内存布局相关,引用的目标必须存在内存中。</li>
+</ul>
+<p>包括四个方面的解析</p>
+<ol>
+<li>类或接口的解析</li>
+<li>字段解析</li>
+<li>类方法解析</li>
+<li>接口方法解析</li>
+</ol>
+<h3 id="初始化阶段"><a href="#初始化阶段" class="headerlink" title="初始化阶段"></a>初始化阶段</h3><p>初始化阶段是执行类构造器<clinit>方法的过程，真正开始执行类中定义的Java程序代码。</p>
+<ol>
+<li><clinit>()方法是由编译器收集类中所有类变量赋值动作和静态语句块( <code>static{}</code> )合并产生。</li>
+<li>虚拟机保证在子类的<clinit>()方法执行之前，父类的<clinit>()方法已经执行完毕</li>
+<li>由2可得，父类定义的静态语句块先于子类执行</li>
+<li><clinit>()方法对于类或者接口不是必需的</li>
+<li>执行接口的<clinit>()方法，不需要先执行父接口的<clinit>()方法，当父接口中定义的变量使用时，父接口才会初始化，接口的实现类在初始化时也不会执行接口的<clinit>()方法</li>
+<li><strong>虚拟机会保证一个类的<clinit>()方法在多线程换进中被正确的枷锁、同步</strong>。如果多个线程同时去初始化一个类，只有一个线程去执行这个类的<clinit>方法，其他线程阻塞等待。<blockquote>
+<p>这也是Java单例写法中 静态类 SingleTonHodler 的实现原理</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h2><h3 id="类与类加载器"><a href="#类与类加载器" class="headerlink" title="类与类加载器"></a>类与类加载器</h3><blockquote>
+<p>实现 “通过一个类的全限定名来获取描述此类的二进制流”动作的代码模块称为”类加载器”</p>
+</blockquote>
+<p>对于任意一个类，都需要由加载它的类加载器和这个类本身一同确立其在Java虚拟机中的唯一性。</p>
+<h3 id="双亲委派模型"><a href="#双亲委派模型" class="headerlink" title="双亲委派模型"></a>双亲委派模型</h3><p>从Java虚拟机角度来看，只有两种类加载器：</p>
+<ol>
+<li>启动类加载器(Bootstrap ClassLoader),使用C++实现，是虚拟机自身的一部分</li>
+<li>其它加载器，由Java语言实现，独立与虚拟机外部，继承字java.lang.ClassLoader。</li>
+</ol>
+<p>从Java开发角度看，三种类加载器</p>
+<ol>
+<li>启动类加载器(Bootstrap ClassLoader)<ul>
+<li>负责从<JAVA_HOME>/lib目录和被-Xbootclasspath指定的路径中,将虚拟机识别的类库(按照文件名识别,如rt.jar)加载到虚拟机内存中。</li>
+<li>启动类加器无法被Java程序直接引用。</li>
+</ul>
+</li>
+<li>扩展类加载器（Extension ClassLoader）<ul>
+<li>负责加载<JAVA_HOME>/lib/ext目录中，或者被java.ext.dirs系统变量所指定路径中的所有类库</li>
+<li>由sun.misc.Launcher$ExtClassLoader实现</li>
+</ul>
+</li>
+<li>应用程序类加载器 (Application ClassLoader)<ul>
+<li>负责加载用户类路径(ClassPath)上指定的类库</li>
+<li>由sun.misc.Launcher$AppClassLoader实现</li>
+</ul>
+</li>
+</ol>
+<p>这几个类加载器之间的关系如图：<br><img src="http://static.zybuluo.com/qh438406812/bket3ekssq7kzj5w40kgj8hf/image_1b8ol9qsf184v1bfk18o7raa198jm.png" alt="image_1b8ol9qsf184v1bfk18o7raa198jm.png-71.6kB"></p>
+<p>在双亲委派模型中，除了最顶层的启动类加载器外，其余的类加载器都必须由自己的父类加载器。</p>
+<p>双亲委派模型工作过程:</p>
+<ol>
+<li>如果一个类加载器收到了类加载请求，它首先不会自己去尝试加载这个类，而是把类加载请求委派给父类加载器去完成。</li>
+<li>每一层的类加载器都把类加载请求委派给父类加载器，直到所有的类加载请求都应该传递给顶层的启动类加载器。</li>
+<li>如果顶层的启动类加载器无法完成加载请求，子类加载器尝试去加载，如果连最初发起类加载请求的类加载器也无法完成加载请求时，将会抛出ClassNotFoundException。</li>
+</ol>
+<blockquote>
+<p>双亲委派的优点是Java类它的类加载器一起具备了一种带优先级的层次关系，越是基础的类，越是被上层的类加载器进行加载，保证了java程序的稳定运行。</p>
+</blockquote>
+<p>实现代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">protected synchronized Class&lt;?&gt; loadClass(String name, Boolean resolve) throws ClassNotFoundException&#123;    </span><br><span class="line">    &#x2F;&#x2F;首先检查请求的类是否已经被加载过    </span><br><span class="line">    Class c &#x3D; findLoadedClass(name);    </span><br><span class="line">    if (c &#x3D;&#x3D; null)&#123;    </span><br><span class="line">        try&#123;    </span><br><span class="line">            if(parent !&#x3D; null)&#123;</span><br><span class="line">                &#x2F;&#x2F;委派父类加载器加载    </span><br><span class="line">                c &#x3D; parent.loadClass(name, false);    </span><br><span class="line">            &#125;    </span><br><span class="line">            else&#123;</span><br><span class="line">                &#x2F;&#x2F;委派启动类加载器加载    </span><br><span class="line">                c &#x3D; findBootstrapClassOrNull(name);     </span><br><span class="line">            &#125;    </span><br><span class="line">        &#125;catch(ClassNotFoundException e)&#123;    </span><br><span class="line">            &#x2F;&#x2F;父类加载器无法完成类加载请求    </span><br><span class="line">        &#125;    </span><br><span class="line">        if(c &#x3D;&#x3D; null)&#123;</span><br><span class="line">            &#x2F;&#x2F;本身类加载器进行类加载    </span><br><span class="line">            c &#x3D; findClass(name);    </span><br><span class="line">        &#125;    </span><br><span class="line">    &#125;    </span><br><span class="line">    if(resolve)&#123;    </span><br><span class="line">        resolveClass(c);    </span><br><span class="line">    &#125;    </span><br><span class="line">    return c;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>书籍 ：《深入理解Java虚拟机》第七章  周志明 著</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/11/15/java/jvm_concurrent_singleton/" rel="prev" title="Java单例-内存模型-并发">
+      <i class="fa fa-chevron-left"></i> Java单例-内存模型-并发
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/01/05/android/droid_plugin_activity/" rel="next" title="插件化DroidPlugin-Activity">
+      插件化DroidPlugin-Activity <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#主要内容："><span class="nav-number">1.</span> <span class="nav-text">主要内容：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#类加载时机"><span class="nav-number">1.1.</span> <span class="nav-text">类加载时机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#触发加载阶段时机"><span class="nav-number">1.1.1.</span> <span class="nav-text">触发加载阶段时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#触发初始化阶段时机"><span class="nav-number">1.1.2.</span> <span class="nav-text">触发初始化阶段时机</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类加载过程"><span class="nav-number">1.2.</span> <span class="nav-text">类加载过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#加载阶段"><span class="nav-number">1.2.1.</span> <span class="nav-text">加载阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#验证阶段"><span class="nav-number">1.2.2.</span> <span class="nav-text">验证阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#准备阶段"><span class="nav-number">1.2.3.</span> <span class="nav-text">准备阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解析阶段"><span class="nav-number">1.2.4.</span> <span class="nav-text">解析阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化阶段"><span class="nav-number">1.2.5.</span> <span class="nav-text">初始化阶段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类加载器"><span class="nav-number">1.3.</span> <span class="nav-text">类加载器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#类与类加载器"><span class="nav-number">1.3.1.</span> <span class="nav-text">类与类加载器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#双亲委派模型"><span class="nav-number">1.3.2.</span> <span class="nav-text">双亲委派模型</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

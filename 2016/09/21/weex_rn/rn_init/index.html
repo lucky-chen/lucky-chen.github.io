@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="概述就像大多数框架一样,ReactNative(简称RN)启动需要初始化依赖的环境和资源,抛开繁复的细节,概括为以下几点:  初始化通信接口表,表中保存 java 端和 js 端的接口信息。 初始化ReactBridge,作为 js 和 java 通信的桥梁，在 java 端开启两个线程 native_modules 和 js ,加上 ui 线程，总共三个线程。 加载JSbundle文件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ReactNative源码-启动过程">
+<meta property="og:url" content="https://lucky-chen.github.io/2016/09/21/weex_rn/rn_init/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="概述就像大多数框架一样,ReactNative(简称RN)启动需要初始化依赖的环境和资源,抛开繁复的细节,概括为以下几点:  初始化通信接口表,表中保存 java 端和 js 端的接口信息。 初始化ReactBridge,作为 js 和 java 通信的桥梁，在 java 端开启两个线程 native_modules 和 js ,加上 ui 线程，总共三个线程。 加载JSbundle文件">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/qw78oo697pzumgd5ly6af6qm/rn_start_01.svg">
+<meta property="article:published_time" content="2016-09-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-09T07:50:57.429Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://static.zybuluo.com/qh438406812/qw78oo697pzumgd5ly6af6qm/rn_start_01.svg">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2016/09/21/weex_rn/rn_init/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ReactNative源码-启动过程 | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2016/09/21/weex_rn/rn_init/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ReactNative源码-启动过程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-09-21 00:00:00" itemprop="dateCreated datePublished" datetime="2016-09-21T00:00:00+08:00">2016-09-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-09 15:50:57" itemprop="dateModified" datetime="2020-06-09T15:50:57+08:00">2020-06-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/WEEX-RN/" itemprop="url" rel="index"><span itemprop="name">WEEX/RN</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>就像大多数框架一样,ReactNative(简称RN)启动需要初始化依赖的环境和资源,抛开繁复的细节,概括为以下几点:</p>
+<ol>
+<li>初始化通信接口表,表中保存 <em>java</em> 端和 <em>js</em> 端的接口信息。</li>
+<li>初始化ReactBridge,作为 <em>js</em> 和 <em>java</em> 通信的桥梁，在 <em>java</em> 端开启两个线程 <em>native_modules</em> 和 <em>js</em> ,加上 <em>ui</em> 线程，总共三个线程。</li>
+<li>加载JSbundle文件</li>
+</ol>
+<a id="more"></a>
+
+<h2 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h2><p>画了个流程图，如下</p>
+<p><img src="http://static.zybuluo.com/qh438406812/qw78oo697pzumgd5ly6af6qm/rn_start_01.svg" alt="rn_start_01.svg-325.3kB"></p>
+<h2 id="几个重要类"><a href="#几个重要类" class="headerlink" title="几个重要类"></a>几个重要类</h2><p>在开始之前,先看几个重要的类,有个印象,后面看起来会轻松很多。</p>
+<table>
+<thead>
+<tr>
+<th align="left">class</th>
+<th align="left">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">ReactInstanceManager</td>
+<td align="left">1.创建ReactContext，CatalystInstance等类 <br> 2. 解析package生成注册表 <br> 3. 配合ReactRootView管理View的创建，生命周期等功能 <br> 4. <strong>默认实现类为</strong> <code>ReactInstanceManagerImpl</code></td>
+</tr>
+<tr>
+<td align="left">ReactContext</td>
+<td align="left">RN程序自己的上下文,里面有CatalystInstance实例，可以去获得Java和JS的module。</td>
+</tr>
+<tr>
+<td align="left">ReactRootView</td>
+<td align="left">RN程序的根视图，Rn的入口</td>
+</tr>
+<tr>
+<td align="left">CatalystInstance</td>
+<td align="left">保存有js和java端的接口,内部通过ReactBridge进行通信,进行方法调用</td>
+</tr>
+<tr>
+<td align="left">ReactBridge</td>
+<td align="left">和jni进行通信</td>
+</tr>
+<tr>
+<td align="left">NativeModuleRegistry</td>
+<td align="left">Java接口的注册表</td>
+</tr>
+<tr>
+<td align="left">JavascriptModuleRegistry</td>
+<td align="left">JS接口的注册表</td>
+</tr>
+<tr>
+<td align="left">CoreModulePackage</td>
+<td align="left">提供RN核心的Java接口和js接口</td>
+</tr>
+<tr>
+<td align="left">MainReactPackage</td>
+<td align="left">RN帮我们封装的类,提供一些额外的Java接口和js接口，用来加载自己的接口</td>
+</tr>
+<tr>
+<td align="left">JsBundleLoader</td>
+<td align="left">故名思议，用于加载打包成bundle的js代码</td>
+</tr>
+</tbody></table>
+<h2 id="步骤分析"><a href="#步骤分析" class="headerlink" title="步骤分析"></a>步骤分析</h2><h3 id="step-１"><a href="#step-１" class="headerlink" title="step_１"></a>step_１</h3><p>按照官方的示例,入口调用为 <strong>reactRootView.startReactApplication(…)</strong> ,看看这句代码干了什么</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ReactRootViewRoot</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startReactApplication</span><span class="params">(ReactInstanceManager mReactInstanceManager,String moduleName, Bundle launchOptions)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="comment">//初始化Rn环境</span></span><br><span class="line">    mReactInstanceManager.createReactContextInBackground();</span><br><span class="line">    <span class="comment">//初始化UI,由于各种状态判定，第一次启动时，这句话不会执行</span></span><br><span class="line">    <span class="comment">//mReactInstanceManager.attachMeasuredRootView(this);</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>mReactInstanceManager 的类型为 ReactInstanceManager，这是一个抽象类，真正的实现类是 ReactInstanceManagerImpl</p>
+<h3 id="step-2"><a href="#step-2" class="headerlink" title="step_2"></a>step_2</h3><p>接着看 ReactInstanceManagerImpl 的 createReactContextInBackground方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public void createReactContextInBackground() &#123;</span><br><span class="line">    mHasStartedCreatingInitialContext &#x3D; true;</span><br><span class="line">    recreateReactContextInBackgroundInner();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>recreateReactContextInBackgroundInner会继续往下进行方法调用，忽略dev模式代码以及异常判断，最终会调用到 recreateReactContextInBackgroundFromBundleFile，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">recreateReactContextInBackgroundFromBundleFile</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    recreateReactContextInBackground(</span><br><span class="line">        <span class="keyword">new</span> JSCJavaScriptExecutor.Factory(),</span><br><span class="line">        JSBundleLoader.createFileLoader(mApplicationContext, mJSBundleFile));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个函数创建了两个对象<br>1.JSBundleLoader 提供jsBundle文件的路径,<br>2. 创建一个JavaScriptExecutor.Factory对象,用于初始化js端环境</p>
+<h3 id="step-3"><a href="#step-3" class="headerlink" title="step_3"></a>step_3</h3><p>recreateReactContextInBackground 函数干了两件事</p>
+<ol>
+<li>创建一个ReactContextInitParams对象，包含之前创建的jsExecutorFactory, jsBundleLoader两个对象</li>
+<li>将initParams传给ReactContextInitAsyncTask，启动asyncTask,开始初始化Rn所需要的资源,</li>
+</ol>
+<p>跳过step_4 – step_5</p>
+<h3 id="step-6"><a href="#step-6" class="headerlink" title="step_6"></a>step_6</h3><p>AsyncTask… 这是一道送分题啊同学们,瞅瞅干了啥</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">protected Result&lt;ReactApplicationContext&gt; doInBackground(ReactContextInitParams... params) &#123;</span><br><span class="line">    JavaScriptExecutor jsExecutor &#x3D;params[0].getJsExecutorFactory().create(</span><br><span class="line">                mJSCConfig &#x3D;&#x3D; null ? new WritableNativeMap() :mJSCConfig.getConfigMap());</span><br><span class="line">    return Result.of(createReactContext(jsExecutor, params[0].getJsBundleLoader()));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>回调之前创建的getJsExecutorFactory.create方法，传入初始化参数(默认为 null )，初始化native</li>
+<li>执行核心初始化函数 createReactContext<br></li>
+</ol>
+<h3 id="step-7-核心初始化函数"><a href="#step-7-核心初始化函数" class="headerlink" title="step_7 核心初始化函数"></a>step_7 核心初始化函数</h3><p>这步很重要，基本上80%的初始化都在这里，大概分为四部分：</p>
+<ol>
+<li>加载java和js的接口接口。</li>
+<li>初始化通信表</li>
+<li>初始化RN 环境</li>
+<li>加载bundle文件</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> ReactApplicationContext <span class="title">createReactContext</span><span class="params">(JavaScriptExecutor jsExecutor,JSBundleLoader jsBundleLoader)</span> </span>&#123;</span><br><span class="line">    mSourceUrl = jsBundleLoader.getSourceUrl();</span><br><span class="line">    NativeModuleRegistry.Builder nativeRegistryBuilder = <span class="keyword">new</span> NativeModuleRegistry.Builder();</span><br><span class="line">    avaScriptModulesConfig.Builder jsModulesBuilder = <span class="keyword">new</span> JavaScriptModulesConfig.Builder();</span><br><span class="line">    ReactApplicationContext reactContext = <span class="keyword">new</span> ReactApplicationContext(mApplicationContext);</span><br><span class="line">    CoreModulesPackage coreModulesPackage =<span class="keyword">new</span> CoreModulesPackage(<span class="keyword">this</span>, mBackBtnHandler, mUIImplementationProvider);</span><br><span class="line">    <span class="comment">//1. 加载java和js接口</span></span><br><span class="line">    processPackage(coreModulesPackage, reactContext, nativeRegistryBuilder, jsModulesBuilder);</span><br><span class="line">    <span class="keyword">for</span> (ReactPackage reactPackage : mPackages) &#123;</span><br><span class="line">        processPackage(reactPackage, reactContext, nativeRegistryBuilder, jsModulesBuilder);</span><br><span class="line">    &#125;</span><br><span class="line">    NativeModuleRegistry nativeModuleRegistry = nativeRegistryBuilder.build();</span><br><span class="line">    JavaScriptModulesConfig javaScriptModulesConfig=jsModulesBuilder.build();</span><br><span class="line"></span><br><span class="line">    NativeModuleCallExceptionHandler exceptionHandler = </span><br><span class="line">mNativeModuleCallExceptionHandler != <span class="keyword">null</span>? mNativeModuleCallExceptionHandler:mDevSupportManager;</span><br><span class="line">    <span class="comment">//2 初始化配置</span></span><br><span class="line">    CatalystInstanceImpl.Builder catalystInstanceBuilder = <span class="keyword">new</span> CatalystInstanceImpl.Builder()</span><br><span class="line">        .setReactQueueConfigurationSpec(ReactQueueConfigurationSpec.createDefault())</span><br><span class="line">        .setJSExecutor(jsExecutor)</span><br><span class="line">            .setRegistry(nativeModuleRegistry)</span><br><span class="line">            .setJSModulesConfig(javaScriptModulesConfig)</span><br><span class="line">            .setJSBundleLoader(jsBundleLoader)</span><br><span class="line">            .setNativeModuleCallExceptionHandler(exceptionHandler);</span><br><span class="line">    CatalystInstance catalystInstance= catalystInstanceBuilder.build();</span><br><span class="line">    <span class="comment">//3 初始化RN 环境</span></span><br><span class="line">    reactContext.initializeWithInstance(catalystInstance);</span><br><span class="line">    <span class="comment">//4 加载bundle文件</span></span><br><span class="line">    catalystInstance.runJSBundle();</span><br><span class="line">    <span class="keyword">return</span> reactContext;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在第8行和第10行分别调用了processPackage方法,唯一的区别是传入的第二个参数不同。参数的类型是ReactPackager,这是一个接口类，用于提供js和java接口。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;ReactPackage.java</span><br><span class="line">public interface ReactPackage &#123;</span><br><span class="line"></span><br><span class="line">  &#x2F;**</span><br><span class="line">   * 返回java端暴露给js的接口集合</span><br><span class="line">   *&#x2F;</span><br><span class="line">  List&lt;NativeModule&gt; createNativeModules(ReactApplicationContext reactContext);</span><br><span class="line">  </span><br><span class="line">  &#x2F;**</span><br><span class="line">   * @return 返回js端暴露给JAVA端的接口集合</span><br><span class="line">   *&#x2F;</span><br><span class="line">  List&lt;Class&lt;? extends JavaScriptModule&gt;&gt; createJSModules();</span><br><span class="line"></span><br><span class="line">  &#x2F;**</span><br><span class="line">   * @return 返回给js端native封装的view集合</span><br><span class="line">   *&#x2F;</span><br><span class="line">  List&lt;ViewManager&gt; createViewManagers(ReactApplicationContext reactContext);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>&#160; &#160; &#160; &#160;接着看processPackage方法，两次调用分别传入了 coreModulesPackage 对象和 reactPackage对象，coreModules提供RN必须的一些通信接口如UIManagerModule和RCTEventEmitter等等,而reactPackage在ReactRootView.startReactApplication()则是我们自己定义的类对象，加载自定义的接口。RN的样例代码中为我们封装了一个类MainReactPackage，加载DialogModule、IntentModule、ReactVirtualTextViewManager等等。<br>&#160; &#160; &#160; &#160;回头继续看processPackage方法实现，也很简单，就是提取ReactPackager中提供的java和js接口并保存在对应的对象中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">private void processPackage(ReactPackage reactPackage, ReactApplicationContext reactContext,</span><br><span class="line">                        NativeModuleRegistry.Builder nativeRegistryBuilder,</span><br><span class="line">                        JavaScriptModulesConfig.Builder jsModulesBuilder) &#123;</span><br><span class="line">    for (NativeModule nativeModule : reactPackage.createNativeModules(reactContext)) &#123;</span><br><span class="line">        nativeRegistryBuilder.add(nativeModule);</span><br><span class="line">    &#125;</span><br><span class="line">    for (Class&lt;? extends JavaScriptModule&gt; jsModuleClass : reactPackage.createJSModules()) &#123;</span><br><span class="line">        jsModulesBuilder.add(jsModuleClass);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>数据准备好之后， 会调用 <em>nativeRegistryBuilder.build()</em> 和 <em>jsModulesBuilder.build()</em> 构造对象,以nativeRegistryBuilder为例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> public NativeModuleRegistry build() &#123;</span><br><span class="line">        List&lt;ModuleDefinition&gt; moduleTable &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line">        Map&lt;Class&lt;? extends NativeModule&gt;, NativeModule&gt; moduleInstances &#x3D; new HashMap&lt;&gt;();</span><br><span class="line">        int idx &#x3D; 0;</span><br><span class="line">        for (NativeModule module : mModules.values()) &#123;</span><br><span class="line">            ModuleDefinition moduleDef &#x3D; new ModuleDefinition(idx++, module.getName(), module);</span><br><span class="line">            moduleTable.add(moduleDef);</span><br><span class="line">            moduleInstances.put(module.getClass(), module);</span><br><span class="line">        &#125;</span><br><span class="line">    return new NativeModuleRegistry(moduleTable, moduleInstances);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>代码逻辑很清晰，就是构造一张java接口表，表中保存java的modelId,mode名称，以及model的引用。举个栗子:</p>
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">modelName</th>
+<th align="left">model</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">DialogManagerAndroid</td>
+<td align="left">DialogModule</td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="left">IntentAndroid</td>
+<td align="left">IntentModule</td>
+</tr>
+</tbody></table>
+<p>加载完接口之后，去干第二件事，初始化通信环境。这一步做了几件事：</p>
+<ol>
+<li>实例化CatalystInstanceImpl， 存储java和js接口</li>
+<li>实例化jni通信模块ReactBridge将java和js接口组织成json形式，通过jni传给native，native在传到js中去。</li>
+<li>创建两个后台线程mqt_js和mqt_native_modules，线程中使用Looper进行消息循环，在这两个线程和ui线程中各创建一个handler，保存handler的引用到对应线程中去。对应关系如下</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th align="left">线程</th>
+<th align="left">looper</th>
+<th align="left">handler</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">ui线程</td>
+<td align="left">true</td>
+<td align="left">handler_main_ui</td>
+</tr>
+<tr>
+<td align="left">js线程</td>
+<td align="left">true</td>
+<td align="left">handler_mqt_js</td>
+</tr>
+<tr>
+<td align="left">native_modules线程</td>
+<td align="left">true</td>
+<td align="left">handler_native_modules</td>
+</tr>
+</tbody></table>
+<p>下面看具体的代码流程<br>首先，第25行build函数实际上是实例化CatalystInstanceImpl</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public CatalystInstanceImpl build() &#123;</span><br><span class="line">    return new CatalystInstanceImpl(</span><br><span class="line">                mReactQueueConfigurationSpec,</span><br><span class="line">                mJSExecutor,</span><br><span class="line">                mRegistry,</span><br><span class="line">                mJSModulesConfig,</span><br><span class="line">                mJSBundleLoader,</span><br><span class="line">                mNativeModuleCallExceptionHandler);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>继续看CatalystInstanceImpl的构造函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">private CatalystInstanceImpl(</span><br><span class="line">        final ReactQueueConfigurationSpec ReactQueueConfigurationSpec,</span><br><span class="line">        final JavaScriptExecutor jsExecutor,</span><br><span class="line">        final NativeModuleRegistry registry,</span><br><span class="line">        final JavaScriptModulesConfig jsModulesConfig,</span><br><span class="line">        final JSBundleLoader jsBundleLoader,</span><br><span class="line">        NativeModuleCallExceptionHandler nativeModuleCallExceptionHandler) &#123;</span><br><span class="line">    &#x2F;&#x2F;1 创建2个线程和三个handler</span><br><span class="line">    mReactQueueConfiguration &#x3D; ReactQueueConfigurationImpl.create(ReactQueueConfigurationSpec,</span><br><span class="line">            new NativeExceptionHandler());</span><br><span class="line">    mBridgeIdleListeners &#x3D; new CopyOnWriteArrayList&lt;&gt;();</span><br><span class="line">    mJavaRegistry &#x3D; registry;</span><br><span class="line">    mJSModuleRegistry &#x3D; new JavaScriptModuleRegistry(CatalystInstanceImpl.this, jsModulesConfig);</span><br><span class="line">    mJSBundleLoader &#x3D; jsBundleLoader;</span><br><span class="line">    mNativeModuleCallExceptionHandler &#x3D; nativeModuleCallExceptionHandler;</span><br><span class="line">    mTraceListener &#x3D; new JSProfilerTraceListener();</span><br><span class="line">    mBridge &#x3D; mReactQueueConfiguration.getJSQueueThread().callOnQueue(</span><br><span class="line">        new Callable&lt;ReactBridge&gt;() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public ReactBridge call() throws Exception &#123;</span><br><span class="line">                &#x2F;&#x2F;2 实例化和jni通信的ReactBridge,并将Java端和js端的方法组装成json形式，传递到C++层</span><br><span class="line">                return initializeBridge(jsExecutor, jsModulesConfig);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).get();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看第9行代码，调用create方法，创建了三个线程的handler，并保存在对应线程的ThreadLocal中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">   public static ReactQueueConfigurationImpl create(ReactQueueConfigurationSpec spec,</span><br><span class="line">                                                     QueueThreadExceptionHandler exceptionHandler) &#123;</span><br><span class="line">    Map&lt;MessageQueueThreadSpec, MessageQueueThreadImpl&gt; specsToThreads &#x3D; MapBuilder.newHashMap();</span><br><span class="line"></span><br><span class="line">    MessageQueueThreadSpec uiThreadSpec &#x3D; MessageQueueThreadSpec.mainThreadSpec();</span><br><span class="line">    &#x2F;&#x2F;创建一个名为&quot;main-ui&quot;的handler，保存在UI线程中ThreadLocal中</span><br><span class="line">    MessageQueueThreadImpl uiThread &#x3D;MessageQueueThreadImpl.create(uiThreadSpec, exceptionHandler);</span><br><span class="line">    specsToThreads.put(uiThreadSpec, uiThread);</span><br><span class="line"></span><br><span class="line">    MessageQueueThreadImpl jsThread &#x3D; specsToThreads.get(spec.getJSQueueThreadSpec());</span><br><span class="line">    if (jsThread &#x3D;&#x3D; null) &#123;</span><br><span class="line">        &#x2F;&#x2F;创建一个名称为mqt_js 的线程,</span><br><span class="line">        &#x2F;&#x2F; 并将Js线程中handler保存到js线程中的ThreadLocal中</span><br><span class="line">        &#x2F;&#x2F;线程中使用Lopper轮询消息，由handle人处理消息</span><br><span class="line">        jsThread &#x3D; MessageQueueThreadImpl.create(spec.getJSQueueThreadSpec(), exceptionHandler);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    MessageQueueThreadImpl nativeModulesThread &#x3D;</span><br><span class="line">        specsToThreads.get(spec.getNativeModulesQueueThreadSpec());</span><br><span class="line">    if (nativeModulesThread &#x3D;&#x3D; null) &#123;</span><br><span class="line">        &#x2F;&#x2F;创建一个名称为mqt_native_modules 的线程,</span><br><span class="line">        &#x2F;&#x2F; 并将Js线程中handler保存到mqt_native_modules线程中的ThreadLocal中</span><br><span class="line">        &#x2F;&#x2F;线程中使用Lopper轮询消息，由handler人处理消息</span><br><span class="line">        nativeModulesThread &#x3D;MessageQueueThreadImpl.create(spec.getNativeModulesQueueThreadSpec(), exceptionHandler);</span><br><span class="line">    &#125;</span><br><span class="line">    return new ReactQueueConfigurationImpl(uiThread, nativeModulesThread, jsThread);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这步中比较重要的参数是 <strong>spec</strong> 保存两个类型为MessageQueueThreadSpec的数据结构,同时，在第5行创建了一个新的MessageQueueThreadSpec，共三个对象</p>
+<table>
+<thead>
+<tr>
+<th align="left">对象</th>
+<th align="left">name</th>
+<th align="left">ThreadType</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">uiThreadSpec</td>
+<td align="left">main_ui</td>
+<td align="left">MAIN_UI</td>
+</tr>
+<tr>
+<td align="left">mNativeModulesQueueThreadSpec</td>
+<td align="left">native_modules</td>
+<td align="left">NEW_BACKGROUND</td>
+</tr>
+<tr>
+<td align="left">mJSQueueThreadSpec</td>
+<td align="left">js</td>
+<td align="left">NEW_BACKGROUND</td>
+</tr>
+<tr>
+<td align="left">分别将这三个对象进行 MessageQueueThreadImpl.create 操作，NEW_BACKGROUND 类型的会常见新的线程和handler，MAIN_UI的则只会创建ui线程的handler，最后将这三个handler保存在各自线程的ThreadLocal中，这部分代码就不贴出来了。</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>初始化两个线程和三个handler后，调用 initializeBridge函数，初始化ReactBridge，将模块和函数表传到jni中去</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">  private ReactBridge initializeBridge(JavaScriptExecutor jsExecutor, JavaScriptModulesConfig jsModulesConfig) &#123;</span><br><span class="line">    ReactBridge bridge &#x3D; new ReactBridge(</span><br><span class="line">                    jsExecutor,</span><br><span class="line">                    new NativeModulesReactCallback(),</span><br><span class="line">                    mReactQueueConfiguration.getNativeModulesQueueThread());</span><br><span class="line">    mMainExecutorToken &#x3D; bridge.getMainExecutorToken();</span><br><span class="line">    bridge.setGlobalVariable(</span><br><span class="line">                    &quot;__fbBatchedBridgeConfig&quot;,</span><br><span class="line">                    buildModulesConfigJSONProperty(mJavaRegistry, jsModulesConfig));</span><br><span class="line">    bridge.setGlobalVariable(</span><br><span class="line">                    &quot;__RCTProfileIsProfiling&quot;,</span><br><span class="line">                    Systrace.isTracing(Systrace.TRACE_TAG_REACT_APPS) ? &quot;true&quot; : &quot;false&quot;);</span><br><span class="line">    mJavaRegistry.notifyReactBridgeInitialized(bridge);</span><br><span class="line">    return bridge;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>主要看这9行代码，buildModulesConfigJSONProperty函数，将模块方法组装成json传到Jni中去，截取了函数Json返回值的一部分，是长这样的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;remoteModuleConfig&quot;: &#123;</span><br><span class="line">        &quot;Log&quot;: &#123;</span><br><span class="line">            &quot;moduleID&quot;: 1,</span><br><span class="line">            &quot;supportsWebWorkers&quot;: false,</span><br><span class="line">            &quot;methods&quot;: &#123;</span><br><span class="line">                &quot;d&quot;: &#123;</span><br><span class="line">                    &quot;methodID&quot;: 0,</span><br><span class="line">                    &quot;type&quot;: &quot;remote&quot;</span><br><span class="line">                &#125;,</span><br><span class="line">                &quot;i&quot;: &#123;</span><br><span class="line">                    &quot;methodID&quot;: 1,</span><br><span class="line">                    &quot;type&quot;: &quot;remote&quot;</span><br><span class="line">                &#125;,</span><br><span class="line">                &quot;w&quot;: &#123;</span><br><span class="line">                    &quot;methodID&quot;: 2,</span><br><span class="line">                    &quot;type&quot;: &quot;remote&quot;</span><br><span class="line">                &#125;,</span><br><span class="line">                &quot;e&quot;: &#123;</span><br><span class="line">                    &quot;methodID&quot;: 3,</span><br><span class="line">                    &quot;type&quot;: &quot;remote&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;NetInfo&quot;: &#123;</span><br><span class="line">            &quot;moduleID&quot;: 2,</span><br><span class="line">            &quot;supportsWebWorkers&quot;: false,</span><br><span class="line">            &quot;methods&quot;: &#123;</span><br><span class="line">                &quot;getCurrentConnectivity&quot;: &#123;</span><br><span class="line">                    &quot;methodID&quot;: 0,</span><br><span class="line">                    &quot;type&quot;: &quot;remoteAsync&quot;</span><br><span class="line">                &#125;,</span><br><span class="line">                &quot;isConnectionMetered&quot;: &#123;</span><br><span class="line">                    &quot;methodID&quot;: 1,</span><br><span class="line">                    &quot;type&quot;: &quot;remoteAsync&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line">        &quot;ToastAndroid&quot;: &#123;</span><br><span class="line">            &quot;moduleID&quot;: 19,</span><br><span class="line">            &quot;supportsWebWorkers&quot;: false,</span><br><span class="line">            &quot;methods&quot;: &#123;</span><br><span class="line">                &quot;show&quot;: &#123;</span><br><span class="line">                    &quot;methodID&quot;: 0,</span><br><span class="line">                    &quot;type&quot;: &quot;remote&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;constants&quot;: &#123;</span><br><span class="line">                &quot;LONG&quot;: 1,</span><br><span class="line">                &quot;SHORT&quot;: 0</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第四步 在reactContext中保持三个线程handler的引用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> reactContext.initializeWithInstance(catalystInstance);</span><br><span class="line"> &#x2F;&#x2F;ReactContext.java</span><br><span class="line"> public void initializeWithInstance(CatalystInstance catalystInstance) &#123;</span><br><span class="line">    mCatalystInstance &#x3D; catalystInstance;</span><br><span class="line">    ReactQueueConfiguration queueConfig &#x3D; catalystInstance.getReactQueueConfiguration();</span><br><span class="line">    mUiMessageQueueThread &#x3D; queueConfig.getUIQueueThread();</span><br><span class="line">    mNativeModulesMessageQueueThread &#x3D; queueConfig.getNativeModulesQueueThread();</span><br><span class="line">    mJSMessageQueueThread &#x3D; queueConfig.getJSQueueThread();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第五步 通过jni，native开始加载jsBundle</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">catalystInstance.runJSBundle();</span><br><span class="line">&#x2F;&#x2F;CatalystInstanceImpl.java</span><br><span class="line">public void runJSBundle() &#123;</span><br><span class="line">   mJSBundleHasLoaded &#x3D; mReactQueueConfiguration.getJSQueueThread().callOnQueue(new Callable&lt;Boolean&gt;() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public Boolean call() throws Exception &#123;</span><br><span class="line">            mJSBundleLoader.loadScript(mBridge);</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;).get();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> mJSBundleLoader.loadScript(mBridge);</span><br><span class="line"> &#x2F;&#x2F;JSBundleLoader.java</span><br><span class="line"> public void loadScript(ReactBridge bridge) &#123;</span><br><span class="line">    if (fileName.startsWith(&quot;assets:&#x2F;&#x2F;&quot;)) &#123;</span><br><span class="line">        bridge.loadScriptFromAssets(context.getAssets(), fileName.replaceFirst(&quot;assets:&#x2F;&#x2F;&quot;, &quot;&quot;));</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        bridge.loadScriptFromFile(fileName, &quot;file:&#x2F;&#x2F;&quot; + fileName);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以loadScriptFromFile都是native方法，将bundle路径传到native，native加载JS代码和资源</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public native void loadScriptFromAssets(AssetManager assetManager, String assetName);</span><br><span class="line"></span><br><span class="line">public native void loadScriptFromFile(@Nullable String fileName, @Nullable String sourceURL);</span><br></pre></td></tr></table></figure>
+
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/08/25/android/handle/" rel="prev" title="Android源码之Handler">
+      <i class="fa fa-chevron-left"></i> Android源码之Handler
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/11/06/java/jvm_mem_struct/" rel="next" title="《深入理解JVM虚拟机》读书笔记——第2章 Java内存区域">
+      《深入理解JVM虚拟机》读书笔记——第2章 Java内存区域 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#流程图"><span class="nav-number">1.1.</span> <span class="nav-text">流程图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#几个重要类"><span class="nav-number">1.2.</span> <span class="nav-text">几个重要类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#步骤分析"><span class="nav-number">1.3.</span> <span class="nav-text">步骤分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#step-１"><span class="nav-number">1.3.1.</span> <span class="nav-text">step_１</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-2"><span class="nav-number">1.3.2.</span> <span class="nav-text">step_2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-3"><span class="nav-number">1.3.3.</span> <span class="nav-text">step_3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-6"><span class="nav-number">1.3.4.</span> <span class="nav-text">step_6</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-7-核心初始化函数"><span class="nav-number">1.3.5.</span> <span class="nav-text">step_7 核心初始化函数</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

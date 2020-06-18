@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="概述对应官网文档地址 接上篇 ,继续 6-10 步的启动过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android动态化容器框架Atlas启动过程(下)">
+<meta property="og:url" content="https://lucky-chen.github.io/2017/05/21/android/atlas_start_2/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="概述对应官网文档地址 接上篇 ,继续 6-10 步的启动过程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lucky-chen.github.io/image/android/atlas_core_start_img.svg">
+<meta property="og:image" content="https://lucky-chen.github.io/image/android/atlas_java_startup_img.svg">
+<meta property="article:published_time" content="2017-05-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-09T13:14:11.710Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lucky-chen.github.io/image/android/atlas_core_start_img.svg">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2017/05/21/android/atlas_start_2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android动态化容器框架Atlas启动过程(下) | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2017/05/21/android/atlas_start_2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android动态化容器框架Atlas启动过程(下)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-05-21 00:00:00" itemprop="dateCreated datePublished" datetime="2017-05-21T00:00:00+08:00">2017-05-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-09 21:14:11" itemprop="dateModified" datetime="2020-06-09T21:14:11+08:00">2020-06-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p><a href="https://alibaba.github.io/atlas/code_read/atlas_start/atlas_start_2.html" target="_blank" rel="noopener">对应官网文档地址</a></p>
+<p>接<a href="https://lucky-chen.github.io/2017/05/02/android/atlas_start_1/">上篇</a> ,继续 6-10 步的启动过程。</p>
+<p><img src="/image/android/atlas_core_start_img.svg" alt=""></p>
+<a id="more"></a>
+
+<h1 id="6-onCreate"><a href="#6-onCreate" class="headerlink" title="6. onCreate"></a>6. onCreate</h1><p>AtlasBridgeApplication.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">super</span>.onCreate();</span><br><span class="line">	Method method = mBridgeApplicationDelegate.getClass().getDeclaredMethod(<span class="string">"onCreate"</span>);</span><br><span class="line">	method.invoke(mBridgeApplicationDelegate);       </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>直接反射调用<code>mBridgeApplicationDelegate</code>的<code>onCreate</code>方法.</p>
+<h1 id="7-BridgeApplicationDelegate-onCreate"><a href="#7-BridgeApplicationDelegate-onCreate" class="headerlink" title="7. BridgeApplicationDelegate.onCreate"></a>7. BridgeApplicationDelegate.onCreate</h1><p>BridgeApplicationDelegate.java</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">public void onCreate()&#123;</span><br><span class="line">   &#x2F;&#x2F; 7.1 实例application</span><br><span class="line">	mRealApplication &#x3D; (Application) mRawApplication.getBaseContext()</span><br><span class="line">		.getClassLoader().loadClass(mRealApplicationName).newInstance();</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F;7.2 replace xxx</span><br><span class="line">    AtlasHacks.ContextImpl_setOuterContext.invoke(</span><br><span class="line">    	mRawApplication.getBaseContext(), mRealApplication);</span><br><span class="line">    &#x2F;&#x2F;...</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F;7.3 mRealApplication.attach</span><br><span class="line">    AtlasHacks.Application_attach</span><br><span class="line">   		.invoke(mRealApplication,mRawApplication.getBaseContext());</span><br><span class="line">   </span><br><span class="line">    &#x2F;&#x2F;7.4 install content providers</span><br><span class="line">    Object mBoundApplication &#x3D; AtlasHacks.ActivityThread_mBoundApplication.get(activityThread);</span><br><span class="line">    AtlasHacks.ActivityThread$AppBindData_providers.set(mBoundApplication,mBoundApplication_provider);</span><br><span class="line">    AtlasHacks.ActivityThread_installContentProviders.invoke(activityThread,mRealApplication,mBoundApplication_provider);</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F;7.5. startup</span><br><span class="line">    Atlas.getInstance().startup(mRealApplication,mIsUpdated);</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F;7.6 onCreate</span><br><span class="line">    mRealApplication.onCreate();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数有点长，不过内容大概分为6块</p>
+<ol>
+<li>实例化app工程中指定的mRealApplication</li>
+<li>替换application</li>
+<li>反射执行mRealApplication的attach方法</li>
+<li>加载provider</li>
+<li>Atlas.startup</li>
+<li>调用mRealApplication.onCreate方法</li>
+</ol>
+<p>##7.1 实例application</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mRealApplication = (Application) mRawApplication.getBaseContext()</span><br><span class="line">		.getClassLoader().loadClass(mRealApplicationName).newInstance();</span><br></pre></td></tr></table></figure>
+<p><code>mRealApplicationName</code>实际上是指<code>com.taobao.demo.DemoApplication</code>。在这里，构造出了app工程中指定application的对象实例。</p>
+<p>##7.2 替换application</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//replace baseContext.mOuterContext</span></span><br><span class="line">AtlasHacks.ContextImpl_setOuterContext.invoke(mRawApplication.getBaseContext(), mRealApplication);</span><br><span class="line"></span><br><span class="line"><span class="comment">//replace baseContext.mPackageInfo.mApplication</span></span><br><span class="line">Object mPackageInfo = AtlasHacks.ContextImpl_mPackageInfo.get(mRawApplication.getBaseContext());</span><br><span class="line"></span><br><span class="line"><span class="comment">//...</span></span><br></pre></td></tr></table></figure>
+<p>7.2部分，为了保证DemoApplication能够像正常声明的application一样正常工作，做了大量的hook。这里不关注具体hook实现，只给出hook后的映射，感兴趣的童鞋可以自行研究。</p>
+<table>
+<thead>
+<tr>
+<th>替换点</th>
+<th>实现类</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ContextImpl.mOuterContextt</td>
+<td>DemoApplication</td>
+</tr>
+<tr>
+<td>ContextImp.mPackageInfo</td>
+<td>DemoApplication</td>
+</tr>
+<tr>
+<td>ActivityThread.mInitialApplication</td>
+<td>DemoApplication</td>
+</tr>
+<tr>
+<td>ActivityThread.mAllApplications</td>
+<td>DemoApplication</td>
+</tr>
+</tbody></table>
+<p>##7.3 Application.attach</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AtlasHacks.Application_attach.invoke(mRealApplication,mRawApplication.getBaseContext());</span><br></pre></td></tr></table></figure>
+
+<p>mRealApplication实际上就是DemoApplication,反射执行application的attach方法,即第8步。</p>
+<p>##7.4 加载provider</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Object mBoundApplication = AtlasHacks.ActivityThread_mBoundApplication.get(activityThread);</span><br><span class="line"></span><br><span class="line">AtlasHacks.ActivityThread$AppBindData_providers.set(mBoundApplication,mBoundApplication_provider);</span><br><span class="line"></span><br><span class="line">AtlasHacks.ActivityThread_installContentProviders.invoke(activityThread,mRealApplication,mBoundApplication_provider);</span><br></pre></td></tr></table></figure>
+
+<p>在<a href="https://lucky-chen.github.io/2017/05/02/android/atlas_start_1/">Atlas启动过程(上)</a>的2.4小节中，为了防止在主dex中找不到bundle中的class,不得已延迟了对provider的加载。而在第5步中，atlas完成了对classloader等关键地方的hook。由于DelegateClassLoader的存在，此时进行加载provider，是不会出现问题的。</p>
+<p>#8. DemoApplication.attach</p>
+<p>DemoApplication.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">attach</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">	attachBaseContext(context);</span><br><span class="line">	mLoadedApk = ContextImpl.getImpl(context).mPackageInfo;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由7.3可知，mRealApplication实际上就是<code>DemoApplication</code></p>
+<ul>
+<li>调用DemoApplication的attachBaseContext方法</li>
+<li>为DemoApplication创建一个LoadedApk对象</li>
+</ul>
+<p>#9. startUp</p>
+<p><img src="/image/android/atlas_java_startup_img.svg" alt=""></p>
+<p>在startup整个函数周期内，做的事情非常之多，重要的是第3、4、6、7和8步。</p>
+<p>##9.3 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public void init(Context context, boolean hookedJavaVM) &#123;</span><br><span class="line">	if(VMUtil.IS_VM_ART) &#123;</span><br><span class="line">		success &#x3D; Boolean.valueOf(ARTUtils.init(context, hookedJavaVM));</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">       success &#x3D; Boolean.valueOf(DalvikUtils.init());</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看函数名，是针对art和dalvik工具类进行初始化。 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;DalvikUtils.java</span><br><span class="line">public static boolean init() &#123;</span><br><span class="line">	System.loadLibrary(&quot;dalvikhack&quot;);</span><br><span class="line">	nativeInit();</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line">&#x2F;&#x2F;ARTUtils.java</span><br><span class="line">public static boolean init(Context context, boolean hookedJavaVM) &#123;</span><br><span class="line">	System.loadLibrary(&quot;dexinterpret&quot;);</span><br><span class="line">	nativeInit(...);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="9-4"><a href="#9-4" class="headerlink" title="9.4"></a>9.4</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public static int patchIfPossible() &#123;</span><br><span class="line">	System.loadLibrary(&quot;dalvikpatch&quot;);</span><br><span class="line">	if(isDalvik()) &#123;</span><br><span class="line">   		int ingored &#x3D; adjustLinearAlloc();</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先加载<code>dalvikpatch</code>so,用途： <strong>todo</strong> <br><br>接着执行 <code>adjustLinearAlloc</code>方法 ，用途 <strong>todo</strong></p>
+<h2 id="9-7"><a href="#9-7" class="headerlink" title="9.7"></a>9.7</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">private synchronized void InitBundleInfoByVersionIfNeed()&#123;</span><br><span class="line">	String bundleInfoStr &#x3D; (String)RuntimeVariables.getFrameworkProperty(&quot;bundleInfo&quot;);</span><br><span class="line">	if(!TextUtils.isEmpty(bundleInfoStr)) &#123;</span><br><span class="line">		LinkedHashMap&lt;String,BundleListing.BundleInfo&gt; infos &#x3D; BundleListingUtil.parseArray(bundleInfoStr);</span><br><span class="line">		BundleListing listing &#x3D; new BundleListing();</span><br><span class="line">		listing.setBundles(infos);</span><br><span class="line">		mCurrentBundleListing &#x3D; listing;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，函数是从<code>RuntimeVariables</code>读取字符串，之后解析成对象存储。很明显，这个字符串应该是配置之类的信息。在<a href="https://lucky-chen.github.io/2017/05/15/android/atlas_atlas_gradle_apk/">atals从gradle到apk</a>中，我们提到过，atlas会在编译期间会分析bundle和gradle配置，将一些配置写入RuntimeVariables中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">package android.taobao.atlas.framework;</span><br><span class="line"></span><br><span class="line">public class FrameworkProperties</span><br><span class="line">&#123;</span><br><span class="line">  public static String autoStartBundles;</span><br><span class="line">  public static String bundleInfo &#x3D; &quot;[&#123;\&quot;activities\&quot;:[\&quot;com.taobao.firstbundle.FirstBundleActivity\&quot;],\&quot;contentProviders\&quot;:[],\&quot;dependency\&quot;:[],\&quot;isInternal\&quot;:true,\&quot;pkgName\&quot;:\&quot;com.taobao.firstbundle\&quot;,\&quot;receivers\&quot;:[],\&quot;services\&quot;:[\&quot;com.taobao.firstbundle.FirstBundleService\&quot;],\&quot;version\&quot;:\&quot;1.0.0@unspecified\&quot;&#125;,&#123;\&quot;activities\&quot;:[\&quot;com.taobao.secondbundle.SecondBundleActivity\&quot;,\&quot;com.taobao.secondbundlelibrary.SecondbundleShareActivity\&quot;],\&quot;contentProviders\&quot;:[],\&quot;dependency\&quot;:[],\&quot;isInternal\&quot;:true,\&quot;pkgName\&quot;:\&quot;com.taobao.secondbundle\&quot;,\&quot;receivers\&quot;:[],\&quot;services\&quot;:[],\&quot;version\&quot;:\&quot;1.0.0@unspecified\&quot;&#125;,&#123;\&quot;activities\&quot;:[\&quot;com.taobao.remotebunle.RemoteBundleActivity\&quot;],\&quot;contentProviders\&quot;:[],\&quot;dependency\&quot;:[],\&quot;isInternal\&quot;:false,\&quot;pkgName\&quot;:\&quot;com.taobao.remotebunle\&quot;,\&quot;receivers\&quot;:[],\&quot;services\&quot;:[],\&quot;version\&quot;:\&quot;1.0.0@unspecified\&quot;&#125;,&#123;\&quot;activities\&quot;:[],\&quot;contentProviders\&quot;:[],\&quot;dependency\&quot;:[],\&quot;isInternal\&quot;:true,\&quot;pkgName\&quot;:\&quot;com.taobao.publicBundle\&quot;,\&quot;receivers\&quot;:[],\&quot;services\&quot;:[],\&quot;version\&quot;:\&quot;1.0.0@unspecified\&quot;&#125;]&quot;;</span><br><span class="line"> </span><br><span class="line">  static</span><br><span class="line">  &#123;</span><br><span class="line">    autoStartBundles &#x3D; &quot;com.taobao.firstbundle&quot;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，<code>bundleInfo</code> 字段是一堆json字段，解析后格式BundleInfo,保存着bundle的信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public static class BundleInfo&#123;</span><br><span class="line">	private String pkgName;</span><br><span class="line">	private String applicationName；</span><br><span class="line">	private List&lt;String&gt; dependency;</span><br><span class="line">	private HashMap&lt;String,Boolean&gt; activities;</span><br><span class="line">	private HashMap&lt;String,Boolean&gt; services;</span><br><span class="line">	private HashMap&lt;String,Boolean&gt; receivers;</span><br><span class="line">	private HashMap&lt;String,Boolean&gt; contentProviders;</span><br><span class="line">	&#x2F;&#x2F;...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说，在这一步， <strong>atlas获得了所有bundle的信息</strong> 。</p>
+<h2 id="9-8"><a href="#9-8" class="headerlink" title="9.8"></a>9.8</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">private void started()&#123;</span><br><span class="line">	&#x2F;&#x2F;读取配置</span><br><span class="line">	String autoStartBundle &#x3D; (String) RuntimeVariables.getFrameworkProperty(&quot;autoStartBundles&quot;);</span><br><span class="line">	String[] bundles &#x3D; autoStartBundle.split(&quot;,&quot;);</span><br><span class="line">	</span><br><span class="line">	&#x2F;&#x2F;异步安装bundle</span><br><span class="line">	for (int x &#x3D; 0; x &lt; bundles.length; x++) &#123;</span><br><span class="line">		final String bundleName &#x3D; bundles[x];</span><br><span class="line">		BundleInstaller.startDelayInstall(bundleName, ...);</span><br><span class="line">	&#125;                        </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>简化了大部分代码，只关注核心逻辑。代码读取<code>RuntimeVariables</code>上的字段<code>autoStartBundles</code>,这个值是在gradle中配置的<code>com.taobao.firstbundle</code>，然后开始异步加载firstbundle</p>
+<p>bundle的加载过程和加载触发时机请参考 <a href="https://lucky-chen.github.io/2017/05/05/android/atlas_bundle_load/">atlas之bundle加载过程</a>(正在准备中)，这里不在讨论。</p>
+<h1 id="10-DemoApplication-onCreate"><a href="#10-DemoApplication-onCreate" class="headerlink" title="10. DemoApplication.onCreate"></a>10. DemoApplication.onCreate</h1><p>DemoApplication.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">super</span>.onCreate();</span><br><span class="line">	<span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行app工程定义的DemoApplication的onCreate方法。</p>
+<hr>
+<p>至此，Atlas启动过程的分析完成。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/05/17/android/atlas_start_1/" rel="prev" title="Android动态化容器框架Atlas之启动过程(上)">
+      <i class="fa fa-chevron-left"></i> Android动态化容器框架Atlas之启动过程(上)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/06/05/android/atlas_bundle_load/" rel="next" title="Android动态化容器框架Atlas之bundle加载过程">
+      Android动态化容器框架Atlas之bundle加载过程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6-onCreate"><span class="nav-number">2.</span> <span class="nav-text">6. onCreate</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7-BridgeApplicationDelegate-onCreate"><span class="nav-number">3.</span> <span class="nav-text">7. BridgeApplicationDelegate.onCreate</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#9-4"><span class="nav-number">3.1.</span> <span class="nav-text">9.4</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-7"><span class="nav-number">3.2.</span> <span class="nav-text">9.7</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-8"><span class="nav-number">3.3.</span> <span class="nav-text">9.8</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-DemoApplication-onCreate"><span class="nav-number">4.</span> <span class="nav-text">10. DemoApplication.onCreate</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

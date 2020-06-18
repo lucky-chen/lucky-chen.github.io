@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="概要 运行时数据区域 对象创建、布局以及定位 各区域OOM分析  比较枯燥，比较干，但没办法，怼吧&#96;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《深入理解JVM虚拟机》读书笔记——第2章 Java内存区域">
+<meta property="og:url" content="https://lucky-chen.github.io/2016/11/06/java/jvm_mem_struct/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="概要 运行时数据区域 对象创建、布局以及定位 各区域OOM分析  比较枯燥，比较干，但没办法，怼吧&#96;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/d9u9jiwp3nc1hqe0z5dn922v/image_1b8mdi0nv1oimauaioh1sqpgai19.png">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/396335rokg9dbfmnkz55i57u/image_1b8mk6sum1hj1f2g4k21cta1ukg23.png">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/2zjzs9r5tu3s8j3rzm4qh7sw/image_1b8mkshhelgfjf152r1dk6ncr2g.png">
+<meta property="article:published_time" content="2016-11-05T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-08T07:10:45.188Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://static.zybuluo.com/qh438406812/d9u9jiwp3nc1hqe0z5dn922v/image_1b8mdi0nv1oimauaioh1sqpgai19.png">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2016/11/06/java/jvm_mem_struct/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>《深入理解JVM虚拟机》读书笔记——第2章 Java内存区域 | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2016/11/06/java/jvm_mem_struct/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《深入理解JVM虚拟机》读书笔记——第2章 Java内存区域
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-11-06 00:00:00" itemprop="dateCreated datePublished" datetime="2016-11-06T00:00:00+08:00">2016-11-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-08 15:10:45" itemprop="dateModified" datetime="2020-06-08T15:10:45+08:00">2020-06-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h1><ul>
+<li>运行时数据区域</li>
+<li>对象创建、布局以及定位</li>
+<li>各区域OOM分析</li>
+</ul>
+<p>比较枯燥，比较干，但没办法，怼吧`</p>
+<a id="more"></a>
+
+<h2 id="运行时内存分布图"><a href="#运行时内存分布图" class="headerlink" title="运行时内存分布图"></a>运行时内存分布图</h2><p><img src="http://static.zybuluo.com/qh438406812/d9u9jiwp3nc1hqe0z5dn922v/image_1b8mdi0nv1oimauaioh1sqpgai19.png" alt="image_1b8mdi0nv1oimauaioh1sqpgai19.png-186kB"></p>
+<blockquote>
+<p>线程私有</p>
+</blockquote>
+<ul>
+<li>程序计数器(字节码行号指示器)</li>
+<li>虚拟机栈(Java方法栈)</li>
+<li>本地方法栈</li>
+</ul>
+<blockquote>
+<p>线程共享</p>
+</blockquote>
+<ul>
+<li>方法区</li>
+<li>堆</li>
+</ul>
+<hr>
+<h3 id="区域说明"><a href="#区域说明" class="headerlink" title="区域说明"></a>区域说明</h3><ol>
+<li><p>程序计数器</p>
+<ul>
+<li>很小的一块内存空间</li>
+<li>记录当前线程正在执行的字节码指令地址(分支、循环、跳转、异常处理),如果当前在执行native方法，值为空</li>
+<li>唯一一个在JVM规范中没有规定OOM情况的区域</li>
+</ul>
+</li>
+<li><p>Java虚拟机栈<br> 描述Java方法执行的内存模型：方法执行时会创建一个栈帧，用于存储局部变量表、操作数栈、动态链接、方法出口等信息。方法从调用到执行完成过程，对应一个栈帧在虚拟机栈中的入栈和出栈的过程。</p>
+<blockquote>
+<p>通常说的堆内存(heap)和栈内存(Stack)，栈内存是指虚拟机栈中的局部变量表部分</p>
+</blockquote>
+<p> 局部变量表存放基本数据类型、对象引用和retrunAdress类型.所需要的内存空间在编译期就可以完成分配。<br> 在JVM规范中,这个区域有两种异常情况：</p>
+<ul>
+<li>请求的栈深度大于虚拟机允许的深度，抛出StackflowError异常</li>
+<li>当动态扩展时无法申请到足够的内存，抛出OOM异常</li>
+</ul>
+</li>
+<li><p>本地方法栈<br> 类似Java虚拟机栈，只是适用与Native方法,也会抛出StackflowError和OOM异常。</p>
+</li>
+<li><p>Java堆</p>
+<ul>
+<li>在虚拟机启动时创建，时Java虚拟机所管理的内存中最大的一块。</li>
+<li>所有对象实例和数组都要在堆上分配内存。</li>
+<li>由于现代垃圾收集器基本都采用分代收集算法，故可以划分为老年代和新生代。</li>
+<li>当堆中没有内存完成分配实例，并无法在扩展时，抛出OOM异常</li>
+</ul>
+</li>
+<li><p>方法区</p>
+<ul>
+<li>存储已被虚拟机加载的类的信息、常量、静态变量、即时编译器编译后的代码</li>
+<li>JVM规范不限制是否对该区域进行垃圾回收</li>
+<li>当无法满足内存分配需求时，抛出OOM</li>
+<li>还包含运行时常量池</li>
+</ul>
+</li>
+<li><p>运行时常量池<br> Class文件出了有类的版本、字段、方法、接口等描述信息外，还有一项是常量池，用于存放编译期生成的各种字面量和符号引用，这部分内容在类加载后进入方法区的运行时常量池存放。<br> 常量池作为方法区的一部分，无法再申请到内存时，抛出OOM</p>
+</li>
+<li><p>直接内存<br> <strong>不属于虚拟机运行时数据区的一部分，也不是JVM规范中定义的内存区域，但是使用很频繁(NIO)</strong></p>
+<blockquote>
+<p>NIO在JDK1.4引入，使用Native函数直接分配堆外内存，然后通过Java堆中的DirectByteBuffer引用、操作这块内存，避免Java堆和Native堆来回复制数据</p>
+</blockquote>
+<p> 不计入-Jvm的Xmx统计中，但是由于物理内粗的限制，会影响Java堆动态扩展，导致OOM异常</p>
+</li>
+</ol>
+<hr>
+<h2 id="Java对象创建、布局以及定位"><a href="#Java对象创建、布局以及定位" class="headerlink" title="Java对象创建、布局以及定位"></a>Java对象创建、布局以及定位</h2><p>包括对象的创建、对象的内存布局以及JVM如何定位对象三部分</p>
+<h3 id="创建对象过程"><a href="#创建对象过程" class="headerlink" title="创建对象过程"></a>创建对象过程</h3><p>分为6步</p>
+<ol>
+<li><p>检查new指令参数是否能在常量池中定位到一个类的符号引用，并检查这个类是否已经被加载、解析和初始化过，如果没有，则执行类的加载过程(第7章)</p>
+</li>
+<li><p>加载完类后，为对象分配内存,两种方式:</p>
+<ul>
+<li><p><code>指针碰撞</code>：假设Java堆中内存是绝对规整的，用过的内存在一边，空闲的在另一边，中间以一个指针作为分界点，分配空间只需要将指针向空间内存方向移动与对象大小相等的距离</p>
+</li>
+<li><p><code>空闲列表</code>：假设Java堆中的内存是不规整的，已使用和空间的你存交错。虚拟机维护一个列表，记录内存块使用情况。分配时，从列表上找一块足够打的空间给对象实例，并更新列表。</p>
+<p>采用哪种分配方式由堆是否规整决定，而堆的规整又与来及收集器相关。</p>
+</li>
+<li><p><code>指针碰撞</code>：CMS(基于Mark-Sweep)</p>
+</li>
+<li><p><code>空闲列表</code>：使用Serial,ParNew等带Compact过程的收集器</p>
+</li>
+</ul>
+</li>
+<li><p>将分配到的内存空间初始化为零值</p>
+</li>
+<li><p>对对象进行必要的设置，如对象是哪个类的实例，GC分代年龄等信息，存放在对象的对象头中。</p>
+</li>
+<li><p>执行对象的 <code>init</code> 方法.</p>
+<blockquote>
+<p>从虚拟机角度，对象已经产生。但是，从Java程序角度,对象创建才开始。在执行new指令后，执行队形的init方法，将对象按照程序员的意愿初始化。</p>
+</blockquote>
+<p> 完成对象初始化工作</p>
+</li>
+</ol>
+<h3 id="对象的内存布局"><a href="#对象的内存布局" class="headerlink" title="对象的内存布局"></a>对象的内存布局</h3><p>在HotSpot中，对象在内存中的布局分为三部分</p>
+<ol>
+<li>对象头包括两部分信息<ul>
+<li>对象自身运行时数据，如哈希码、GC分代年龄、锁状态等等</li>
+<li>类型指针，虚拟机通过这个指针确定对象是哪个类的实例</li>
+</ul>
+</li>
+<li>实例数据<br> 存放对象真正存储的有效信息</li>
+<li>对齐填充<br> HotSpot VM要求对象起始地址必须是8字节整数倍，这部分占位，补齐8字节</li>
+</ol>
+<h3 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h3><p>主流的两种方式：使用句柄和直接指针</p>
+<ol>
+<li><p>句柄</p>
+<ul>
+<li><p>句柄包含到实例数据指针和到类型数据的指针。</p>
+</li>
+<li><p>好处是引用中存储的是稳定的句柄地址，在对象被移动时，只改变句柄中的地址，引用不需要变</p>
+<p><img src="http://static.zybuluo.com/qh438406812/396335rokg9dbfmnkz55i57u/image_1b8mk6sum1hj1f2g4k21cta1ukg23.png" alt="image_1b8mk6sum1hj1f2g4k21cta1ukg23.png-104.8kB"></p>
+</li>
+</ul>
+</li>
+<li><p>直接指针<br> 好处是节省了一次指针定位的开销，访问速度更快。<br> <img src="http://static.zybuluo.com/qh438406812/2zjzs9r5tu3s8j3rzm4qh7sw/image_1b8mkshhelgfjf152r1dk6ncr2g.png" alt="image_1b8mkshhelgfjf152r1dk6ncr2g.png-99.5kB"></p>
+</li>
+</ol>
+<hr>
+<h2 id="各区域OOM分析"><a href="#各区域OOM分析" class="headerlink" title="各区域OOM分析"></a>各区域OOM分析</h2><ol>
+<li>Java堆溢出<br> 使用内存分析工具，重点确认<ul>
+<li>是否出现了内存泄漏</li>
+<li>确实是内存溢出</li>
+</ul>
+</li>
+<li>方法区和运行时常量区<ul>
+<li>加载的类太多?</li>
+<li>代码中向常量区中加入太多常量？(如String.intern等方法活着动态生成大量class)</li>
+</ul>
+</li>
+<li>本机直接内存溢出<br> 最明显的特征：Heap Dump文件不会看到明显异常<br> OOM后发现Dump文件很小，和程序中又使用了NIO，有可能是这部分原因。</li>
+</ol>
+<hr>
+<p>书籍 ：《深入理解Java虚拟机》第二章  周志明 著</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/09/21/weex_rn/rn_init/" rel="prev" title="ReactNative源码-启动过程">
+      <i class="fa fa-chevron-left"></i> ReactNative源码-启动过程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/11/15/java/jvm_concurrent_singleton/" rel="next" title="Java单例-内存模型-并发">
+      Java单例-内存模型-并发 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概要"><span class="nav-number">1.</span> <span class="nav-text">概要</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#运行时内存分布图"><span class="nav-number">1.1.</span> <span class="nav-text">运行时内存分布图</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#区域说明"><span class="nav-number">1.1.1.</span> <span class="nav-text">区域说明</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java对象创建、布局以及定位"><span class="nav-number">1.2.</span> <span class="nav-text">Java对象创建、布局以及定位</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建对象过程"><span class="nav-number">1.2.1.</span> <span class="nav-text">创建对象过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对象的内存布局"><span class="nav-number">1.2.2.</span> <span class="nav-text">对象的内存布局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对象的访问定位"><span class="nav-number">1.2.3.</span> <span class="nav-text">对象的访问定位</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#各区域OOM分析"><span class="nav-number">1.3.</span> <span class="nav-text">各区域OOM分析</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

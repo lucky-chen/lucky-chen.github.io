@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="主要思想 拦截动态广播的注册和发送，cache广播信息 cache插件的静态广播，在stubReceiver中操控插件的receiver 模仿AMS,自己管理receiver">
+<meta property="og:type" content="article">
+<meta property="og:title" content="插件化DroidPlugin-Receiver">
+<meta property="og:url" content="https://lucky-chen.github.io/2017/02/07/android/droid_plugin_receiver/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="主要思想 拦截动态广播的注册和发送，cache广播信息 cache插件的静态广播，在stubReceiver中操控插件的receiver 模仿AMS,自己管理receiver">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-02-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-08T12:24:53.416Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2017/02/07/android/droid_plugin_receiver/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>插件化DroidPlugin-Receiver | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2017/02/07/android/droid_plugin_receiver/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          插件化DroidPlugin-Receiver
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-02-07 00:00:00" itemprop="dateCreated datePublished" datetime="2017-02-07T00:00:00+08:00">2017-02-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-08 20:24:53" itemprop="dateModified" datetime="2020-06-08T20:24:53+08:00">2020-06-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="主要思想"><a href="#主要思想" class="headerlink" title="主要思想"></a>主要思想</h1><ol>
+<li>拦截动态广播的注册和发送，cache广播信息</li>
+<li>cache插件的静态广播，在stubReceiver中操控插件的receiver</li>
+<li>模仿AMS,自己管理receiver<a id="more"></a>
+
+</li>
+</ol>
+<h2 id="注册过程处理"><a href="#注册过程处理" class="headerlink" title="注册过程处理"></a>注册过程处理</h2><h3 id="静态广播缓存"><a href="#静态广播缓存" class="headerlink" title="静态广播缓存"></a>静态广播缓存</h3><ol>
+<li><p>从插件安装看起</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** **&#x2F;</span><br><span class="line">static int installPackageFromSys(PackageInfo packageInfo, IPackageInstallCallback     callback) &#123;</span><br><span class="line">    InstallerInner.InstallerData installerData &#x3D; new InstallerInner.InstallerData(参数);</span><br><span class="line">    InstallerInner.installBlockingQueue.offer(installerData);</span><br><span class="line">    return PackageManagerCompat.INSTALL_SUCCEEDED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>InstallerInner安装过程</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public void run() &#123;</span><br><span class="line">    installerData &#x3D; installBlockingQueue.take();</span><br><span class="line">    doInstaller(installerData);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 继续看doInstaller函数</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public int doInstallPackageFromSys(PackageInfo packageInfo, IPackageInstallCallback callback)&#123;</span><br><span class="line">    PluginPackageParser parser &#x3D; new PluginPackageParser(mContext, packageInfo);</span><br><span class="line">    mPluginCache.put(parser.getPackageName(), parser);</span><br><span class="line">    return PackageManagerCompat.INSTALL_SUCCEEDED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 函数将pkgIngo上的数据封装为一个parser对象，并且以包名为key缓存在一个map中,接下来看parer的操作。</p>
+</li>
+<li><p>PluginPackageParser</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">public PluginPackageParser(Context hostContext, PackageInfo appInfo)&#123;</span><br><span class="line">    mPluginFile &#x3D; new File(appInfo.applicationInfo.sourceDir);</span><br><span class="line">    mParser &#x3D; PackageParser.newPluginParser(hostContext);</span><br><span class="line">    &#x2F;&#x2F;解析apk文件</span><br><span class="line">    mParser.parsePackage(mPluginFile, 0);</span><br><span class="line">    mPackageName &#x3D; mParser.getPackageName();</span><br><span class="line">    &#x2F;&#x2F;拿到apk中所有的静态Receiver信息</span><br><span class="line">    List datas &#x3D; mParser.getReceivers();</span><br><span class="line">    for (Object data : datas) &#123;</span><br><span class="line">        ComponentName componentName &#x3D; new ComponentName(mPackageName, mParser.readNameFromComponent(data));</span><br><span class="line">        &#x2F;&#x2F;将receiver数据放入缓存</span><br><span class="line">        mReceiversObjCache.put(componentName, data);</span><br><span class="line">        ActivityInfo value &#x3D; mParser.generateReceiverInfo(data, 0);</span><br><span class="line">        mReceiversInfoCache.put(componentName, value);</span><br><span class="line">        &#x2F;&#x2F;将reviever的filters放入缓存</span><br><span class="line">        List&lt;IntentFilter&gt; filters &#x3D; mParser.readIntentFilterFromComponent(data);</span><br><span class="line">        mReceiverIntentFilterCache.put(componentName, new ArrayList&lt;&gt;(filters));</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;.. activity cache</span><br><span class="line">    &#x2F;&#x2F;.. service cache</span><br><span class="line">    &#x2F;&#x2F;.. provider cache</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 函数很简单，就是解析APK，然后将manifist中静态注册的四大组件信息给缓存起来。</p>
+<h3 id="动态广播hook"><a href="#动态广播hook" class="headerlink" title="动态广播hook"></a>动态广播hook</h3></li>
+<li><p>注册广播源码 </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">private Intent registerReceiverInternal(BroadcastReceiver receiver,IntentFilter filter, 参数) &#123;</span><br><span class="line">    return ActivityManagerNative.getDefault().registerReceiver(receiver,一堆参数);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 注册过程最终还是通过AMS，所以继续hook AMS的registerReceiver方法即可。</p>
+</li>
+<li><p>hook过程 </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** IActivityManagerHookHandle **&#x2F;</span><br><span class="line">protected void init() &#123;</span><br><span class="line">    sHookedMethodHandlers.put(&quot;registerReceiver&quot;, new registerReceiver(mHostContext));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 继续看hook后，具体做的处理</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">protected boolean beforeInvoke(Object receiver, Method method, Object[] args)&#123;</span><br><span class="line">    String callerPackage &#x3D; (String) args[1];</span><br><span class="line">    &#x2F;&#x2F;.. 截取参数</span><br><span class="line">    &#x2F;&#x2F;注册到自身的服务进程中</span><br><span class="line">    PluginManager.getInstance().registerReceiver(callerPackage, (IntentFilter) args[index + 2],iIntentReceiver, broadcastReceiver.getClass().getName(),permission);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> PluginManger最终调用到BroadcastCenter的addRegisterReceiver方法中</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public void addRegisterReceiver(int pid, IBinder intentReceiver, String receiverName，参数)&#123;</span><br><span class="line">    BroadcastItem item &#x3D; new BroadcastItem();</span><br><span class="line">    item.setPid(pid);</span><br><span class="line">    item.setPackageName(packageName);</span><br><span class="line">    item.setTargetProcessName(targetProcessName);</span><br><span class="line">    item.setIntentFilter(intentFilter);</span><br><span class="line">    item.setReceiverName(receiverName);</span><br><span class="line">    item.setIntentReceiver(intentReceiver);</span><br><span class="line">    item.setPermiss(permiss);</span><br><span class="line">    &#x2F;&#x2F;存储动态注册的receiver信息</span><br><span class="line">    registerList.add(item);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 绕了半天，其实就是将动态注册的广播的数据做一个封装，然后缓存起来，就这么回事。</p>
+<h2 id="发送广播处理"><a href="#发送广播处理" class="headerlink" title="发送广播处理"></a>发送广播处理</h2></li>
+</ol>
+<p>之前的操作中，已经将静态注册的广播和动态注册的广播缓存起来。接下来继续看当发送广播时的处理.</p>
+<h3 id="静态广播发送"><a href="#静态广播发送" class="headerlink" title="静态广播发送"></a>静态广播发送</h3><ol>
+<li><p>以WIFI_STATE_CHANGED为例，manifist定义</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">    &lt;receiver</span><br><span class="line">    android:name&#x3D;&quot;com.dopen.sysbroadcast.NetStatReceiver&quot;</span><br><span class="line">    android:process&#x3D;&quot;:CoreService&quot;&gt;</span><br><span class="line">    &lt;intent-filter android:priority&#x3D;&quot;0x7fffffff&quot;&gt;</span><br><span class="line">        &lt;action android:name&#x3D;&quot;android.net.wifi.WIFI_STATE_CHANGED&quot; &#x2F;&gt;</span><br><span class="line">        &lt;action android:name&#x3D;&quot;android.net.conn.CONNECTIVITY_CHANGE&quot; &#x2F;&gt;</span><br><span class="line">        &lt;action android:name&#x3D;&quot;android.intent.action.ANY_DATA_STATE&quot; &#x2F;&gt;</span><br><span class="line">        &lt;action android:name&#x3D;&quot;android.net.wifi.STATE_CHANGE&quot; &#x2F;&gt;</span><br><span class="line">    &lt;&#x2F;intent-filter&gt;</span><br><span class="line">&lt;&#x2F;receiver&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>继续看NetStatReceiver的实现</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public class NetStatReceiver extends BroadcastReceiver &#123;</span><br><span class="line">    public void onReceive(Context context, Intent intent) &#123;</span><br><span class="line">        &#x2F;&#x2F;...</span><br><span class="line">        PluginManager.getInstance().broadcastIntent(..., cloneIntent, null,param,null);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>PluginManager 经过层层调用，最终调用到BroadcastCenter的broadcastIntent方法</p>
+</li>
+<li><p>BroadcastCenter </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public int broadcastIntent(final int vUid, Intent intent, String resolvedType, List&lt;ResolveInfo&gt; resolveInfos, Bundle param, String[] permissions) &#123;</span><br><span class="line">    Message msg &#x3D; Message.obtain();</span><br><span class="line">    msg.what &#x3D; EventHandler.BROADCAST_INTENT_MSG;</span><br><span class="line">    BroadcastData broadcastData &#x3D; new BroadcastData();</span><br><span class="line">    &#x2F;&#x2F;.. </span><br><span class="line">    msg.obj &#x3D; broadcastData;</span><br><span class="line">    sendHandler.sendMessage(msg);</span><br><span class="line">    return 0;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> Handler在收到BROADCAST_INTENT_MSG消息后，会调用processNextBroadcast方法，在这个方法里面真正的执行静态广播和动态广播的发送,我们先看静态广播的部分</p>
+</li>
+<li><p>processNextBroadcas处理静态广播</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">private void processNextBroadcast(Message msg) &#123;</span><br><span class="line">    BroadcastData broadcastData &#x3D; (BroadcastData)msg.obj;</span><br><span class="line">    &#x2F;&#x2F;..参数处理</span><br><span class="line">    &#x2F;&#x2F;查询静态注册broadcastReceiver</span><br><span class="line">    resolveInfos &#x3D; pluginManagerImpl.resolveReceiver(参数);</span><br><span class="line">    &#x2F;&#x2F;处理静态注册的广播</span><br><span class="line">    List&lt;BroadcastCenter.BroadcastItem&gt; staticItems &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line">    for (ResolveInfo resolveInfo : resolveInfos) &#123;</span><br><span class="line">        BroadcastCenter.BroadcastItem item &#x3D; new BroadcastCenter.BroadcastItem();</span><br><span class="line">        item.setReceiverName(resolveInfo.activityInfo.name);</span><br><span class="line">        &#x2F;&#x2F;...</span><br><span class="line">        staticItems.add(item);</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F; 发送广播</span><br><span class="line">    for (int i &#x3D; 0; i &lt; staticItems.size(); i++) &#123;</span><br><span class="line">        item &#x3D; staticItems.get(i);</span><br><span class="line">        &#x2F;&#x2F;找到一个坑Receiver</span><br><span class="line">        ActivityInfo stubReceiver &#x3D; activityManagerService.selectStubReceiverInfo(tmpVar);</span><br><span class="line">        Intent lItent &#x3D; new Intent();</span><br><span class="line">        lItent.setClassName(stubReceiver.packageName, stubReceiver.name);</span><br><span class="line">        &#x2F;&#x2F;携带插件receiver的信息</span><br><span class="line">        lItent.putExtra(Env.EXTRA_TARGET_RECEIVER, item.getReceiverName());</span><br><span class="line">        lItent.putExtra(Env.EXTRA_TARGET_RECEIVER_PACKAGENAME, item.getPackageName());</span><br><span class="line">        &#x2F;&#x2F;启动坑reveiver</span><br><span class="line">        context.sendBroadcast(lItent);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>ReceiverStub的处理<br> 在onReceive函数中只是执行了dispatcherReceiver方法</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public void dispatcherReceiver(Context context, Intent intent) &#123;</span><br><span class="line">    &#x2F;&#x2F;拿到插件receiver的信息</span><br><span class="line">    String receiverName &#x3D; stubIntent.getStringExtra(Env.EXTRA_TARGET_RECEIVER);</span><br><span class="line">    String packageName &#x3D; stubIntent.getStringExtra(Env.EXTRA_TARGET_RECEIVER_PACKAGENAME);</span><br><span class="line">    ComponentName targetComponentName &#x3D; new ComponentName(packageName, receiverName);</span><br><span class="line">    &#x2F;&#x2F;拿到插件的ClassLoader</span><br><span class="line">    pluginClassLoader &#x3D; PluginProcessManager.getPluginClassLoader(targetComponentName.getPackageName());</span><br><span class="line">    &#x2F;&#x2F;实例化插件Receiver</span><br><span class="line">    Class&lt;?&gt; targetReceiverClass &#x3D; pluginClassLoader.loadClass(receiverName);</span><br><span class="line">    BroadcastReceiver receiver &#x3D; (BroadcastReceiver) targetReceiverClass.newInstance();</span><br><span class="line">    &#x2F;&#x2F;执行插件reciever的onReceive函数</span><br><span class="line">    receiver.onReceive(pluginApplication.getApplicationContext(), targetIntent);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 至此，静态广播的处理分析完毕。</p>
+</li>
+<li><p>小结<br> 1). 缓存插件静态广播<br> 2). 在Host中注册若干stubReceiver和真正需要的静态广播<br> 3). 触发host静态广播时,匹配插件receiver，并启动一个stubReceiver<br> 4). 在stubReceiver中实例化插件receiver,并执行onReceive生命周期函数。</p>
+</li>
+</ol>
+<h3 id="动态广播发送"><a href="#动态广播发送" class="headerlink" title="动态广播发送"></a>动态广播发送</h3><ol>
+<li><p>继续hook AM</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** IActivityManagerHookHandle **&#x2F;</span><br><span class="line">protected void init() &#123;</span><br><span class="line">    sHookedMethodHandlers.put(&quot;broadcastIntent&quot;,new broadcastIntent(mHostContext));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 看hook的实现</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">protected boolean beforeInvoke(Object receiver, Method method, Object[] args)&#123;</span><br><span class="line">    &#x2F;&#x2F;参数处理</span><br><span class="line">    PluginManager.getInstance().broadcastIntent(PluginProcessManager.getCurrentVUid(), intent, null, param,permissions);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 又调用了PluginManager的broadcastIntent方法，在静态广播发送一节，我们已经分析过，最终会执行到processNextBroadcast方法。前面已经看过该方法对静态广播的处理，接下来，即系分析对动态广播的处理。</p>
+</li>
+<li><p>processNextBroadcas处理动态广播</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">private void processNextBroadcast(Message msg) &#123;</span><br><span class="line">    BroadcastData broadcastData &#x3D; (BroadcastData)msg.obj;</span><br><span class="line">    String packageName &#x3D; broadcastData.packageName;</span><br><span class="line">    &#x2F;&#x2F;..参数处理</span><br><span class="line">    &#x2F;&#x2F;查询动态注册过的广播</span><br><span class="line">    List&lt;BroadcastCenter.BroadcastItem&gt; dynamicItems &#x3D; queryBroadcastItem(packageName, intent,permissions);</span><br><span class="line">    &#x2F;&#x2F;发送动态广播</span><br><span class="line">    for(int i &#x3D; 0; i &lt; dynamicItems.size(); i++) &#123;</span><br><span class="line">        item &#x3D; dynamicItems.get(i);</span><br><span class="line">        sendDynamicBroadcast(item, broadcastData);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>插件动态广播执行入口hook<br> sendDynamicBroadcast函数通过一系列的反射，最终拿到了插件receiver的远程binderProx，用于执行binderProx上的performReceive方法。这个点，刚好是FrameWork中调度receiver起始点。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">private void sendDynamicBroadcast(BroadcastCenter.BroadcastItem item,BroadcastData broadcastData) &#123;</span><br><span class="line">    Intent intent &#x3D; broadcastData.intent;</span><br><span class="line">    Class&lt;?&gt; iIntentReceiverClass &#x3D; Class.forName(&quot;android.content.IIntentReceiver$Stub$Proxy&quot;);</span><br><span class="line">    Class&lt;?&gt; iIntentReceiverClass1 &#x3D; Class.forName(&quot;android.content.IIntentReceiver$Stub&quot;);</span><br><span class="line">    performReceiverMethod &#x3D; iIntentReceiverClass.getDeclaredMethod(&quot;performReceive&quot;, 参数);</span><br><span class="line">    Method asInterfaceMethod &#x3D; iIntentReceiverClass1.getDeclaredMethod(&quot;asInterface&quot;, IBinder.class);</span><br><span class="line">    Object iIntentReceiver &#x3D; asInterfaceMethod.invoke(null, item.getIntentReceiver());</span><br><span class="line">    &#x2F;&#x2F;调度插件动态注册的receiver</span><br><span class="line">    performReceiverMethod.invoke(iIntentReceiver, intent,参数);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 到这一步，动态注册的receiver也处理完毕。</p>
+</li>
+<li><p>附加AMS 调度recevie的源码<br> 在AMS匹配完毕receiver后，最终会调度到由APP端提供给AMS的binder代理对象IIntentReceiver的performReceive方法</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public void performReceive(Intent intent,参数) &#123;</span><br><span class="line">    Args args &#x3D; new Args(intent, 参数);</span><br><span class="line">    mActivityThread.post(args)) </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> mActivityThread向UI线程post一个任务，看Args中的实现</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** Args **&#x2F;</span><br><span class="line">public void run() &#123;</span><br><span class="line">    final BroadcastReceiver receiver &#x3D; mReceiver;</span><br><span class="line">    &#x2F;&#x2F;加载receiver </span><br><span class="line">    ClassLoader cl &#x3D;  mReceiver.getClass().getClassLoader();</span><br><span class="line">    &#x2F;&#x2F;执行onReceive</span><br><span class="line">    receiver.onReceive(mContext, intent)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 之后就是常见的receiver的onReceive函数执行了。</p>
+</li>
+</ol>
+<hr>
+<p>参考：</p>
+<ol>
+<li><a href="http://weishu.me/2016/05/11/understand-plugin-framework-service/" target="_blank" rel="noopener">Android插件化原理解析——广播的管理</a></li>
+<li><a href="http://blog.csdn.net/luoshengyang/article/details/6730748" target="_blank" rel="noopener">老罗-Android系统中的广播（Broadcast）机制简要介绍和学习计划</a></li>
+<li><a href="http://blog.csdn.net/luoshengyang/article/details/6737352" target="_blank" rel="noopener">老罗-Android应用程序注册广播接收器（registerReceiver）的过程分析</a></li>
+<li><a href="http://blog.csdn.net/luoshengyang/article/details/6744448" target="_blank" rel="noopener">老罗-Android应用程序发送广播（sendBroadcast）的过程分析</a></li>
+<li><a href="https://github.com/Qihoo360/DroidPlugin" target="_blank" rel="noopener">DroidPlugin Github</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/02/01/android/droid_plugin_provider/" rel="prev" title="插件化DroidPlugin-Provider">
+      <i class="fa fa-chevron-left"></i> 插件化DroidPlugin-Provider
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/02/14/android/android_process_start/" rel="next" title="Android源码之进程启动过程">
+      Android源码之进程启动过程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#主要思想"><span class="nav-number">1.</span> <span class="nav-text">主要思想</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#注册过程处理"><span class="nav-number">1.1.</span> <span class="nav-text">注册过程处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#静态广播缓存"><span class="nav-number">1.1.1.</span> <span class="nav-text">静态广播缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态广播hook"><span class="nav-number">1.1.2.</span> <span class="nav-text">动态广播hook</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#发送广播处理"><span class="nav-number">1.2.</span> <span class="nav-text">发送广播处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#静态广播发送"><span class="nav-number">1.2.1.</span> <span class="nav-text">静态广播发送</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态广播发送"><span class="nav-number">1.2.2.</span> <span class="nav-text">动态广播发送</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

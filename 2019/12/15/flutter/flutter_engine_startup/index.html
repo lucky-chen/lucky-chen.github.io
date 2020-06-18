@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="核心点主要分为3个部分  启动Engine前的准备(Platform端Android) Engine的启动(创建DartVM、相关线程、初始化相关配置) Engine加载Dart产物，直到执行main.dart中的main方法  给官方提交了相关PR给官方，支持engine异步初始化  Engine创建流程不是很合理，底层在做异步任务的时候，主线程会wait阻塞，非常影响体验。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FlutterEngine初始化源码分析以及优化(官方PR)">
+<meta property="og:url" content="https://lucky-chen.github.io/2019/12/15/flutter/flutter_engine_startup/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="核心点主要分为3个部分  启动Engine前的准备(Platform端Android) Engine的启动(创建DartVM、相关线程、初始化相关配置) Engine加载Dart产物，直到执行main.dart中的main方法  给官方提交了相关PR给官方，支持engine异步初始化  Engine创建流程不是很合理，底层在做异步任务的时候，主线程会wait阻塞，非常影响体验。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lucky-chen.github.io/image/flutter/engine_init.svg">
+<meta property="og:image" content="https://lucky-chen.github.io/image/flutter/flutter_startup_struct.svg">
+<meta property="article:published_time" content="2019-12-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-10T13:16:34.844Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lucky-chen.github.io/image/flutter/engine_init.svg">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2019/12/15/flutter/flutter_engine_startup/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>FlutterEngine初始化源码分析以及优化(官方PR) | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line toggle-line-first"></span>
+        <span class="toggle-line toggle-line-middle"></span>
+        <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2019/12/15/flutter/flutter_engine_startup/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          FlutterEngine初始化源码分析以及优化(官方PR)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-15 00:00:00" itemprop="dateCreated datePublished" datetime="2019-12-15T00:00:00+08:00">2019-12-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-10 21:16:34" itemprop="dateModified" datetime="2020-06-10T21:16:34+08:00">2020-06-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Flutter/" itemprop="url" rel="index"><span itemprop="name">Flutter</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="核心点"><a href="#核心点" class="headerlink" title="核心点"></a>核心点</h1><p>主要分为3个部分</p>
+<ul>
+<li>启动Engine前的准备(Platform端<code>Android</code>)</li>
+<li>Engine的启动(创建DartVM、相关线程、初始化相关配置)</li>
+<li>Engine加载Dart产物，直到执行<code>main.dart</code>中的<code>main</code>方法</li>
+</ul>
+<p>给官方提交了<a href="https://github.com/flutter/engine/pull/18047" target="_blank" rel="noopener">相关PR给官方</a>，支持engine异步初始化</p>
+<blockquote>
+<p>Engine创建流程不是很合理，底层在做异步任务的时候，主线程会wait阻塞，非常影响体验。</p>
+</blockquote>
+<a id="more"></a>
+
+<ul>
+<li><a href="https://github.com/flutter/engine/pull/18047" target="_blank" rel="noopener">support engine init async</a></li>
+<li><a href="">adapter Android</a></li>
+<li><a href="">adapter iOS</a></li>
+</ul>
+<blockquote>
+<p>flutter版本：1.12</p>
+</blockquote>
+<h1 id="启动流程"><a href="#启动流程" class="headerlink" title="启动流程"></a>启动流程</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//初始化engine</span></span><br><span class="line">FlutterEngien engine = <span class="keyword">new</span> FlutterEngine(...);</span><br><span class="line"><span class="comment">//加载dart代码</span></span><br><span class="line">engine.getDartExecutor().executeDartEntrypoint(...);</span><br></pre></td></tr></table></figure>
+
+<p>分为2部分</p>
+<ul>
+<li>初始化engine</li>
+<li>加载、执行Dart代码</li>
+</ul>
+<p>整体流程图如下<br><img src="/image/flutter/engine_init.svg" alt=""></p>
+<p>初始化的对象大概如下<br><img src="/image/flutter/flutter_startup_struct.svg" alt=""></p>
+<h1 id="初始化engine"><a href="#初始化engine" class="headerlink" title="初始化engine"></a>初始化engine</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;** Fully configurable &#123;@code FlutterEngine&#125; constructor. *&#x2F;</span><br><span class="line"></span><br><span class="line">public FlutterEngine(..) &#123;</span><br><span class="line">   </span><br><span class="line">    &#x2F;&#x2F;第一步: 加载flutter.so、assest下的资源(字体、debug模式的snapshot文件)</span><br><span class="line">   flutterLoader.startInitialization(context.getApplicationContext());</span><br><span class="line">   flutterLoader.ensureInitializationComplete(context, dartVmArgs);</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;第二步: 核心初始化函数，在native创建dartVM、相关线程</span><br><span class="line">   attachToJni();</span><br><span class="line"></span><br><span class="line">   this.dartExecutor &#x3D; new DartExecutor(flutterJNI, context.getAssets());</span><br><span class="line">   this.dartExecutor.onAttachedToJNI();</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;第3步：创建renderer，管理flutter到surface&#x2F;texuteview 的纹理显示数据，在启动activity后，会和acitvity上的view关联</span><br><span class="line">   this.renderer &#x3D; new FlutterRenderer(flutterJNI);</span><br><span class="line">   </span><br><span class="line">   &#x2F;&#x2F;注册各种channnel(键盘、系统事件监听)</span><br><span class="line">   xxxChannel &#x3D; new xxxChannel();</span><br><span class="line">   </span><br><span class="line">   this.platformViewsController.onAttachedToJNI();</span><br><span class="line"></span><br><span class="line">   if (automaticallyRegisterPlugins) &#123;</span><br><span class="line">    &#x2F;&#x2F;第5步：注册 pubspect.ymal 中依赖的plugin</span><br><span class="line">     registerPlugins();</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="1、启动Engine前的准备"><a href="#1、启动Engine前的准备" class="headerlink" title="1、启动Engine前的准备"></a>1、启动Engine前的准备</h2><ul>
+<li>初始化vsync</li>
+<li>将assest下flutter的资源copy到私有目录中</li>
+<li>load flutter.so</li>
+<li>主线程wait等待结果</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;FlutterLoader.java</span><br><span class="line">startInitialization()&#123;</span><br><span class="line">  &#x2F;&#x2F;初始化vsync</span><br><span class="line">  VsyncWaiter</span><br><span class="line">    .getInstance((WindowManager)appContext.getSystemService(Context.WINDOW_SERVICE))</span><br><span class="line">    .init();</span><br><span class="line"> </span><br><span class="line">  Callable&lt;InitResult&gt; initTask &#x3D; new Callable&lt;InitResult&gt;() &#123;   </span><br><span class="line">    &#x2F;&#x2F;会启动一个asynctask，将assest目录下的flutter资源copy到私有目录</span><br><span class="line">    ResourceExtractor resourceExtractor &#x3D; initResources(appContext);</span><br><span class="line">    </span><br><span class="line">    System.loadLibrary(&quot;flutter&quot;);</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F;等待资源copy完毕</span><br><span class="line">    if (resourceExtractor !&#x3D; null) &#123;</span><br><span class="line">      resourceExtractor.waitForCompletion();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;;</span><br><span class="line">  initResultFuture &#x3D; Executors.newSingleThreadExecutor().submit(initTask);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主线程wait, 等待整个流程执行完成</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flutterLoader.ensureInitializationComplete(...);</span><br></pre></td></tr></table></figure>
+
+<h2 id="2、启动engine"><a href="#2、启动engine" class="headerlink" title="2、启动engine"></a>2、启动engine</h2><p>核心函数<code>attachToJni()</code>,辗转调用到<code>AndroidShellHolder</code>的构造函数中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">AndroidShellHolder::AndroidShellHolder(...) &#123;</span><br><span class="line">  &#x2F;&#x2F;创建3个线程：UI、GPU、IO</span><br><span class="line">    thread_host_ &#x3D; &#123;thread_label, ThreadHost::Type::UI | ThreadHost::Type::GPU |</span><br><span class="line">                                      ThreadHost::Type::IO&#125;;</span><br><span class="line">    &#x2F;&#x2F;创建callback: platform_view_android</span><br><span class="line">    Shell::CreateCallback&lt;PlatformView&gt; on_create_platform_view &#x3D; [](..) &#123; </span><br><span class="line">    platform_view_android &#x3D; std::make_unique&lt;PlatformViewAndroid&gt;(...);</span><br><span class="line">    );</span><br><span class="line">   </span><br><span class="line">     </span><br><span class="line">    &#x2F;&#x2F;创建callback: Rasterizer</span><br><span class="line">    Shell::CreateCallback&lt;Rasterizer&gt; on_create_rasterizer &#x3D; [](Shell&amp; shell) &#123;</span><br><span class="line">      return std::make_unique&lt;Rasterizer&gt;(shell, shell.GetTaskRunners());</span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F;创建callback: IOManager</span><br><span class="line">    fml::TaskRunner::RunNowOrPostTask(io_task_runner,[]() &#123;</span><br><span class="line">       auto io_manager &#x3D; std::make_unique&lt;ShellIOManager&gt;(...);</span><br><span class="line">        io_manager_promise.set_value(std::move(io_manager));</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;创建engine(内部创建dart、skia环境)</span><br><span class="line">    shell_ &#x3D;</span><br><span class="line">        Shell::Create(task_runners,             &#x2F;&#x2F; task runners</span><br><span class="line">                    GetDefaultWindowData(),   &#x2F;&#x2F; window data</span><br><span class="line">                    settings_,                &#x2F;&#x2F; settings</span><br><span class="line">                    on_create_platform_view,  &#x2F;&#x2F; platform view create callback</span><br><span class="line">                    on_create_rasterizer      &#x2F;&#x2F; rasterizer create callback</span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">    is_valid_ &#x3D; shell_ !&#x3D; nullptr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>主要是在初始化flutterengine运行的环境</p>
+<ul>
+<li>3个线程(UI、GPU、IO)</li>
+<li>创建3个callback: 用于初始化platform_view_android、Rasterizer、IOManager</li>
+<li>创建engine</li>
+</ul>
+<p>继续往下看</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;shell.cc</span><br><span class="line">std::unique_ptr&lt;Shell&gt; Shell::Create()&#123;</span><br><span class="line">  &#x2F;&#x2F;创建DartVm</span><br><span class="line">  auto vm &#x3D; DartVMRef::Create(settings);</span><br><span class="line">  &#x2F;&#x2F;创建engine</span><br><span class="line">  return Shell::Create(... , std::move(vm));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先，会创建一个DartVM,然后调用<code>Shell::Create</code>，内部会调用到函数<code>CreateShellOnPlatformThread</code>上</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">std::unique_ptr&lt;Shell&gt; Shell::CreateShellOnPlatformThread(...) &#123;</span><br><span class="line">  &#x2F;&#x2F;创建shell对象，但是还未初始化完成</span><br><span class="line">  auto shell &#x3D; std::unique_ptr&lt;Shell&gt;(new Shell(std::move(vm), task_runners, settings));</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;在gpu线程中创建rasterizer，用于将渲染结果，纹理化</span><br><span class="line">  fml::TaskRunner::RunNowOrPostTask(RasterTaskRunner, [..]() &#123;</span><br><span class="line">        std::unique_ptr&lt;Rasterizer&gt; rasterizer(on_create_rasterizer(*shell));</span><br><span class="line">        rasterizer_promise.set_value(std::move(rasterizer));</span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;创建platformview对象</span><br><span class="line">  auto platform_view &#x3D; on_create_platform_view(*shell.get());</span><br><span class="line">    if (!platform_view || !platform_view-&gt;GetWeakPtr()) &#123;</span><br><span class="line">      return nullptr;</span><br><span class="line">    &#125;</span><br><span class="line">  &#x2F;&#x2F;在io线程中创建IOManager，一般是用于图片纹理上传</span><br><span class="line">    fml::TaskRunner::RunNowOrPostTask(io_task_runner,[]() &#123;</span><br><span class="line">        auto io_manager &#x3D; std::make_unique&lt;ShellIOManager&gt;(...);</span><br><span class="line">        io_manager_promise.set_value(std::move(io_manager));</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    std::promise&lt;std::unique_ptr&lt;Engine&gt;&gt; engine_promise;</span><br><span class="line">    auto engine_future &#x3D; engine_promise.get_future();</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F;创建native的engine对象</span><br><span class="line">    fml::TaskRunner::RunNowOrPostTask(UITaskRunner(),[...]() mutable &#123;</span><br><span class="line">    &#x2F;&#x2F;创建animator</span><br><span class="line">    auto animator &#x3D; std::make_unique&lt;Animator&gt;(*shell, ...));</span><br><span class="line">    &#x2F;&#x2F;创建engine</span><br><span class="line">        engine_promise.set_value(</span><br><span class="line">          std::make_unique&lt;Engine&gt;(weak_io_future.get(),...)</span><br><span class="line">       )</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;主线程等待io、gpu、io线程的任务都执行完，完成对shell的初始化</span><br><span class="line">    if (!shell-&gt;Setup(std::move(platform_view),  &#x2F;&#x2F;</span><br><span class="line">                    engine_future.get(),       &#x2F;&#x2F;</span><br><span class="line">                    rasterizer_future.get(),   &#x2F;&#x2F;</span><br><span class="line">                    io_manager_future.get())   &#x2F;&#x2F;</span><br><span class="line">    ) &#123;</span><br><span class="line">      return nullptr;</span><br><span class="line">    &#125;</span><br><span class="line">    return shell;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>分为3个部分</p>
+<ul>
+<li>使用上一步的callback，创建相应的对象<ul>
+<li>在gpu线程中创建rasterizer</li>
+<li>在platform线程中创建platform_view</li>
+<li>在io线程中创建IOManager</li>
+</ul>
+</li>
+<li>UI线程等待其它线程task执行完，开始创建engine</li>
+<li>platform线程wait(future.get)，等待其它线程都执行完，最后执行<code>shell-&gt;Setup</code>完成shell的初始化</li>
+</ul>
+<p><strong>这里其实设计的不是很好，在Android和iOS上阻塞主线程的代价是非常大的，测试低端机这里大概会有200ms左右的阻塞,已经给官方提了PR改成异步模式</strong> </p>
+<ul>
+<li><a href="https://github.com/flutter/engine/pull/18047" target="_blank" rel="noopener">support engine init async</a></li>
+<li><a href="">adapter android</a></li>
+<li><a href="">adapter iOS</a></li>
+</ul>
+<p>我们接着看Engine的初始化</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">class Engine&#123;</span><br><span class="line">   FontCollection font_collection_;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Engine::Engine(...) &#123;</span><br><span class="line">  runtime_controller_ &#x3D; std::make_unique&lt;RuntimeController&gt;(...);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>先初始化engine上的成员<code>FontCollection</code>,<strong>这里也是一个比较耗时的地方</strong></li>
+<li>engine的构造函数中，会去创建RuntimeController</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">RuntimeController::RuntimeController(...)&#123;</span><br><span class="line">   </span><br><span class="line">  auto strong_root_isolate &#x3D; DartIsolate::CreateRootIsolate(...).lock();</span><br><span class="line"></span><br><span class="line">  window-&gt;DidCreateIsolate();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>RuntimeController中会创建一个DartIsolate</p>
+<p>DartIsolate图.jpg</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">std::weak_ptr&lt;DartIsolate&gt; DartIsolate::CreateRootIsolate(...) &#123;</span><br><span class="line"></span><br><span class="line">  auto isolate_group_data &#x3D; std::make_unique&lt;std::shared_ptr&lt;DartIsolateGroupData&gt;&gt;(</span><br><span class="line">      std::shared_ptr&lt;DartIsolateGroupData&gt;(new DartIsolateGroupData(...))</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  auto isolate_data &#x3D; std::make_unique&lt;std::shared_ptr&lt;DartIsolate&gt;&gt;(</span><br><span class="line">      std::shared_ptr&lt;DartIsolate&gt;(new DartIsolate(...))</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  Dart_Isolate vm_isolate &#x3D; CreateDartIsolateGroup(...);</span><br><span class="line"></span><br><span class="line">  std::shared_ptr&lt;DartIsolate&gt;* root_isolate_data &#x3D;</span><br><span class="line">      static_cast&lt;std::shared_ptr&lt;DartIsolate&gt;*&gt;(Dart_IsolateData(vm_isolate));</span><br><span class="line"></span><br><span class="line">  (*root_isolate_data)-&gt;SetWindow(std::move(window));</span><br><span class="line"></span><br><span class="line">  return (*root_isolate_data)-&gt;GetWeakIsolatePtr();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在执行完后，<code>shel-&gt;DartVM-&gt;engine-&gt;runtimecontroller-&gt;DartIsolate</code>的创建。回到<code>CreateShellOnPlatformThread</code>方法中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">fml::TaskRunner::RunNowOrPostTask(UITaskRunner(),[...]() mutable &#123;</span><br><span class="line">    &#x2F;&#x2F;创建完shell后，通知platfrom线程</span><br><span class="line">    engine_promise.set_value(</span><br><span class="line">       std::make_unique&lt;Engine&gt;(weak_io_future.get(),...)</span><br><span class="line">    )</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;platfrom线程线程等待io、gpu、io线程的任务都执行完，完成对shell的初始化</span><br><span class="line">shell-&gt;Setup( ... , engine_future.get())</span><br></pre></td></tr></table></figure>
+<p><code>shell-&gt;Setup</code>其实就是将上述执创建的engine、platform_view、rasterizer、io_manager等等挂到shell的成员变量上.</p>
+<p>至此，native环境创建完毕,回到创建AndroidShellHolder的JNI函数<code>attachjni</code>入口</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;platform_view_android_jni.cc</span><br><span class="line">static jlong AttachJNI(...) &#123;</span><br><span class="line">  auto shell_holder &#x3D; std::make_unique&lt;AndroidShellHolder&gt;(...);</span><br><span class="line">  &#x2F;&#x2F;返回AndroidShellHolder的指针</span><br><span class="line">  return reinterpret_cast&lt;jlong&gt;(shell_holder.release());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;FlutterJNI.java</span><br><span class="line">public void attachToNative(boolean isBackgroundView) &#123;</span><br><span class="line">  &#x2F;&#x2F;持有AndroidShellHolder的指针</span><br><span class="line">    nativePlatformViewId &#x3D; nativeAttach(this, isBackgroundView);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>FlutterJNI持有了AndroidshellHolder的指针，AndroidShellHolder持有了底层整个环境的变量(engine、shell、DartVm、DartIsolaate)</p>
+<h2 id="3、初始化变量"><a href="#3、初始化变量" class="headerlink" title="3、初始化变量"></a>3、初始化变量</h2><p>在<code>attachToJni</code>执行完后，会在平台层（Android）继续初始化上层需要的变量</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;FlutterEngine.java</span><br><span class="line">attachToJni()</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;初始化DartExecutor，用于后面加载、执行dart产物</span><br><span class="line">this.dartExecutor &#x3D; new DartExecutor(flutterJNI, context.getAssets());</span><br><span class="line">this.dartExecutor.onAttachedToJNI();</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;创建renderer，管理flutter到surface&#x2F;texuteview 的纹理显示数据，在启动activity后，会和acitvity上的view关联</span><br><span class="line">this.renderer &#x3D; new FlutterRenderer(flutterJNI);</span><br><span class="line">    </span><br><span class="line">&#x2F;&#x2F;注册各种channnel(键盘、系统事件监听)</span><br><span class="line">xxxChannel &#x3D; new xxxChannel();</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;注册 pubspect.ymal 中依赖的plugin</span><br><span class="line">if (automaticallyRegisterPlugins) &#123;</span><br><span class="line">   registerPlugins();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里主要是在初始化上层的一些环境</p>
+<ul>
+<li>DartExecutor：用于后面加载、执行dart产物</li>
+<li>FlutterRenderer：管理flutter到surface/texuteview 的纹理显示数据，在启动activity后，会和acitvity上的view关联</li>
+<li>xxxChannel：各种flutter和native通信能力，比如监听系统事件的、activity切换声明周期等等</li>
+<li>registerPlugins: 注册注册<code>pubspect.ymal</code>中依赖的plugin</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">private void registerPlugins() &#123;</span><br><span class="line">  Class&lt;?&gt; generatedPluginRegistrant &#x3D;</span><br><span class="line">          Class.forName(&quot;io.flutter.plugins.GeneratedPluginRegistrant&quot;);</span><br><span class="line">  Method registrationMethod &#x3D;</span><br><span class="line">          generatedPluginRegistrant.getDeclaredMethod(&quot;registerWith&quot;, FlutterEngine.class);</span><br><span class="line">    registrationMethod.invoke(null, this);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>反射调用GeneratedPluginRegistrant类，注册<code>pubspect.ymal</code>中声明的插件</p>
+<h1 id="加载执行Dart代码"><a href="#加载执行Dart代码" class="headerlink" title="加载执行Dart代码"></a>加载执行Dart代码</h1><p>接着看engine初始化完后，加载执行dart代码的流程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">engine.getDartExecutor().executeDartEntrypoint(...);</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;DartExecutor.java</span><br><span class="line">executeEntryPoint(...)&#123;</span><br><span class="line">  flutterJNI.runBundleAndSnapshotFromLibrary(...);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>经过一系列跳转，最终会执行到<code>DartIsolate</code>的<code>Run</code>函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">bool DartIsolate::Run(const std::string&amp; entrypoint_name,</span><br><span class="line">                      const std::vector&lt;std::string&gt;&amp; args,</span><br><span class="line">                      const fml::closure&amp; on_run) &#123;</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;entrypoint_name为&quot;main&quot;，指Dart代码的入口函数</span><br><span class="line">  &#x2F;&#x2F;在dart产物上，寻找key为&quot;main&quot;(entrypoint_name)的入口函数</span><br><span class="line">  auto user_entrypoint_function &#x3D;</span><br><span class="line">      Dart_GetField(Dart_RootLibrary(), tonic::ToDart(entrypoint_name.c_str()));</span><br><span class="line"></span><br><span class="line">  auto entrypoint_args &#x3D; tonic::ToDart(args);</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F;执行main.dart函数中的main()方法</span><br><span class="line">  if (!InvokeMainEntrypoint(user_entrypoint_function, entrypoint_args)) &#123;</span><br><span class="line">    return false;</span><br><span class="line">  &#125;</span><br><span class="line">  return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p><strong>至此，flutter初始化完毕</strong></p>
+<ul>
+<li>可以正常执行dart代码</li>
+<li>进行渲染(startActivity后)</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/09/21/weex_rn/crocess_platform_solution/" rel="prev" title="跨平台渲染方案对比探究">
+      <i class="fa fa-chevron-left"></i> 跨平台渲染方案对比探究
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/12/25/flutter/flutter_hybrid/" rel="next" title="Flutter混合栈的实现原理">
+      Flutter混合栈的实现原理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#核心点"><span class="nav-number">1.</span> <span class="nav-text">核心点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#启动流程"><span class="nav-number">2.</span> <span class="nav-text">启动流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#初始化engine"><span class="nav-number">3.</span> <span class="nav-text">初始化engine</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1、启动Engine前的准备"><span class="nav-number">3.1.</span> <span class="nav-text">1、启动Engine前的准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2、启动engine"><span class="nav-number">3.2.</span> <span class="nav-text">2、启动engine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3、初始化变量"><span class="nav-number">3.3.</span> <span class="nav-text">3、初始化变量</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#加载执行Dart代码"><span class="nav-number">4.</span> <span class="nav-text">加载执行Dart代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#最后"><span class="nav-number">5.</span> <span class="nav-text">最后</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

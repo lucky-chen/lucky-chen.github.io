@@ -1,0 +1,31 @@
+@startuml
+
+autonumber
+
+Title: handleResumeActivity
+
+ActivityThread->ActivityThread: handleResumeActivity
+ActivityThread->ActivityThread: performResumeActivity
+ActivityThread->Activity: getWindow
+ActivityThread->Activity: getDecorView
+ActivityThread->Activity: getWindowManager
+ActivityThread->WindowManagerImpl: addView
+WindowManagerImpl->WindowManagerGlobal: addView
+WindowManagerGlobal->ViewRootImpl: new
+ViewRootImpl->WindowManagerGlobal: getWindowSession
+ViewRootImpl->W: new
+ViewRootImpl->Viewn.AttachInfo: new
+ViewRootImpl->Choreographer: getInstance
+WindowManagerGlobal->ViewRootImpl: setView
+ViewRootImpl->ViewRootImpl: requestLayout
+ViewRootImpl->ViewRootImpl: scheduleTraversals
+ViewRootImpl->Choreographer: postCallback
+Choreographer-> ViewRootImpl: performTraversals
+ViewRootImpl->ViewRootImpl: measureHierarchy
+ViewRootImpl->DecorView :measure
+ViewRootImpl->DecorView :layout
+ViewRootImpl->ViewRootImpl: draw
+ViewRootImpl-->IWindowSession: addToDisplay
+IWindowSession->WindowManagerService: addWindow
+
+@enduml
