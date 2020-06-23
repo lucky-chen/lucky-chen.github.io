@@ -20,22 +20,24 @@
     var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"8.0.0-rc.3","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="2.0特性 二进制报文 链接多路复用 头部压缩 Server Push">
+  <meta name="description" content="概览   版本 底层协议 特性 备注    1.x tcp 更多的缓存控制策略请求范围设置(断点续传)新增了错误状态响应码Host头处理，传递主机名支持长连接 :—   https tcp+tls 需要证书TLS加密传输协议 :—   2.0 tcp+tls 二进制格式多路复用header压缩服务端推送 :—   3.0 udp 减少了TCP三次握手及TLS握手时间连接迁移线头阻塞(HOL)问题的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Http 2.0协议初探">
+<meta property="og:title" content="Http版本协议变迁历史">
 <meta property="og:url" content="https://lucky-chen.github.io/2016/08/06/network/http2/index.html">
 <meta property="og:site_name" content="Chen&#39;s Notes">
-<meta property="og:description" content="2.0特性 二进制报文 链接多路复用 头部压缩 Server Push">
+<meta property="og:description" content="概览   版本 底层协议 特性 备注    1.x tcp 更多的缓存控制策略请求范围设置(断点续传)新增了错误状态响应码Host头处理，传递主机名支持长连接 :—   https tcp+tls 需要证书TLS加密传输协议 :—   2.0 tcp+tls 二进制格式多路复用header压缩服务端推送 :—   3.0 udp 减少了TCP三次握手及TLS握手时间连接迁移线头阻塞(HOL)问题的">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images2018.cnblogs.com/blog/877318/201804/877318-20180418160914403-902015370.png">
+<meta property="og:image" content="https://images2018.cnblogs.com/blog/877318/201804/877318-20180418161014087-738990087.png">
+<meta property="og:image" content="http://static.zybuluo.com/qh438406812/92dwizpb3rzlf66gz90hm58b/http2.png">
 <meta property="og:image" content="http://static.zybuluo.com/qh438406812/sj9s2vcx169ttt4z604mt7sj/201504182058.png">
 <meta property="og:image" content="http://static.zybuluo.com/qh438406812/stm3cxid5pe8ayrgasicbw59/http2-server-push.png">
 <meta property="og:image" content="http://static.zybuluo.com/qh438406812/tjkln37060z1ng8cgs1xatxc/hpack.png">
-<meta property="og:image" content="http://static.zybuluo.com/qh438406812/92dwizpb3rzlf66gz90hm58b/http2.png">
 <meta property="article:published_time" content="2016-08-05T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-06-08T07:14:49.428Z">
+<meta property="article:modified_time" content="2020-06-23T08:59:14.928Z">
 <meta property="article:author" content="lucky_chen">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://static.zybuluo.com/qh438406812/sj9s2vcx169ttt4z604mt7sj/201504182058.png">
+<meta name="twitter:image" content="https://images2018.cnblogs.com/blog/877318/201804/877318-20180418160914403-902015370.png">
 
 <link rel="canonical" href="https://lucky-chen.github.io/2016/08/06/network/http2/">
 
@@ -50,7 +52,7 @@
   };
 </script>
 
-  <title>Http 2.0协议初探 | Chen's Notes</title>
+  <title>Http版本协议变迁历史 | Chen's Notes</title>
   
 
 
@@ -177,7 +179,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Http 2.0协议初探
+          Http版本协议变迁历史
         </h1>
 
         <div class="post-meta">
@@ -194,7 +196,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-06-08 15:14:49" itemprop="dateModified" datetime="2020-06-08T15:14:49+08:00">2020-06-08</time>
+                <time title="修改时间：2020-06-23 16:59:14" itemprop="dateModified" datetime="2020-06-23T16:59:14+08:00">2020-06-23</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -217,39 +219,95 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="2-0特性"><a href="#2-0特性" class="headerlink" title="2.0特性"></a>2.0特性</h1><ul>
+        <h1 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h1><table>
+<thead>
+<tr>
+<th align="left">版本</th>
+<th align="left">底层协议</th>
+<th align="left">特性</th>
+<th align="left">备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1.x</td>
+<td align="left">tcp</td>
+<td align="left">更多的缓存控制策略<br>请求范围设置(断点续传)<br>新增了错误状态响应码<br>Host头处理，传递主机名<br>支持长连接</td>
+<td align="left">:—</td>
+</tr>
+<tr>
+<td align="left">https</td>
+<td align="left">tcp+tls</td>
+<td align="left">需要证书<br>TLS加密传输协议<br></td>
+<td align="left">:—</td>
+</tr>
+<tr>
+<td align="left">2.0</td>
+<td align="left">tcp+tls</td>
+<td align="left">二进制格式<br>多路复用<br>header压缩<br>服务端推送</td>
+<td align="left">:—</td>
+</tr>
+<tr>
+<td align="left">3.0</td>
+<td align="left">udp</td>
+<td align="left">减少了TCP三次握手及TLS握手时间<br>连接迁移<br>线头阻塞(HOL)问题的解决更为彻底</td>
+<td align="left">:—</td>
+</tr>
+</tbody></table>
+<a id="more"></a>
+
+<h1 id="Http-1-x"><a href="#Http-1-x" class="headerlink" title="Http 1.x"></a>Http 1.x</h1><h2 id="报文格式"><a href="#报文格式" class="headerlink" title="报文格式"></a>报文格式</h2><p>请求报文</p>
+<p><img src="https://images2018.cnblogs.com/blog/877318/201804/877318-20180418160914403-902015370.png" alt=""></p>
+<p>响应报文</p>
+<p><img src="https://images2018.cnblogs.com/blog/877318/201804/877318-20180418161014087-738990087.png" alt=""></p>
+<h2 id="链接过程"><a href="#链接过程" class="headerlink" title="链接过程"></a>链接过程</h2><ul>
+<li>建立一个TCP套接字连接(<strong>3次握手</strong>)</li>
+<li>客户端向服务器发送一个文本的请求报文</li>
+<li>服务器响应报文: 解析请求，定位请求资源。服务器将资源复本写到TCP套接字，由客户端读取</li>
+<li>释放连接TCP连接:<ul>
+<li>若connection 模式为close，则服务器主动关闭TCP连接，客户端被动关闭连接，释放TCP连接; (<strong>4次挥手</strong>)</li>
+<li>若connection 模式为keepalive，则该连接会保持一段时间，在该时间内可以继续接收请求;</li>
+</ul>
+</li>
+</ul>
+<h1 id="Http-2-0"><a href="#Http-2-0" class="headerlink" title="Http 2.0"></a>Http 2.0</h1><ul>
+<li>特性<ul>
 <li>二进制报文</li>
 <li>链接多路复用</li>
 <li>头部压缩</li>
 <li>Server Push</li>
 </ul>
-<a id="more"></a>
-
-<h1 id="Http-2-0"><a href="#Http-2-0" class="headerlink" title="Http 2.0"></a>Http 2.0</h1><ul>
+</li>
+<li>相关文档<ul>
 <li><a href="http://httpwg.org/specs/rfc7540.html" target="_blank" rel="noopener">协议文档</a></li>
 <li><a href="https://l-zhi.com:8081/item1.html" target="_blank" rel="noopener">速度对比</a></li>
 <li><a href="http://www.softwareishard.com/har/viewer/" target="_blank" rel="noopener">har</a></li>
 </ul>
-<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>流(Stream)</p>
-<blockquote>
-<p>交互处理单元，表达一次完整的资源请求-响应数据交换流程</p>
-</blockquote>
-<p>帧(Frame)：</p>
-<blockquote>
-<p>交换数据的基本单位，一个流有一到多个帧</p>
-</blockquote>
+</li>
+</ul>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><ul>
+<li>流(Stream): 交互处理单元，表达一次完整的资源请求-响应数据交换流程</li>
+<li>帧(Frame)：交换数据的基本单位，一个流有一到多个帧</li>
+</ul>
+<h2 id="报文"><a href="#报文" class="headerlink" title="报文"></a>报文</h2><p><img src="http://static.zybuluo.com/qh438406812/92dwizpb3rzlf66gz90hm58b/http2.png" alt="http2.png-190.3kB"></p>
+<p>HTTP/2 采用二进制格式传输数据，数据的单位是Frame,Frame的格式如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">+-----------------------------------------------+</span><br><span class="line">|                 Length (24)                   |</span><br><span class="line">+---------------+---------------+---------------+</span><br><span class="line">|   Type (8)    |   Flags (8)   |</span><br><span class="line">+-+-------------+---------------+-------------------------------+</span><br><span class="line">|R|                 Stream Identifier (31)                      |</span><br><span class="line">+&#x3D;+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;+</span><br><span class="line">|                   Frame Payload (0...)                      ...</span><br><span class="line">+---------------------------------------------------------------+</span><br></pre></td></tr></table></figure>
+<p>报文解释</p>
+<ul>
+<li>Length 24: Frame Payload的大小,2M</li>
+<li>Type: Frame类型  <code>DATA/HEADERS/PRIORITY/PUSH_PROMISE</code></li>
+<li>Flags 8 <code>END_STREAM/END_HEADERS/PADDED/PRIORITY</code></li>
+<li>R 1 保留位</li>
+<li>Stream Identifier 31 数据流id</li>
+<li>Frame Payload 0… 数据内容</li>
+</ul>
 <h2 id="多路复用"><a href="#多路复用" class="headerlink" title="多路复用"></a>多路复用</h2><p>解决1.x 线头阻塞(Head-of-Line Blocking)问题，提高网路请求速度</p>
 <p><img src="http://static.zybuluo.com/qh438406812/sj9s2vcx169ttt4z604mt7sj/201504182058.png" alt="201504182058.png-168.7kB"></p>
 <h2 id="Server-Push"><a href="#Server-Push" class="headerlink" title="Server Push"></a>Server Push</h2><p><img src="http://static.zybuluo.com/qh438406812/stm3cxid5pe8ayrgasicbw59/http2-server-push.png" alt="http2-server-push.png-157.6kB"></p>
 <ul>
-<li><p>HTTP 2.0 连接后，客户端与服务器交换SETTINGS 帧，借此可以限定双向并发的流的最大数量。因此，客户端可以限定推送流的数量，或者通过把这个值设置为0 而完全禁用服务器推送。</p>
-</li>
-<li><p>所有推送的资源都遵守同源策略。换句话说，服务器不能随便将第三方资源推送给客户端，而必须是经过双方确认才行。</p>
-</li>
-<li><p>PUSH_PROMISE：所有服务器推送流都由PUSH_PROMISE 发端，服务器向客户端发出的有意推送所述资源的信号。客户端接收到PUSH_PROMISE 帧之后，可以视自身需求选择拒绝这个流</p>
-</li>
-<li><p>几点限制：</p>
-<ul>
+<li>HTTP 2.0 连接后，客户端与服务器交换SETTINGS 帧，借此可以限定双向并发的流的最大数量。因此，客户端可以限定推送流的数量，或者通过把这个值设置为0 而完全禁用服务器推送。</li>
+<li>所有推送的资源都遵守同源策略。换句话说，服务器不能随便将第三方资源推送给客户端，而必须是经过双方确认才行。</li>
+<li>PUSH_PROMISE：所有服务器推送流都由PUSH_PROMISE 发端，服务器向客户端发出的有意推送所述资源的信号。客户端接收到PUSH_PROMISE 帧之后，可以视自身需求选择拒绝这个流</li>
+<li>几点限制：<ul>
 <li>服务器必须遵循请求- 响应的循环，只能借着对请求的响应推送资源</li>
 <li>PUSH_PROMISE 帧必须在返回响应之前发送，以免客户端出现竞态条件。</li>
 </ul>
@@ -351,107 +409,50 @@
 <p><img src="http://static.zybuluo.com/qh438406812/tjkln37060z1ng8cgs1xatxc/hpack.png" alt="hpack.png-148.4kB"></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;----------  Index Address Space ----------&gt;</span><br><span class="line">&lt;-- Static  Table --&gt;  &lt;-- Dynamic Table --&gt;</span><br><span class="line">+---+-----------+---+  +---+-----------+---+</span><br><span class="line">| 1 |    ...    | s |  |s+1|    ...    |s+k|</span><br><span class="line">+---+-----------+---+  +---+-----------+---+</span><br><span class="line">                       ^                   |</span><br><span class="line">                       |                   V</span><br><span class="line">                 Insertion Point      Dropping Point</span><br></pre></td></tr></table></figure>
 
-<h2 id="报文"><a href="#报文" class="headerlink" title="报文"></a>报文</h2><p><img src="http://static.zybuluo.com/qh438406812/92dwizpb3rzlf66gz90hm58b/http2.png" alt="http2.png-190.3kB"></p>
-<p>HTTP/2 采用二进制格式传输数据，数据的单位是Frame,Frame的格式如下:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">+-----------------------------------------------+</span><br><span class="line">|                 Length (24)                   |</span><br><span class="line">+---------------+---------------+---------------+</span><br><span class="line">|   Type (8)    |   Flags (8)   |</span><br><span class="line">+-+-------------+---------------+-------------------------------+</span><br><span class="line">|R|                 Stream Identifier (31)                      |</span><br><span class="line">+&#x3D;+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;+</span><br><span class="line">|                   Frame Payload (0...)                      ...</span><br><span class="line">+---------------------------------------------------------------+</span><br></pre></td></tr></table></figure>
-<p>报文解释</p>
-<blockquote>
-<p>Length 24</p>
-</blockquote>
-<p>Frame Payload的大小,2M</p>
-<blockquote>
-<p>Type 8</p>
-</blockquote>
+<h1 id="Http3-0"><a href="#Http3-0" class="headerlink" title="Http3.0"></a>Http3.0</h1><ul>
+<li>对线头阻塞(HOL)问题的解决更为彻底</li>
+<li>切换网络时的连接保持</li>
+</ul>
 <table>
 <thead>
 <tr>
-<th align="left">Frame</th>
-<th align="left">Type    Code</th>
+<th align="left">机制</th>
+<th align="left">2.0问题</th>
+<th align="left">3.0方案</th>
+<th align="left">备注</th>
 </tr>
 </thead>
 <tbody><tr>
-<td align="left">DATA</td>
-<td align="left">0x0</td>
+<td align="left">自定义连接机制</td>
+<td align="left">tcp连接是由四元组标识的，分别是源ip、源端口、目的端口，一旦一个元素发生变化时，就会断开重连，重新连接</td>
+<td align="left">使用udp协议，不再以四元组标识，而是以一个64位的随机数作为ID来标识。</td>
+<td align="left">:—</td>
 </tr>
 <tr>
-<td align="left">HEADERS</td>
-<td align="left">0x1</td>
+<td align="left">自定义重传机制</td>
+<td align="left">tcp超时的采样存在不准确的问题（原始包和重传包ack区分）</td>
+<td align="left">QUIC也有个序列号，是递增的</td>
+<td align="left">:—</td>
 </tr>
 <tr>
-<td align="left">PRIORITY</td>
-<td align="left">0x2</td>
+<td align="left">无阻塞的多路复用</td>
+<td align="left">tcp协议在处理包时是有严格顺序的，当其中一个数据包遇到问题，TCP连接需要等待这个包完成重传之后才能继续进行.(前面stream2的帧没有收到，后面stream1的帧也会因此堵塞)</td>
+<td align="left">QUIC是基于UDP的，一个连接上的多个stream之间没有依赖</td>
+<td align="left">:—</td>
 </tr>
 <tr>
-<td align="left">RST_STREAM</td>
-<td align="left">0x3</td>
-</tr>
-<tr>
-<td align="left">SETTINGS</td>
-<td align="left">0x4</td>
-</tr>
-<tr>
-<td align="left">PUSH_PROMISE</td>
-<td align="left">0x5</td>
-</tr>
-<tr>
-<td align="left">PING</td>
-<td align="left">0x6</td>
-</tr>
-<tr>
-<td align="left">GOAWAY</td>
-<td align="left">0x7</td>
-</tr>
-<tr>
-<td align="left">WINDOW_UPDATE</td>
-<td align="left">0x8</td>
-</tr>
-<tr>
-<td align="left">CONTINUATION</td>
-<td align="left">0x9</td>
+<td align="left">自定义流量控制</td>
+<td align="left">TCP协议中，接收端的窗口的起始点是下一个要接收并且ACK的包，即便后来的包都到了，放在缓存里面，窗口也不能右移，就会导致后面的到了，也有可能超时重传，浪费带宽</td>
+<td align="left">QUIC的ACK是基于offset的，每个offset的包来了，进了缓存，就可以应答，应答后就不会重发</td>
+<td align="left">:—</td>
 </tr>
 </tbody></table>
-<blockquote>
-<p>Flags 8</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th align="left">name</th>
-<th align="left">code</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">END_STREAM</td>
-<td align="left">0x1</td>
-</tr>
-<tr>
-<td align="left">END_HEADERS</td>
-<td align="left">0x4</td>
-</tr>
-<tr>
-<td align="left">PADDED</td>
-<td align="left">0x8</td>
-</tr>
-<tr>
-<td align="left">PRIORITY</td>
-<td align="left">0x20</td>
-</tr>
-</tbody></table>
-<blockquote>
-<p>R 1</p>
-</blockquote>
-<p>保留位</p>
-<blockquote>
-<p>Stream Identifier 31</p>
-</blockquote>
-<p>数据流id</p>
-<blockquote>
-<p>Frame Payload 0…</p>
-</blockquote>
-<p>数据内容</p>
-<h2 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h2><blockquote>
-<p>har 文件几个概念<br>|字段|说明|<br>|:-|:-|<br>|blocked|建立网络连接时在队列里边等待的时间|<br>|dns|DNS查询时间|<br>|connect|建立TCP连接所需的时间|<br>|send|发送HTTP请求到服务器所需的时间|<br>|wait|等待服务器返回响应的时间|<br>|receive|接收服务器响应（或者缓存）所需时间|</p>
-</blockquote>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><ul>
+<li><a href="https://zhuanlan.zhihu.com/p/90438293" target="_blank" rel="noopener">HTTP的前世今生（HTTP1.1，HTTPS，SPDY，HTTP2.0，QUIC，HTTP3.0）</a></li>
+<li><a href="https://blog.csdn.net/glpghz/article/details/106063833" target="_blank" rel="noopener">HTTP1.0、HTTP2.0、HTTP 3.0及HTTPS简要介绍</a></li>
+<li><a href="https://www.cnblogs.com/an-wen/p/11180076.html" target="_blank" rel="noopener">HTTP协议超级详解</a></li>
+<li><a href="https://www.cnblogs.com/chenjinxinlove/p/10104854.html" target="_blank" rel="noopener">HTTP3.0(QUIC的实现机制)</a></li>
+</ul>
 
     </div>
 
@@ -532,7 +533,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#2-0特性"><span class="nav-number">1.</span> <span class="nav-text">2.0特性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Http-2-0"><span class="nav-number">2.</span> <span class="nav-text">Http 2.0</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概念"><span class="nav-number">2.1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多路复用"><span class="nav-number">2.2.</span> <span class="nav-text">多路复用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Server-Push"><span class="nav-number">2.3.</span> <span class="nav-text">Server Push</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流："><span class="nav-number">2.4.</span> <span class="nav-text">流：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#头部压缩"><span class="nav-number">2.5.</span> <span class="nav-text">头部压缩</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#报文"><span class="nav-number">2.6.</span> <span class="nav-text">报文</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其它"><span class="nav-number">2.7.</span> <span class="nav-text">其它</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概览"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Http-1-x"><span class="nav-number">2.</span> <span class="nav-text">Http 1.x</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#报文格式"><span class="nav-number">2.1.</span> <span class="nav-text">报文格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#链接过程"><span class="nav-number">2.2.</span> <span class="nav-text">链接过程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Http-2-0"><span class="nav-number">3.</span> <span class="nav-text">Http 2.0</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概念"><span class="nav-number">3.1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#报文"><span class="nav-number">3.2.</span> <span class="nav-text">报文</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多路复用"><span class="nav-number">3.3.</span> <span class="nav-text">多路复用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Server-Push"><span class="nav-number">3.4.</span> <span class="nav-text">Server Push</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流："><span class="nav-number">3.5.</span> <span class="nav-text">流：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#头部压缩"><span class="nav-number">3.6.</span> <span class="nav-text">头部压缩</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Http3-0"><span class="nav-number">4.</span> <span class="nav-text">Http3.0</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#附录"><span class="nav-number">5.</span> <span class="nav-text">附录</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
