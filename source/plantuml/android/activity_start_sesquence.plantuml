@@ -1,0 +1,33 @@
+@startuml
+
+autonumber
+
+ContextImpl->Instrumentation: exec\nStartActivity
+Instrumentation->AMS: startActivity
+AMS->ActivityStackSupervisor: startActivityMayWait
+ActivityStackSupervisor->ActivityStackSupervisor: startActivityLocked
+ActivityStackSupervisor->ActivityStackSupervisor: startActivity\nUncheckedLocked
+ActivityStackSupervisor->ActivityStack: startActivityLocked
+ActivityStack->ActivityStackSupervisor:resumeTop\nActivitiesLocked
+ActivityStackSupervisor->ActivityStack: resumeTopActivityLocked
+ActivityStack->ActivityStack: resume\nTopActivity\nInnerLocked
+ActivityStack->ActivityStackSupervisor: startSpecificActivityLocked
+ActivityStackSupervisor->ActivityStackSupervisor: realStartActivityLocked
+ActivityStackSupervisor->IApplicationThreadn.Stub: scheduleLaunchActivity
+IApplicationThreadn.Stub->H: handleMessage
+H->ActivityThread: handleLaunchActivity
+ActivityThread->ActivityThread: performLaunchActivity
+ActivityThread->Activity: attach
+ActivityThread->Instrumentation: callActivityOnCreate
+Instrumentation->Activity: performCreate
+Activity->Activity: onCreate
+ActivityThread->ActivityThread: handleResumeActivity
+ActivityThread->ActivityThread: performResumeActivity
+ActivityThread->Activity: performResume
+Activity->Activity: performStart
+Activity->Instrumentation: callActivityOnStart
+Instrumentation->Activity: onStart
+Activity->Instrumentation: callActivityOnResume
+Instrumentation->Activity: onResume
+
+@enduml

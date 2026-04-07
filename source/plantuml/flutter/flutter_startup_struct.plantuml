@@ -1,0 +1,49 @@
+@startuml
+
+rectangle FlutterEngine
+
+rectangle FlutterJNI
+
+rectangle AndroidShellHolder
+
+rectangle Shell
+
+rectangle RuntimeConller
+
+rectangle Engine
+
+rectangle DartVM
+
+rectangle DartIsolate
+
+
+rectangle FlutterRender
+
+rectangle DartExecutor
+
+rectangle XXXChannel
+
+rectangle PlatformViewsController
+
+
+
+FlutterEngine *-down- FlutterJNI
+
+FlutterEngine *-down- FlutterRender
+FlutterEngine *-down- DartExecutor
+FlutterEngine *-down- XXXChannel
+FlutterEngine *-down- PlatformViewsController
+
+FlutterJNI *-down- AndroidShellHolder
+
+AndroidShellHolder *-down- Shell
+
+Shell *-down- Engine
+
+Shell *-down- DartVM
+
+Engine *-down- RuntimeConller
+
+RuntimeConller *-down- DartIsolate
+
+@enduml

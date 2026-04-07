@@ -1,0 +1,33 @@
+@startuml
+
+
+
+Title: 进程启动过程
+ActivityStack->AMS: 1.startProcess\nLocked
+AMS->Proc: 2.start
+Proc->Proc: 3.zygoteSendArgs\nAndGetResult
+Proc->ZygoteInit: 4.runSelectLoop
+ZygoteInit->ZygoteConnection: 5.runOnce
+ZygoteConnection->ZygoteConnection: 6.handleChildProc
+ZygoteConnection->ZygoteInit: 7.invokeStaticMain
+ZygoteInit->ZygoteInit: 8.main
+ZygoteInit->MethodAndArgsCaller: 9.run
+MethodAndArgsCaller->ActivityThread: 10.main
+ActivityThread->Looper: 11.prepareMainLooper
+ActivityThread->ActivityThread: 12.attach
+ActivityThread-->AMS: 13.attachApplication
+AMS->AMS: 14.attach\nApplication\nLocked
+AMS-->IApplicationThread: 15.bindApplication
+IApplicationThread->ActivityThread :16.bindApplication
+ActivityThread-->ActivityThread: 17.handleBindApplication
+ActivityThread->LoadedApk: 18.makeApplication
+LoadedApk->Instrumentation: 19.newApplication
+Instrumentation->Application: 20.attach
+ActivityThread->Instrumentation: 21.callApplicationOnCreate
+InstrumentationNew->Application: 22.onCreate
+ActivityThread->Looper: 23.loop
+
+
+
+
+@enduml

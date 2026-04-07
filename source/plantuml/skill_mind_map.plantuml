@@ -1,0 +1,51 @@
+@startmindmap
+
++ Skill
+++ technology
++++ Base
+++++ NetWork
++++++ IP
++++++ TCP
++++++ UDP
++++++ HTTP 1.X/S/2/3
+
+++++ Design
++++++ Process
++++++ Thread
++++++ Mem
++++++ IPC
++++++ Lock
+
+
+++++ algorithm
++++++ serch
++++++ sort
++++++ dp
+
+
++++ Lanague
+++++ JAVA
++++++ JVM
+++++++ classLoad
+++++++ MemStruct
++++++ ConcurrentPkg
+++++++ ConcurrentHashMap/hashMap
+++++++ Lock
+++++++ sync
+++++++ lock/wait sleep/...
+
+++++ C/CPP
+
+
+-- project
+--- Weex
+---- 高可用-性能稳定性体系
+----- 指标
+----- 工具
+----- 平台
+----- 性能-可流畅/首屏
+--- Altas
+--- ALiFlutter
+
+
+@endmindmap

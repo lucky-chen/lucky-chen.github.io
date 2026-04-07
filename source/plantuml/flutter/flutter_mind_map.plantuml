@@ -1,0 +1,57 @@
+@startmindmap
+
++ Flutter
+++ Container
++++ runtime
+++++ Boost
++++++ engine one
++++++ router
++++ Plugin
+++++ Api
+++++ nativeWidget
++++++ 共享纹理
+++++++ 视频组件
++++++ engine魔改
+++++++ native图片方案
++++ Dev
+++++ build
++++++ publish
++++++ versionControl
+++++ debug
++++++ dart simple
+++ Engine
++++ Performance
+++++ startUp
+++++ imgLoad
+++++ size
++++++ skia
++++++ icu
++++++ dynamic load
++++++ network
++++ Bug
+++++ adapter
++++++ androidx/support
++++ source
+++++ render
++++++ tree
+++++++ widget
+++++++ element
+++++++ render
++++++ pipleLine
+++++++ ui
+++++++ gpu
+++++++ skia
+++++ event
+++ DartVM
++++ mem
+++++ GC
++++++ young 
+++++++ 划分1:1  JVM 1:1:8
+++++++ 算法 mark-compact 滑动指针
++++++ old 
+++++++ compact
+++ tools
++++ buildComand
++++ template
+
+@endmindmap

@@ -1,0 +1,82 @@
+@startuml
+
+
+package OS{
+    package Android{
+        [Binder-Kernerl]
+        [JavaFrameWork]
+        [nativeFrameWork]
+        [APPLICATION]
+    }
+    package iOS{
+        [VC]
+    }
+}
+
+
+package Base{
+    package Design{
+        [IPC]
+        [Process]
+        [Thread]
+        [Memory]
+    }
+    package NetWork{
+        [TCP]
+        [UDP]
+        [IP]
+        [HTTP 1.x/S/2/3]
+    }
+}
+
+package VM{
+    [JVM]
+    [DartVm]
+    [V8]
+    [JSC]
+}
+package Language{
+    [Java]
+    [C/CPP]
+    package Other{
+        [OC]
+        [JS]
+        [kotlin]
+        [Grooy]
+        [Dart]
+    }
+}
+
+package Project{
+    package DroidPlugin{
+        [AnddridFrameWork]
+        [Hook]
+    }
+
+    package Atlas{
+        [Patch]
+        [Bundle]
+        [ClassLoader]
+        [AssestManager]
+    }
+
+    package Weex{
+        [JS]
+        [Render Android/iOS]
+    }
+
+    package ALiFlutter{
+        [FlutterEngine]
+        [FlutterFrameWork]
+    }
+}
+
+
+Base --up-> VM
+VM --up-> Project
+Base --up-> Language
+Base --up-> OS
+Language --up-> Project
+OS --up-> Project
+
+@enduml

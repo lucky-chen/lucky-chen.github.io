@@ -1,0 +1,88 @@
+@startuml
+
+FlutterEngine -> FlutterEngine : startInitalization
+
+FlutterEngine ->  FlutterEngine: ensureInizationComplete
+
+FlutterEngine -> FlutterJNI : attachToNative
+
+FlutterJNI -> AndroidShellHolder : newInstance
+
+AndroidShellHolder -> ThreadHost : createThread
+
+AndroidShellHolder -> Shell : Create
+
+Shell -> Shell : CreateShellOnPlatformThread
+
+Shell -> IOThread : create_shell_io_manager
+
+Shell -> GPUThread : create_rasterizer
+
+Shell -> PlatformThread: create_platform_view
+
+Shell -> UIThread : createEngine
+
+Shell -> Future:  shell_future.get()
+
+UIThread -> Engine: init
+
+Engine -> Future: io_manager_future.get()
+
+Engine -> Future: raster_future.get()
+
+Engine -> FontCollection: initFontCollection \n timecost
+
+Engine -> RuntimeController : init
+
+RuntimeController-> DartIsolate: createRootIsolate
+
+DartIsolate -> DartIsolate : CreateDartVM\nAndEmbedderObjectPair
+
+Engine -> Future: shell_promise.set_value();
+
+Future-> Shell : return
+
+Shell -> AndroidShellHolder: return
+
+AndroidShellHolder -> FlutterJNI: nativePlatformViewId
+
+FlutterEngine -> DartExecutor : newInstance
+
+DartExecutor-> DartExecutor:onAttachedToJNI
+FlutterEngine-> FlutterRenderer:newInstance
+FlutterEngine -> XXXChannel : init
+
+FlutterEngine ->  PlatformViewsController :init
+
+PlatformViewsController -> PlatformViewsController:onAttachedToJNI
+
+FlutterEngine ->FlutterEnginePluginRegistry: init
+
+FlutterEngine -> FlutterEngine:registerPlugins
+
+FlutterEngine -> GeneratedPluginRegistrant:registerWith
+
+DartExecutor->DartExecutor:executeDartEntrypoint
+
+DartExecutor->FlutterJNI:runBundleAndSnapshotFromLibrary
+
+FlutterJNI -> platform_view_android_jni:RunBundleAndSnapshotFromLibrary
+
+platform_view_android_jni->AndroidShellHolder:Launch
+
+AndroidShellHolder->Shell:RunEngine
+
+Shell->UIThread:post
+
+UIThread->Engine:run
+
+Engine->Engine:PrepareAndLaunchIsolate
+
+Engine->DartIsolate:RunFromLibrary
+
+DartIsolate->DartIsolate:InvokeMainEntrypoint
+
+DartIsolate->isolate_patch:_runMainZoned
+isolate_patch->mainDart:main
+
+@enduml

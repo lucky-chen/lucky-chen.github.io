@@ -1,0 +1,40 @@
+@startmindmap
+
++ Atals
+++ compile
++++ manifist
+++++ merge bundle component
++++ application
++++ PREVERIFY dex ref
++++ atlas-aapt 
+++++ resId
+++ Host
++++ Bundle Framework
++++ Hook
+++++ AMS
++++++ Activity
++++++ Service
++++++ Provider
++++++ Receiver
+++++ mH
+++++ ClassLoader
++++++ BundleClassLoader
++++++ DelegateClassLoader
++++++ PathClassLoader
+++++++ DexPathList
++++++++ DexElement
++++++++ NativeElement
++++++ BootClassLoader
+++++ AssetManager
++++ Runtime
+++++ Version
+++++ BundleListing
+++++ Delegate
+++++ dex2oat art
+++ Bundle
++++ ClassLoader
++++ Context
++++ AssetPath
++++ LifeCycle
+
+@endmindmap

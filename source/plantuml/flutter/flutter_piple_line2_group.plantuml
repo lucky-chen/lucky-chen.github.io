@@ -1,0 +1,46 @@
+@startuml
+
+autonumber
+
+== Animate ==
+
+Window->SchedulerBinding:handleBeginFrame
+SchedulerBinding->FrameCallbackEntry:invoke
+
+Window->Window:FlushMicrotasksNow
+
+
+Window->SchedulerBinding:handleDrawFrame
+SchedulerBinding->WidgetBinding:drawFrame
+
+== Build ==
+
+WidgetBinding->BuildOwner:buildScope
+
+
+
+
+WidgetBinding->RendererBinding:drawFrame
+
+== Layout ==
+
+RenderBinding->PipelineOwner:flushLayout
+RenderBinding->PipelineOwner:flushCompositingBits
+
+== Paint ==
+
+RenderBinding->PipelineOwner:flushPaint
+
+== Layer ==
+
+RenderBinding->RenderView:compositeFrame
+RenderBinding->PipelineOwner:flushSemantics
+
+== finalizeTree ==
+
+BuildOwner->BuildOwner:finalizeTree
+
+
+
+
+@enduml
