@@ -3,6 +3,7 @@ title: 我进入 AI 领域的方式，以及 Agent SDK 的设计
 categories: [AI, Infra, 方法论]
 date: 2025-12-07
 tags: [Agent, Runtime, SDK, 架构设计, 问题分析]
+lang: zh
 ---
 
 # 背景
@@ -12,6 +13,8 @@ tags: [Agent, Runtime, SDK, 架构设计, 问题分析]
 - **调查**：进入 AI 领域时面对什么问题，准备怎么切入，以及基于调查形成了哪些初步推断
 - **结论**：经过调查和实践，当前形成了哪些核心判断
 - **实践展开**：通过一个实际的 agent 工程，说明这些判断是如何被推导、设计和验证的
+
+英文版本：[How I Entered AI and Designed an Agent SDK](/2025/12/07/ai/agent_sdk_design_en/)
 
 <!-- more -->
 
