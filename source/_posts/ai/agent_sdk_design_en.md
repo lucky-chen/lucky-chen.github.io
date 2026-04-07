@@ -14,7 +14,7 @@ This article is about how to enter a new field quickly. The method used here is 
 - **Conclusions**: what core judgments were formed after investigation and practice
 - **Practical engineering**: how those judgments were derived, designed, and validated through a real agent engineering project
 
-Chinese version: [我进入 AI 领域的方式，以及 Agent SDK 的设计](/zh/agent-sdk-design/)
+Chinese version: [我进入 AI 领域的方式，以及 Agent SDK 的设计](/i18n/zh/ai/agent-sdk-design.html)
 
 <!-- more -->
 
