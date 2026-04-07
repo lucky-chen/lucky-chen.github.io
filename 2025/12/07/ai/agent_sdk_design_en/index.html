@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="BackgroundThis article is about how to enter a new field quickly. The method used here is seeking truth from facts, with three steps: investigation, practice, and iteration through review. The concret">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How I Entered AI and Designed an Agent SDK">
+<meta property="og:url" content="https://lucky-chen.github.io/2025/12/07/ai/agent_sdk_design_en/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="BackgroundThis article is about how to enter a new field quickly. The method used here is seeking truth from facts, with three steps: investigation, practice, and iteration through review. The concret">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-12-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-07T12:34:56.294Z">
+<meta property="article:author" content="lucky_chen">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="Runtime">
+<meta property="article:tag" content="SDK">
+<meta property="article:tag" content="Architecture">
+<meta property="article:tag" content="Problem Analysis">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2025/12/07/ai/agent_sdk_design_en/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>How I Entered AI and Designed an Agent SDK | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2025/12/07/ai/agent_sdk_design_en/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          How I Entered AI and Designed an Agent SDK
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-12-07 00:00:00" itemprop="dateCreated datePublished" datetime="2025-12-07T00:00:00+08:00">2025-12-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2026-04-07 20:34:56" itemprop="dateModified" datetime="2026-04-07T20:34:56+08:00">2026-04-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI/" itemprop="url" rel="index"><span itemprop="name">AI</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI/Infra/" itemprop="url" rel="index"><span itemprop="name">Infra</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI/Infra/Methodology/" itemprop="url" rel="index"><span itemprop="name">Methodology</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h1><p>This article is about how to enter a new field quickly. The method used here is <strong>seeking truth from facts</strong>, with three steps: <strong>investigation</strong>, <strong>practice</strong>, and <strong>iteration through review</strong>. The concrete example in this article is agent engineering in the AI domain.</p>
+<ul>
+<li><strong>Investigation</strong>: what problems appeared when entering the AI field, how to approach it, and what initial assumptions were formed through investigation</li>
+<li><strong>Conclusions</strong>: what core judgments were formed after investigation and practice</li>
+<li><strong>Practical engineering</strong>: how those judgments were derived, designed, and validated through a real agent engineering project</li>
+</ul>
+<p>Chinese version: <a href="/zh/agent-sdk-design/">我进入 AI 领域的方式，以及 Agent SDK 的设计</a></p>
+<span id="more"></span>
+
+<h1 id="Investigation"><a href="#Investigation" class="headerlink" title="Investigation"></a>Investigation</h1><h2 id="Exploring-and-understanding-what-AI-is"><a href="#Exploring-and-understanding-what-AI-is" class="headerlink" title="Exploring and understanding what AI is"></a>Exploring and understanding what AI is</h2><ul>
+<li>Understand the basic principles of AI and its capability boundaries</li>
+<li>Understand engineering objects such as prompt, agent, context, and MCP</li>
+<li>Understand where AI is effective in real delivery and where it loses control</li>
+</ul>
+<h2 id="Deriving-a-human-AI-collaboration-model-from-AI’s-characteristics"><a href="#Deriving-a-human-AI-collaboration-model-from-AI’s-characteristics" class="headerlink" title="Deriving a human-AI collaboration model from AI’s characteristics"></a>Deriving a human-AI collaboration model from AI’s characteristics</h2><ul>
+<li>Decide which problems are suitable for AI and which must remain human-led</li>
+<li>Reassign engineering focus toward requirement discovery, problem decomposition, architecture design, and execution control</li>
+<li>Form a practical way of working where humans and AI collaborate on engineering tasks</li>
+</ul>
+<h2 id="Validating-these-judgments-in-practice-and-turning-them-into-tools"><a href="#Validating-these-judgments-in-practice-and-turning-them-into-tools" class="headerlink" title="Validating these judgments in practice and turning them into tools"></a>Validating these judgments in practice and turning them into tools</h2><ul>
+<li>Use real projects to validate whether the previous judgments hold</li>
+<li>Turn effective methods into process, runtime, and tooling</li>
+<li>Make those capabilities reusable, extensible, and sustainable</li>
+</ul>
+<h1 id="Conclusions-from-AI-Project-Retrospectives"><a href="#Conclusions-from-AI-Project-Retrospectives" class="headerlink" title="Conclusions from AI Project Retrospectives"></a>Conclusions from AI Project Retrospectives</h1><ul>
+<li><strong>From the AI technology perspective</strong>: AI behaves more like a group of highly capable but not fully controllable executors. The key is to define goals, paths, and constraints first, then progressively compress highly uncertain problems into more concrete and more deterministic ones.</li>
+<li><strong>From the perspective of personal capability focus</strong>: in the AI era, more value shifts upward into requirement discovery, problem definition, problem decomposition, solution design, process control, and result acceptance.</li>
+<li><strong>From the perspective of project practice</strong>: several projects in different directions are validating the same point: AI works better inside systems that are already decomposed, constrained, and supported by documents and process, rather than replacing an entire workflow without boundaries.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Project</th>
+<th>Domain</th>
+<th>Main Goal</th>
+<th>Current Conclusion</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agent_runtime</code></td>
+<td>Infra</td>
+<td>Provide a shared runtime foundation for agent systems, unifying session, orchestration, context, tooling, model, observability, and storage capabilities</td>
+<td>Stable AI engineering depends not only on model calls, but on a controllable runtime</td>
+</tr>
+<tr>
+<td><code>sdlc</code></td>
+<td>Software delivery</td>
+<td>Connect requirement, design, implementation, and verification into a staged delivery chain, and support continuous update based on existing artifacts</td>
+<td>AI fits better into decomposed, constrained, and document-backed engineering processes than into full end-to-end replacement</td>
+</tr>
+<tr>
+<td><code>travel</code> direction project</td>
+<td>Product / business</td>
+<td>Validate AI capability in complex user scenarios such as requirement discovery, planning, and continuous task carrying</td>
+<td>AI improves information processing and plan generation efficiency, but the real difficulty still lies in requirement discovery and problem definition under complex scenarios</td>
+</tr>
+</tbody></table>
+<h1 id="Practical-Engineering"><a href="#Practical-Engineering" class="headerlink" title="Practical Engineering"></a>Practical Engineering</h1><h2 id="Why-I-Started-with-an-Agent-SDK"><a href="#Why-I-Started-with-an-Agent-SDK" class="headerlink" title="Why I Started with an Agent SDK"></a>Why I Started with an Agent SDK</h2><p>Conclusion: an <code>Agent SDK</code> is the right place to start because it is the most suitable layer for carrying the common problems in AI engineering.</p>
+<ul>
+<li>Runtime hosting</li>
+<li>Interface boundaries</li>
+<li>Orchestration control</li>
+<li>Context governance</li>
+<li>Tool integration</li>
+<li>Model integration</li>
+<li>Permission control</li>
+<li>Observability</li>
+</ul>
+<p>It is foundational enough, general enough, and suitable enough to become a shared base reused by later projects.</p>
+<h2 id="SDK-Design"><a href="#SDK-Design" class="headerlink" title="SDK Design"></a>SDK Design</h2><h3 id="Requirement-Definition-and-Decomposition"><a href="#Requirement-Definition-and-Decomposition" class="headerlink" title="Requirement Definition and Decomposition"></a>Requirement Definition and Decomposition</h3><p>From a requirement perspective, this <code>Agent SDK</code> is not solving one isolated feature problem. It is solving a group of recurring needs that repeatedly appear in real agent engineering. The goal is to compress these needs into shared foundational capabilities, so upper-layer projects no longer rebuild runtime foundations repeatedly and can instead evolve on top of unified boundaries.</p>
+<ul>
+<li><p><strong>A need for unified runtime hosting</strong>: an agent system cannot stop at one-shot model calls. As soon as it enters multi-turn conversation, tool use, state carrying, and result write-back, it needs a unified capability to host session lifecycle, execution flow, and runtime state. Otherwise every project handles these basics separately, at high cost and with poor consistency.</p>
+</li>
+<li><p><strong>A need for stable external interface boundaries</strong>: upper-layer projects need stable, clear, and reusable entry points rather than direct exposure to internal implementation details. In other words, what external users need first is a stable boundary, not a larger pile of capabilities. Only with consistent access boundaries can later capability growth, runtime evolution, and cross-project reuse stay manageable.</p>
+</li>
+<li><p><strong>A need for controllable agent orchestration and execution control</strong>: different requests need different execution paths, and execution also needs explicit stopping conditions, failure handling, and state update mechanisms. The system therefore needs unified orchestration and execution control rather than scattering execution decisions across business logic, temporary rules, and prompts.</p>
+</li>
+<li><p><strong>A need for context governance</strong>: multi-turn agent systems naturally depend on context, but context is not just a single large input. Conversation history, stage memory, retrieval results, and context budget constraints are different by nature. If they are mixed together carelessly, the system quickly loses explainability and maintainability. What is really needed is not “more context”, but governable context.</p>
+</li>
+<li><p><strong>A need for MCP / tool integration and execution</strong>: agents do more than generate text. They also need to access and execute external capabilities. Tool registration, discovery, dispatch, and execution should therefore become shared foundational capabilities rather than private implementations rebuilt by each project.</p>
+</li>
+<li><p><strong>A need for permission control and safety boundaries</strong>: tool calls and external capability access naturally introduce safety and permission risks. The system must define not only what can be executed, but also what must be blocked. Without this layer of control, stronger capabilities create larger risks.</p>
+</li>
+<li><p><strong>A need for model integration and abstraction</strong>: models are an important input to agent systems, but upper-layer projects should not directly absorb differences between model providers and invocation styles. What they really need is a unified model access boundary that hides switching, invocation differences, and output normalization.</p>
+</li>
+<li><p><strong>A need for execution tracing and runtime fact recording</strong>: AI systems cannot be judged only by final results. Execution steps, key events, tool calls, failure points, and resource usage all need to be recorded so the system becomes traceable, analyzable, and verifiable.</p>
+</li>
+<li><p><strong>A need for future evolution</strong>: this SDK will not stop at its current capability boundary. It will continue to extend into retrieval, memory, checkpoint, compression, and multi-agent capabilities. That means clear room for evolution must exist from the beginning.</p>
+</li>
+</ul>
+<h3 id="SDK-Design-1"><a href="#SDK-Design-1" class="headerlink" title="SDK Design"></a>SDK Design</h3><p>Once the requirements are made clear, the next step is to map them into an implementable and extensible technical architecture. Overall, this SDK adopts a layered runtime architecture. Different layers are responsible for interface exposure, lifecycle control, orchestration, context governance, capability integration, model integration, observability, and persistence.</p>
+<p>Overall architecture:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">+----------------------------+</span><br><span class="line">|        Application         |</span><br><span class="line">| terminal / external app    |</span><br><span class="line">+----------------------------+</span><br><span class="line">             |</span><br><span class="line">             v</span><br><span class="line">+----------------------------+</span><br><span class="line">|         Interface          |</span><br><span class="line">| session / agent api        |</span><br><span class="line">+----------------------------+</span><br><span class="line">             |</span><br><span class="line">             v</span><br><span class="line">+----------------------------+</span><br><span class="line">|    Runtime Controller      |</span><br><span class="line">| lifecycle / execution      |</span><br><span class="line">+----------------------------+</span><br><span class="line">             |</span><br><span class="line">             v</span><br><span class="line">+----------------------------+</span><br><span class="line">|    Agent Orchestration     |</span><br><span class="line">| chat / react / peo         |</span><br><span class="line">+----------------------------+</span><br><span class="line">     |            |            \</span><br><span class="line">      v            v             v</span><br><span class="line">+-------------+ +-------------+ +------------------+</span><br><span class="line">|   Context   | | Capability  | |      Model       |</span><br><span class="line">| Governance  | | and Tooling | |   Integration    |</span><br><span class="line">+-------------+ +-------------+ +------------------+</span><br><span class="line">       \                            /</span><br><span class="line">        \                          /</span><br><span class="line">         v                        v</span><br><span class="line">     +-------------------------------+</span><br><span class="line">     |         Observability         |</span><br><span class="line">     |       trace / metrics         |</span><br><span class="line">     +-------------------------------+</span><br><span class="line">              |             \</span><br><span class="line">              v              v</span><br><span class="line">     +--------------------------------+</span><br><span class="line">     |            Data Layer          |</span><br><span class="line">     |      storage / persistence     |</span><br><span class="line">     +--------------------------------+</span><br></pre></td></tr></table></figure>
+
+<h4 id="Application-Layer"><a href="#Application-Layer" class="headerlink" title="Application Layer"></a>Application Layer</h4><p>Responsibilities:</p>
+<ol>
+<li>Provide terminal or external application entry points and solve the lack of directly usable SDK entry forms</li>
+<li>Handle user input/output and runtime access and avoid tight coupling between interaction logic and internal runtime capabilities</li>
+</ol>
+<p>Included modules:</p>
+<ul>
+<li><code>TerminalSessionDemo</code>: provides a terminal interaction entry for reading input, invoking runtime APIs, and presenting results</li>
+<li>External Application Integrations: entry forms for external apps or host systems to connect to the SDK</li>
+</ul>
+<h4 id="Interface-Layer"><a href="#Interface-Layer" class="headerlink" title="Interface Layer"></a>Interface Layer</h4><p>Responsibilities:</p>
+<ol>
+<li>Expose stable session and execution interfaces and solve unstable external access boundaries</li>
+<li>Hide internal runtime details and prevent upper-layer projects from directly coupling to internal implementation</li>
+</ol>
+<p>Included modules:</p>
+<ul>
+<li><code>Api</code>: defines and exposes the external boundary of the SDK</li>
+<li><code>RuntimeApi</code>: defines stable lifecycle interfaces such as session create, open, and close</li>
+<li><code>ISession</code>: defines session access, runtime state query, and execution entry points</li>
+<li>Agent / Session API Contracts: unify the contracts exposed externally</li>
+</ul>
+<h4 id="Runtime-Controller-Layer"><a href="#Runtime-Controller-Layer" class="headerlink" title="Runtime Controller Layer"></a>Runtime Controller Layer</h4><p>Responsibilities:</p>
+<ol>
+<li>Carry session lifecycle and solve the lack of a unified execution unit in multi-turn systems</li>
+<li>Centralize execution flow and runtime state, avoiding control logic scattered outside the runtime</li>
+<li>Normalize results and runtime scheduling through a unified execution boundary</li>
+</ol>
+<p>Included modules:</p>
+<ul>
+<li><code>Runtime</code>: runtime initialization, session lifecycle management, and unified entry dispatch</li>
+<li><code>AgentSession</code>: the main execution chain, state carrying, and result normalization for a single session</li>
+<li><code>RunCheckpoint</code>: reserved boundaries for checkpoint, resume, and background execution</li>
+</ul>
+<h4 id="Agent-Orchestration-Layer"><a href="#Agent-Orchestration-Layer" class="headerlink" title="Agent Orchestration Layer"></a>Agent Orchestration Layer</h4><p>Responsibilities:</p>
+<ol>
+<li>Handle routing and execution-mode orchestration for agent requests</li>
+<li>Select the proper execution path for different requests instead of forcing all requests into one pattern</li>
+</ol>
+<p>Included modules:</p>
+<ul>
+<li><code>AgentSelector</code>: chooses execution mode based on request characteristics and runtime state</li>
+<li><code>ChatAgent</code>: handles direct conversational requests</li>
+<li><code>ReActAgent</code>: handles iterative execution with tool use and observation feedback</li>
+<li><code>PEOAgent</code>: handles staged plan-execute-observe execution</li>
+<li><code>MultiAgentProtocol</code>: reserved protocol boundary for multi-agent collaboration</li>
+</ul>
+<h4 id="Context-Governance-Layer"><a href="#Context-Governance-Layer" class="headerlink" title="Context Governance Layer"></a>Context Governance Layer</h4><p>Responsibilities:</p>
+<ol>
+<li>Manage multiple context sources in multi-turn systems</li>
+<li>Control context assembly, budgeting, and trimming</li>
+</ol>
+<p>Included modules:</p>
+<ul>
+<li><code>SessionTranscript</code>: carries session history as the base of multi-turn context</li>
+<li><code>RuntimeMemory</code>: carries stage memory and summarized state</li>
+<li><code>RetrievalProvider</code>: provides retrieval-based context input</li>
+<li><code>ContextAssembler</code>: assembles context from multiple sources</li>
+<li><code>ContextBudgetPolicy</code>: controls context budget, trimming, and constraints</li>
+</ul>
+<h4 id="Capability-and-Tooling-Layer"><a href="#Capability-and-Tooling-Layer" class="headerlink" title="Capability and Tooling Layer"></a>Capability and Tooling Layer</h4><p>Responsibilities:</p>
+<ol>
+<li>Carry external capability access and invocation</li>
+<li>Unify tool registration, dispatch, and execution boundaries</li>
+<li>Manage permission control and execution environments</li>
+</ol>
+<p>Included modules:</p>
+<ul>
+<li><code>McpGateway</code>: receives tool invocation requests and dispatches them</li>
+<li><code>McpToolRegistry</code>: manages tool registration, discovery, and lookup</li>
+<li><code>RuntimePermissionPolicy</code>: performs permission checks and capability constraints before execution</li>
+<li><code>ExecutionEnvironment</code>: defines local, sandboxed, or remote execution boundaries</li>
+</ul>
+<h4 id="Model-Integration-Layer"><a href="#Model-Integration-Layer" class="headerlink" title="Model Integration Layer"></a>Model Integration Layer</h4><p>Responsibilities:</p>
+<ol>
+<li>Unify model integration patterns</li>
+<li>Hide differences across providers and invocation styles from upper layers</li>
+</ol>
+<p>Included modules:</p>
+<ul>
+<li><code>ModelFactory</code>: creates model instances and selects integration methods</li>
+<li>Provider Adapters: isolate provider differences</li>
+<li><code>StreamingEventAdapter</code>: normalizes streaming events and outputs</li>
+</ul>
+<h4 id="Observability-Layer"><a href="#Observability-Layer" class="headerlink" title="Observability Layer"></a>Observability Layer</h4><p>Responsibilities:</p>
+<ol>
+<li>Record execution process and key events</li>
+<li>Provide the foundation for tracing, analysis, and verification</li>
+</ol>
+<p>Included modules:</p>
+<ul>
+<li><code>Trace</code>: records key execution events and invocation chains</li>
+<li><code>Metrics</code>: collects runtime metrics, resource consumption, and invocation statistics</li>
+<li>Diagnostics / Usage: supplements runtime diagnostics and usage facts</li>
+</ul>
+<h4 id="Data-Layer"><a href="#Data-Layer" class="headerlink" title="Data Layer"></a>Data Layer</h4><p>Responsibilities:</p>
+<ol>
+<li>Persist runtime data and solve the problem that runtime facts are not stably retained</li>
+<li>Unify the persistence boundary for transcript, memory, checkpoint, trace, and metrics, and provide stable data foundations for future evolution</li>
+</ol>
+<p>Included modules:</p>
+<ul>
+<li><code>Storage</code>: defines the unified persistence interface</li>
+<li>File / Remote Persistence Backends: provide file-based or remote persistence implementations</li>
+</ul>
+<h3 id="Delivery-Validation"><a href="#Delivery-Validation" class="headerlink" title="Delivery Validation"></a>Delivery Validation</h3><p>The current implementation status can be summarized as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Module</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Application Layer</code></td>
+<td><code>TerminalSessionDemo</code></td>
+<td>Basic implementation</td>
+<td>A terminal entry already exists for manual running and session-flow validation</td>
+</tr>
+<tr>
+<td><code>Interface Layer</code></td>
+<td><code>Api</code> / <code>RuntimeApi</code> / <code>ISession</code></td>
+<td>Basic implementation</td>
+<td>Session-oriented interface boundaries already exist, but still in a foundational form</td>
+</tr>
+<tr>
+<td><code>Interface Layer</code></td>
+<td><code>AgentApi</code> / <code>IAgent</code></td>
+<td>Basic implementation</td>
+<td>A direct-agent entry has been added as a complement to session APIs</td>
+</tr>
+<tr>
+<td><code>Runtime Controller Layer</code></td>
+<td><code>Runtime</code> / <code>AgentSession</code></td>
+<td>Basic implementation</td>
+<td>Session lifecycle, execution chain, state updates, and result normalization are in place, but more complex control scenarios remain to be extended</td>
+</tr>
+<tr>
+<td><code>Runtime Controller Layer</code></td>
+<td><code>RunCheckpoint</code></td>
+<td>Partially complete</td>
+<td>Checkpoint boundaries exist, but resume, retry, and background execution are still pending</td>
+</tr>
+<tr>
+<td><code>Agent Orchestration Layer</code></td>
+<td><code>AgentSelector</code> / intent routing</td>
+<td>Partially complete</td>
+<td>Routing capability exists, but strategy and modes can continue to evolve</td>
+</tr>
+<tr>
+<td><code>Agent Orchestration Layer</code></td>
+<td><code>ChatAgent</code> / <code>ReActAgent</code> / <code>PEOAgent</code></td>
+<td>Basic implementation</td>
+<td>Three major execution paths are already landed, though still at a foundational orchestration level</td>
+</tr>
+<tr>
+<td><code>Agent Orchestration Layer</code></td>
+<td><code>MultiAgentProtocol</code></td>
+<td>Reserved for extension</td>
+<td>Reserved in architecture but not part of the current main execution path</td>
+</tr>
+<tr>
+<td><code>Context Governance Layer</code></td>
+<td><code>SessionTranscript</code> / <code>RuntimeMemory</code> / <code>ContextAssembler</code> / <code>ContextBudgetPolicy</code></td>
+<td>Partially complete</td>
+<td>Basic support for history, stage memory, context assembly, and budget control exists, but finer governance in complex scenarios is still pending</td>
+</tr>
+<tr>
+<td><code>Context Governance Layer</code></td>
+<td><code>RetrievalProvider</code></td>
+<td>Partially complete</td>
+<td>The retrieval boundary exists, but more complete and rigorous retrieval / RAG support is still pending</td>
+</tr>
+<tr>
+<td><code>Capability and Tooling Layer</code></td>
+<td><code>McpGateway</code> / <code>McpToolRegistry</code> / <code>RuntimePermissionPolicy</code> / <code>ExecutionEnvironment</code></td>
+<td>Basic implementation</td>
+<td>Tool integration, dispatch, permission control, and execution boundaries are in place, but still foundational</td>
+</tr>
+<tr>
+<td><code>Model Integration Layer</code></td>
+<td><code>ModelFactory</code> / <code>StreamingEventAdapter</code></td>
+<td>Basic implementation</td>
+<td>Unified model access and streaming-event adaptation exist, while model-side capability can continue to evolve</td>
+</tr>
+<tr>
+<td><code>Model Integration Layer</code></td>
+<td>Provider Adapters</td>
+<td>Partially complete</td>
+<td>Mock and current providers are connected, but provider coverage remains limited</td>
+</tr>
+<tr>
+<td><code>Observability Layer</code></td>
+<td><code>Trace</code> / <code>Metrics</code></td>
+<td>Basic implementation</td>
+<td>Key runtime events and metrics have entered the main path, but observability depth can still be improved</td>
+</tr>
+<tr>
+<td><code>Observability Layer</code></td>
+<td>Diagnostics / Usage</td>
+<td>Partially complete</td>
+<td>Basic runtime facts are recorded, but more complete diagnostics are still pending</td>
+</tr>
+<tr>
+<td><code>Data Layer</code></td>
+<td><code>Storage</code> / File Persistence</td>
+<td>Basic implementation</td>
+<td>Unified storage interfaces and file persistence exist, but the data layer is still mainly focused on basic persistence</td>
+</tr>
+<tr>
+<td><code>Data Layer</code></td>
+<td>Remote Persistence Backends</td>
+<td>Reserved for extension</td>
+<td>Architectural boundaries exist, but remote persistence is not implemented yet</td>
+</tr>
+</tbody></table>
+<h3 id="Summary-of-the-Agent-SDK"><a href="#Summary-of-the-Agent-SDK" class="headerlink" title="Summary of the Agent SDK"></a>Summary of the Agent SDK</h3><h4 id="What-this-SDK-design-and-implementation-taught"><a href="#What-this-SDK-design-and-implementation-taught" class="headerlink" title="What this SDK design and implementation taught"></a>What this SDK design and implementation taught</h4><ul>
+<li><strong>Shared foundational capability</strong>: an <code>Agent SDK</code> does not face isolated problems. It faces a set of recurring problems that appear together, including interface boundaries, execution control, context governance, tool integration, model invocation, observability, and persistence. The value of the framework lies in separating these concerns and turning them into shared infrastructure.</li>
+<li><strong>Capability control</strong>: an <code>Agent SDK</code> is not only responsible for bringing external capabilities into the system. It must also control how those capabilities are used, including MCP boundaries, tool registration and dispatch, permission checks, and execution environment constraints.</li>
+<li><strong>Memory management</strong>: multi-turn agent systems naturally need history carrying and stage memory, but those signals cannot grow without bound and cannot simply be mixed together. Transcript, memory, retrieval, and context budget need to be treated as separate governance problems.</li>
+<li><strong>Scenario hosting</strong>: the key job of an <code>Agent SDK</code> is not just model access. It is to host real scenario requirements such as multi-turn state, tool execution, permission constraints, memory management, and result write-back, and organize them into a runnable system.</li>
+</ul>
+<h4 id="Comparison-with-industry-Agent-SDKs"><a href="#Comparison-with-industry-Agent-SDKs" class="headerlink" title="Comparison with industry Agent SDKs"></a>Comparison with industry Agent SDKs</h4><p>Common points:</p>
+<ul>
+<li><strong>They solve the same category of problems</strong>: all of them deal with multi-turn runtime hosting, tool organization, permission boundaries, runtime recording, and building relatively stable control over uncertain model behavior.</li>
+<li><strong>They share a similar architectural skeleton</strong>: all of them need stable interface boundaries, unified runtime hosting, orchestration and routing, tool and model integration, observability, and persistence.</li>
+</ul>
+<p>Differences:</p>
+<ul>
+<li><strong>Different maturity and capability depth</strong>: compared with mature industry SDKs, this implementation is still foundational. It still has clear gaps in strategy maturity, breadth of capability, stability in complex scenarios, multi-agent support, long-term memory, and complex permission governance.</li>
+<li><strong>Different priority</strong>: the current priority of this SDK is to validate what architectural boundaries, runtime layering, and capability organization an agent system should have at the engineering level, rather than to maximize feature completeness first.</li>
+</ul>
+<h4 id="Comparison-with-previous-engineering-experience"><a href="#Comparison-with-previous-engineering-experience" class="headerlink" title="Comparison with previous engineering experience"></a>Comparison with previous engineering experience</h4><p>Common points:</p>
+<ul>
+<li><strong>Problem and requirement analysis</strong>: the system still has to answer what problem it solves, who it serves, and where its boundaries are.</li>
+<li><strong>Stable external interfaces</strong>: how external users access the system and how internal implementation evolves remain core engineering questions.</li>
+<li><strong>Capabilities must be organized</strong>: which capabilities belong in shared infrastructure and which belong to upper-layer business logic is still a key architectural problem.</li>
+<li><strong>Clear module layering</strong>: interface, control, capability, and data layers still need explicit boundaries and dependency discipline.</li>
+<li><strong>Common runtime-system concerns</strong>: lifecycle management, capability boundaries, state carrying, observability, and persistence are still classic runtime-system concerns.</li>
+</ul>
+<p>Differences:</p>
+<ul>
+<li><strong>LLM uncertainty</strong>: model outputs are probabilistic by nature. The same input does not always produce the same result, which directly affects control, debugging, and verification.</li>
+<li><strong>Context dynamism</strong>: context keeps evolving with history, memory, retrieval results, and budget constraints. This is not only a matter of more context, but of harder memory management: what to keep, what to compress, and what should enter the current execution round.</li>
+<li><strong>Dynamic execution paths</strong>: whether to call tools, which tools to call, whether to continue, and when to stop often need to be decided at runtime.</li>
+<li><strong>Open capability boundaries</strong>: agent systems actively connect to external tools, external data sources, and execution environments, which significantly amplifies safety and permission-governance complexity.</li>
+<li><strong>Higher verification requirements</strong>: it is not enough to verify final results. The process, state, and runtime facts must also be trustworthy and traceable.</li>
+</ul>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>When entering a new field, the priority is not to chase trends first. The priority is to keep correcting judgment through <strong>investigation</strong>, <strong>practice</strong>, and <strong>iteration through review</strong>. The method used here is <strong>seeking truth from facts</strong>.</p>
+<ul>
+<li><strong>Investigation</strong>: first understand what it is, what its strengths and weaknesses are, and what industry solutions and experience already exist.</li>
+<li><strong>Practice</strong>: form judgments from the investigation, then validate them through concrete engineering.</li>
+<li><strong>Iteration through review</strong>: summarize and review practice results, supplement the earlier investigation, update the existing judgments, and continue validating them.</li>
+</ul>
+<p><code>Agent SDK</code>, as one of the earliest engineering foundations produced by this methodology, already shows that this direction is valid, that the architectural structure is complete, and that it can continue evolving as a shared base for later projects.</p>
+<p>Chinese version: <a href="/zh/agent-sdk-design/">我进入 AI 领域的方式，以及 Agent SDK 的设计</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Agent/" rel="tag"># Agent</a>
+              <a href="/tags/Runtime/" rel="tag"># Runtime</a>
+              <a href="/tags/SDK/" rel="tag"># SDK</a>
+              <a href="/tags/Architecture/" rel="tag"># Architecture</a>
+              <a href="/tags/Problem-Analysis/" rel="tag"># Problem Analysis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/06/12/dart/dart_compiler/" rel="prev" title="Dart编译器概述">
+      <i class="fa fa-chevron-left"></i> Dart编译器概述
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Background"><span class="nav-number">1.</span> <span class="nav-text">Background</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Investigation"><span class="nav-number">2.</span> <span class="nav-text">Investigation</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Exploring-and-understanding-what-AI-is"><span class="nav-number">2.1.</span> <span class="nav-text">Exploring and understanding what AI is</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deriving-a-human-AI-collaboration-model-from-AI%E2%80%99s-characteristics"><span class="nav-number">2.2.</span> <span class="nav-text">Deriving a human-AI collaboration model from AI’s characteristics</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Validating-these-judgments-in-practice-and-turning-them-into-tools"><span class="nav-number">2.3.</span> <span class="nav-text">Validating these judgments in practice and turning them into tools</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Conclusions-from-AI-Project-Retrospectives"><span class="nav-number">3.</span> <span class="nav-text">Conclusions from AI Project Retrospectives</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Practical-Engineering"><span class="nav-number">4.</span> <span class="nav-text">Practical Engineering</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Why-I-Started-with-an-Agent-SDK"><span class="nav-number">4.1.</span> <span class="nav-text">Why I Started with an Agent SDK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SDK-Design"><span class="nav-number">4.2.</span> <span class="nav-text">SDK Design</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Requirement-Definition-and-Decomposition"><span class="nav-number">4.2.1.</span> <span class="nav-text">Requirement Definition and Decomposition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SDK-Design-1"><span class="nav-number">4.2.2.</span> <span class="nav-text">SDK Design</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Application-Layer"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">Application Layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Interface-Layer"><span class="nav-number">4.2.2.2.</span> <span class="nav-text">Interface Layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Runtime-Controller-Layer"><span class="nav-number">4.2.2.3.</span> <span class="nav-text">Runtime Controller Layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Agent-Orchestration-Layer"><span class="nav-number">4.2.2.4.</span> <span class="nav-text">Agent Orchestration Layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Context-Governance-Layer"><span class="nav-number">4.2.2.5.</span> <span class="nav-text">Context Governance Layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Capability-and-Tooling-Layer"><span class="nav-number">4.2.2.6.</span> <span class="nav-text">Capability and Tooling Layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Model-Integration-Layer"><span class="nav-number">4.2.2.7.</span> <span class="nav-text">Model Integration Layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Observability-Layer"><span class="nav-number">4.2.2.8.</span> <span class="nav-text">Observability Layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Data-Layer"><span class="nav-number">4.2.2.9.</span> <span class="nav-text">Data Layer</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Delivery-Validation"><span class="nav-number">4.2.3.</span> <span class="nav-text">Delivery Validation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Summary-of-the-Agent-SDK"><span class="nav-number">4.2.4.</span> <span class="nav-text">Summary of the Agent SDK</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#What-this-SDK-design-and-implementation-taught"><span class="nav-number">4.2.4.1.</span> <span class="nav-text">What this SDK design and implementation taught</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Comparison-with-industry-Agent-SDKs"><span class="nav-number">4.2.4.2.</span> <span class="nav-text">Comparison with industry Agent SDKs</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Comparison-with-previous-engineering-experience"><span class="nav-number">4.2.4.3.</span> <span class="nav-text">Comparison with previous engineering experience</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Summary"><span class="nav-number">5.</span> <span class="nav-text">Summary</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
