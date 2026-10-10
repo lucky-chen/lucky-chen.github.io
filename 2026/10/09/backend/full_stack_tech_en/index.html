@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="GoalQuickly understand full-stack architecture, with a focus on the backend technology stack.  A high-level architecture and technology map for full-stack projects. A flash-sale e-commerce case study">
+<meta property="og:type" content="article">
+<meta property="og:title" content="A Backend Technology Map from a Full-Stack Perspective">
+<meta property="og:url" content="https://lucky-chen.github.io/2026/10/09/backend/full_stack_tech_en/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="GoalQuickly understand full-stack architecture, with a focus on the backend technology stack.  A high-level architecture and technology map for full-stack projects. A flash-sale e-commerce case study">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-10-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-10T08:06:10.186Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2026/10/09/backend/full_stack_tech_en/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>A Backend Technology Map from a Full-Stack Perspective | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2026/10/09/backend/full_stack_tech_en/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          A Backend Technology Map from a Full-Stack Perspective
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2026-10-09 00:00:00" itemprop="dateCreated datePublished" datetime="2026-10-09T00:00:00+08:00">2026-10-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2026-10-10 16:06:10" itemprop="dateModified" datetime="2026-10-10T16:06:10+08:00">2026-10-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/BackEnd/" itemprop="url" rel="index"><span itemprop="name">BackEnd</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Goal"><a href="#Goal" class="headerlink" title="Goal"></a>Goal</h1><p>Quickly understand full-stack architecture, with a focus on the backend technology stack.</p>
+<ol>
+<li>A high-level architecture and technology map for full-stack projects.</li>
+<li>A flash-sale e-commerce case study to connect the architecture with key backend technologies.</li>
+<li>Practical references for project technology selection and architecture design.</li>
+</ol>
+<p>Chinese version: <a href="/i18n/zh/backend/full_stack_tech.html">全栈视角下的后端技术栈地图</a></p>
+<span id="more"></span>
+
+<h1 id="Full-Stack-Architecture-Overview"><a href="#Full-Stack-Architecture-Overview" class="headerlink" title="Full-Stack Architecture Overview"></a>Full-Stack Architecture Overview</h1><p>The main system path can be understood as “front end + backend”. The front end handles client-side business logic, client frameworks, and local runtime behavior. The backend handles request entry, business processing, data, async workflows, and deployment runtime.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th align="right">Level</th>
+<th>Main Layer</th>
+<th>Problem Solved</th>
+<th>Common Technologies / Patterns / Infrastructure</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Front end</td>
+<td align="right">1</td>
+<td>Frontend application layer</td>
+<td>Client-side business logic, page flows, user interactions, business state</td>
+<td>Web App, Mobile App, Mini Program, Dashboard, Content Site</td>
+</tr>
+<tr>
+<td>Front end</td>
+<td align="right">2</td>
+<td>Framework layer</td>
+<td>Page/client development model, components, routing, state, API calls</td>
+<td>Android, iOS, React, Vue, Rax, Next.js, Pinia, TanStack Query</td>
+</tr>
+<tr>
+<td>Front end</td>
+<td align="right">3</td>
+<td>System kernel layer</td>
+<td>Code compilation, runtime, virtual machine, rendering, threads, event loop</td>
+<td>Compiler, JS VM, JVM, ART, WebView, Browser Rendering, Native Rendering</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td align="right">4</td>
+<td>Entry layer</td>
+<td>Request entry, routing, reverse proxy, traffic control</td>
+<td>Nginx, API Gateway, web frameworks: Gin, Gorilla Mux, Spring MVC</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td align="right">5</td>
+<td>Authentication and authorization layer</td>
+<td>Identity, login state, roles, permissions, resource access control</td>
+<td>JWT, Session, OAuth2, OIDC, RBAC, auth frameworks/libraries: Better Auth</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td align="right">6</td>
+<td>Backend business layer</td>
+<td>Use-case orchestration, transaction boundaries, external dependency calls, error semantics</td>
+<td>Service, Use Case, Application Service, business state machine</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td align="right">7</td>
+<td>Domain model layer</td>
+<td>Business concepts, business rules, state transitions, domain events</td>
+<td>Entity, Value Object, Aggregate, Domain Event</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td align="right">8</td>
+<td>Data and storage layer</td>
+<td>Persistence, queries, cache, search, upload/download</td>
+<td>MySQL, PostgreSQL, Redis, Elasticsearch, S3, MinIO</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td align="right">9</td>
+<td>Async and realtime layer</td>
+<td>Peak shaving, long-running tasks, retries, long workflows, realtime progress updates</td>
+<td>Kafka, RabbitMQ, River, workflow engines: Temporal, Hatchet, SSE, WebSocket</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td align="right">10</td>
+<td>Framework and system layer</td>
+<td>Backend frameworks, language runtimes, build tools, deployment runtime</td>
+<td>Frameworks: Spring Boot, Gin, NestJS, Express, Fastify<br>Runtimes: JVM, Go runtime, Node.js runtime<br>Build/package management: Maven, Gradle, Go toolchain, npm, pnpm<br>Deployment infrastructure: Docker, Kubernetes, cloud runtime</td>
+</tr>
+</tbody></table>
+<p>Cross-cutting capabilities span all layers and support security, stability, and maintainability.</p>
+<table>
+<thead>
+<tr>
+<th>Cross-Cutting Capability</th>
+<th>Layers Covered</th>
+<th>Problem Solved</th>
+<th>Common Technologies / Cloud Capabilities</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Configuration and environments</td>
+<td>All</td>
+<td>Multi-environment configuration, secrets, feature flags, runtime parameters</td>
+<td><code>.env</code>, Viper, Vault, Secret Manager, ConfigMap, Feature Flag</td>
+</tr>
+<tr>
+<td>Security governance</td>
+<td>All</td>
+<td>Prevent attacks, leaks, privilege escalation, abuse, and support audit/compliance</td>
+<td>WAF, CORS, Rate Limit, KMS, IAM, Gitleaks, Trivy, bcrypt</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>All</td>
+<td>Logs, metrics, tracing, health checks, alerts, capacity judgment</td>
+<td>Prometheus, Grafana, Loki, ELK, OpenTelemetry, CloudWatch</td>
+</tr>
+<tr>
+<td>Cloud-managed capabilities</td>
+<td>All</td>
+<td>Use managed services instead of self-hosted infrastructure to reduce operations cost</td>
+<td>CDN, LB, RDS, Redis, S3/OSS/COS, SQS, EKS, Cloud Run</td>
+</tr>
+<tr>
+<td>AI governance</td>
+<td>Backend business layer, data and storage layer, async and realtime layer, framework and system layer</td>
+<td>Prompt injection protection, content safety, model evaluation, cost control, call audit</td>
+<td>Guardrails, Moderation, Eval, Token Budget, Prompt Audit, Model Router</td>
+</tr>
+</tbody></table>
+<h2 id="AI-Application-Backend-Supplement"><a href="#AI-Application-Backend-Supplement" class="headerlink" title="AI Application Backend Supplement"></a>AI Application Backend Supplement</h2><p>An AI application backend usually adds model calls, context retrieval, tool calls, async tasks, and governance capabilities on top of a traditional backend path.</p>
+<table>
+<thead>
+<tr>
+<th>AI Backend Capability</th>
+<th>Related Path</th>
+<th>Common Technologies / Patterns</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Retrieval augmentation</td>
+<td>Data and storage layer, backend business layer</td>
+<td>RAG, Embedding Store, pgvector, Milvus, Pinecone, Weaviate</td>
+</tr>
+<tr>
+<td>Task orchestration</td>
+<td>Backend business layer, async and realtime layer</td>
+<td>AI Use Case, Agent Workflow, Prompt Orchestration, Tool Calling, Agent Task Queue</td>
+</tr>
+<tr>
+<td>Model runtime</td>
+<td>Framework and system layer</td>
+<td>Ollama, vLLM, Triton, SageMaker, Vertex AI</td>
+</tr>
+<tr>
+<td>Streaming responses</td>
+<td>Async and realtime layer, entry layer</td>
+<td>Streaming Response, SSE, WebSocket</td>
+</tr>
+<tr>
+<td>Governance and evaluation</td>
+<td>Cross-cutting capability</td>
+<td>Guardrails, Moderation, Eval, Token Budget, Prompt Audit, Model Router</td>
+</tr>
+</tbody></table>
+<h1 id="Connecting-the-Stack-with-a-Flash-Sale-E-Commerce-System"><a href="#Connecting-the-Stack-with-a-Flash-Sale-E-Commerce-System" class="headerlink" title="Connecting the Stack with a Flash-Sale E-Commerce System"></a>Connecting the Stack with a Flash-Sale E-Commerce System</h1><h2 id="1-What-Is-the-Business-Scenario"><a href="#1-What-Is-the-Business-Scenario" class="headerlink" title="1. What Is the Business Scenario?"></a>1. What Is the Business Scenario?</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">100 phones available for limited-time purchase</span><br><span class="line">A large number of users request at the same time</span><br><span class="line">The system must guarantee performance, data consistency, and security</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-Why-Use-This-Scenario"><a href="#2-Why-Use-This-Scenario" class="headerlink" title="2. Why Use This Scenario?"></a>2. Why Use This Scenario?</h2><p>A flash-sale system is a useful backend architecture case because it includes both a complete business loop and system quality requirements. On the business side, it needs login, eligibility checks, stock deduction, order creation, payment, and cancellation. On the system side, it needs high concurrency handling, overselling prevention, idempotency, peak shaving, compensation, scaling, and troubleshooting.</p>
+<p>To use this scenario to connect the backend technology stack, first break down the problems, then map each problem type to the backend capability layer that solves it:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Business problem -&gt; functional requirement -&gt; business layer / domain layer / data layer</span><br><span class="line">System problem -&gt; non-functional requirement -&gt; entry layer / cache / MQ / observability / deployment runtime</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-Requirements-and-Capability-Needs-in-This-Scenario"><a href="#3-Requirements-and-Capability-Needs-in-This-Scenario" class="headerlink" title="3. Requirements and Capability Needs in This Scenario"></a>3. Requirements and Capability Needs in This Scenario</h2><p>The requirements in this scenario can be divided into two categories: functional requirements complete the business loop, while non-functional requirements keep the system stable and correct under high traffic, failures, and business edge cases.</p>
+<p>Functional requirements:</p>
+<table>
+<thead>
+<tr>
+<th>Functional Requirement</th>
+<th>Backend Capability</th>
+<th>Typical Technologies / Methods</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Users must be logged in and eligible to participate</td>
+<td>Authentication and authorization layer, risk control</td>
+<td>Session / JWT, RBAC, eligibility token, CAPTCHA, IP/user rate limiting</td>
+</tr>
+<tr>
+<td>The campaign must start and end at specific times</td>
+<td>Business rules, campaign configuration</td>
+<td>Campaign configuration, time-window checks, switch controls</td>
+</tr>
+<tr>
+<td>Stock must be queryable and deductible</td>
+<td>Data and storage layer, consistency control</td>
+<td>Redis stock, DB stock, stock ledger</td>
+</tr>
+<tr>
+<td>Each user can only purchase once</td>
+<td>Idempotency and deduplication</td>
+<td>User-level dedup key, request_id, unique order index</td>
+</tr>
+<tr>
+<td>A successful purchase must create an order</td>
+<td>Backend business layer, data persistence</td>
+<td>Application Service, Order Worker, MySQL</td>
+</tr>
+<tr>
+<td>Orders need payment, cancellation, and closure</td>
+<td>Domain model layer, state transitions</td>
+<td>Order state machine, domain events, payment callback</td>
+</tr>
+<tr>
+<td>Stock must be released after payment timeout</td>
+<td>Async tasks, compensation</td>
+<td>Delay queue, scheduled task, stock rollback</td>
+</tr>
+</tbody></table>
+<p>Non-functional requirements can be grouped into four categories: high performance, high availability, high scalability, and data consistency.</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Non-Functional Requirement</th>
+<th>Backend Capability</th>
+<th>Typical Technologies / Methods</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>High performance</td>
+<td>Many users enter the campaign page at the same time</td>
+<td>Entry layer, traffic control, static resource acceleration</td>
+<td>CDN, Nginx, API Gateway, Rate Limit</td>
+</tr>
+<tr>
+<td>High performance</td>
+<td>Traffic spikes must not directly overload the database</td>
+<td>Cache, peak shaving, async processing</td>
+<td>Redis, MQ, Worker, queuing</td>
+</tr>
+<tr>
+<td>High performance</td>
+<td>Hot products must not drag down the system</td>
+<td>Hotspot cache, hotspot isolation, rate limiting</td>
+<td>Local cache, Redis, Rate Limit, stock sharding</td>
+</tr>
+<tr>
+<td>High availability</td>
+<td>Orders must not be lost when some components fail</td>
+<td>Reliable messaging, retry, compensation</td>
+<td>Local message table, transactional messages, Retry, DLQ, compensation scan</td>
+</tr>
+<tr>
+<td>High availability</td>
+<td>Issues must be diagnosable</td>
+<td>Observability</td>
+<td>traceId, Metrics, Logs, Tracing, alerts</td>
+</tr>
+<tr>
+<td>High scalability</td>
+<td>The system must scale as traffic grows</td>
+<td>Horizontal scaling, capacity planning</td>
+<td>Stateless services, multiple replicas, Redis Cluster, MQ Cluster, Worker scaling</td>
+</tr>
+<tr>
+<td>Data consistency</td>
+<td>100 phones must not be oversold</td>
+<td>Atomic deduction, transactional fallback</td>
+<td>Redis Lua, DB optimistic locking</td>
+</tr>
+<tr>
+<td>Data consistency</td>
+<td>Repeated requests must not create repeated orders</td>
+<td>Idempotency, deduplication, unique constraints</td>
+<td>request_id, idempotency table, unique order index</td>
+</tr>
+<tr>
+<td>Data consistency</td>
+<td>Payment timeout must not occupy stock forever</td>
+<td>State transitions, compensation</td>
+<td>Delay queue, order closure, stock release</td>
+</tr>
+</tbody></table>
+<p>When functional and non-functional requirements are connected, they form the main flash-sale system path:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Preparation phase</span><br><span class="line">-&gt; Preload product stock into Redis</span><br><span class="line">-&gt; Generate campaign configuration, purchase limits, and eligibility tokens</span><br><span class="line"></span><br><span class="line">Request phase</span><br><span class="line">-&gt; CDN / Nginx / Gateway</span><br><span class="line">-&gt; Rate limiting, risk control, login check</span><br><span class="line">-&gt; Check campaign time, eligibility, one-order-per-user rule</span><br><span class="line">-&gt; Atomically deduct stock with Redis Lua</span><br><span class="line">-&gt; Publish to MQ after success</span><br><span class="line"></span><br><span class="line">Async order phase</span><br><span class="line">-&gt; Worker creates order asynchronously</span><br><span class="line">-&gt; Persist order into MySQL</span><br><span class="line">-&gt; Cancel order after payment timeout</span><br><span class="line">-&gt; Compensate stock</span><br></pre></td></tr></table></figure>
+
+<h1 id="Flash-Sale-System-Evolution-Path"><a href="#Flash-Sale-System-Evolution-Path" class="headerlink" title="Flash-Sale System Evolution Path"></a>Flash-Sale System Evolution Path</h1><h2 id="Stage-1-Monolith"><a href="#Stage-1-Monolith" class="headerlink" title="Stage 1: Monolith"></a>Stage 1: Monolith</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">User -&gt; Nginx -&gt; Spring Boot / Gin monolith -&gt; MySQL</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Goal</td>
+<td>Understand basic web architecture, complete the business loop, and learn Controller / Service / DAO</td>
+</tr>
+<tr>
+<td>Solves</td>
+<td>Basic ordering, product query, user login, order persistence</td>
+</tr>
+<tr>
+<td>Does not solve</td>
+<td>High database pressure under concurrency, possible overselling, limited single-instance scalability</td>
+</tr>
+<tr>
+<td>Suitable for</td>
+<td>Small projects, internal systems, MVPs</td>
+</tr>
+</tbody></table>
+<p>Core path code:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Seckill</span><span class="params">(ctx context.Context, userID, skuID <span class="type">int64</span>)</span></span> &#123;</span><br><span class="line">	<span class="comment">// Start a transaction so stock deduction and order creation succeed or fail together.</span></span><br><span class="line">	tx := db.Begin()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Lock the stock row to avoid concurrent requests reading the same stock value.</span></span><br><span class="line">	stock := tx.Query(<span class="string">&quot;select stock from sku where id = ? for update&quot;</span>, skuID)</span><br><span class="line">	<span class="keyword">if</span> stock &lt;= <span class="number">0</span> &#123;</span><br><span class="line">		tx.Rollback()</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Deduct stock.</span></span><br><span class="line">	tx.Exec(<span class="string">&quot;update sku set stock = stock - 1 where id = ?&quot;</span>, skuID)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Create order.</span></span><br><span class="line">	tx.Exec(<span class="string">&quot;insert into orders(user_id, sku_id, status) values (?, ?, &#x27;created&#x27;)&quot;</span>, userID, skuID)</span><br><span class="line">	tx.Commit()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Related technology stack:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Role</th>
+<th>JS / Node</th>
+<th>Go</th>
+<th>Java</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Web framework</td>
+<td>Receive requests, route requests, organize APIs</td>
+<td>Express, NestJS, Fastify</td>
+<td>Gin, Echo, Fiber</td>
+<td>Spring Boot, Spring MVC</td>
+</tr>
+<tr>
+<td>Data access</td>
+<td>Queries, transactions, CRUD</td>
+<td>Prisma, TypeORM, Drizzle</td>
+<td>database/sql, GORM, sqlc, ent</td>
+<td>MyBatis, Spring Data JPA, MyBatis-Plus</td>
+</tr>
+<tr>
+<td>Basic engineering</td>
+<td>Configuration, logging, validation, project organization</td>
+<td>dotenv, Pino, Zod</td>
+<td>Viper, zap, validator</td>
+<td>Spring Config, Logback, Hibernate Validator</td>
+</tr>
+</tbody></table>
+<p>This stage can complete the loop of querying stock, deducting stock, and creating orders. As concurrency increases, requests hit the database directly, and row locks on stock plus order writes become bottlenecks.</p>
+<h2 id="Stage-2-Introduce-Redis"><a href="#Stage-2-Introduce-Redis" class="headerlink" title="Stage 2: Introduce Redis"></a>Stage 2: Introduce Redis</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">User</span><br><span class="line">  |</span><br><span class="line">Nginx</span><br><span class="line">  |</span><br><span class="line">App</span><br><span class="line">  |-- Redis: hot products, stock, eligibility, deduplication</span><br><span class="line">  |-- MySQL: orders, users, product persistence</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Goal</td>
+<td>Reduce database pressure, improve hot-read performance, and use atomic operations to control stock deduction</td>
+</tr>
+<tr>
+<td>Solves</td>
+<td>Hot product reads, fast stock deduction, initial repeated-order blocking</td>
+</tr>
+<tr>
+<td>Does not solve</td>
+<td>Async peak shaving, order persistence pressure, Redis/DB consistency, hot keys</td>
+</tr>
+<tr>
+<td>Upgrade signal</td>
+<td>Redis can handle reads/writes, but order creation, payment, notifications, or later steps begin to block</td>
+</tr>
+</tbody></table>
+<p>Core path code:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Seckill</span><span class="params">(ctx context.Context, userID <span class="type">int64</span>, skuID <span class="type">string</span>)</span></span> &#123;</span><br><span class="line">	stockKey := <span class="string">&quot;stock:&quot;</span> + skuID</span><br><span class="line">	userKey := fmt.Sprintf(<span class="string">&quot;seckill:user:%d:sku:%s&quot;</span>, userID, skuID)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Redis Lua atomically completes stock deduction and user deduplication.</span></span><br><span class="line">	result := redis.Eval(decrStockLua, stockKey, userKey)</span><br><span class="line">	<span class="keyword">if</span> result != <span class="string">&quot;ok&quot;</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Create the order synchronously after the stock pre-deduction succeeds.</span></span><br><span class="line">	db.Exec(<span class="string">&quot;insert into orders(user_id, sku_id, status) values (?, ?, &#x27;created&#x27;)&quot;</span>, userID, skuID)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Related technology stack:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Role</th>
+<th>JS / Node</th>
+<th>Go</th>
+<th>Java</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Redis client</td>
+<td>Access Redis and execute Lua</td>
+<td>ioredis, node-redis</td>
+<td>go-redis</td>
+<td>Spring Data Redis, Lettuce, Jedis</td>
+</tr>
+<tr>
+<td>Cache and stock deduction</td>
+<td>Hot cache, stock pre-deduction, deduplication</td>
+<td>Redis Lua, lru-cache</td>
+<td>Redis Lua, Ristretto</td>
+<td>Redis Lua, Caffeine, Redisson</td>
+</tr>
+<tr>
+<td>Rate limiting and anti-abuse</td>
+<td>Control user, IP, and API frequency</td>
+<td>Bottleneck, rate-limiter-flexible</td>
+<td>x/time/rate, redis-rate</td>
+<td>Bucket4j, Resilience4j</td>
+</tr>
+</tbody></table>
+<p>This stage moves hot stock deduction from the database to Redis, improving stock checks and deduction throughput. Orders are still written synchronously to the database, so database writes still block when request peaks continue to grow.</p>
+<h2 id="Stage-3-Introduce-a-Message-Queue"><a href="#Stage-3-Introduce-a-Message-Queue" class="headerlink" title="Stage 3: Introduce a Message Queue"></a>Stage 3: Introduce a Message Queue</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">User</span><br><span class="line">  |</span><br><span class="line">Gateway / Nginx</span><br><span class="line">  |</span><br><span class="line">App</span><br><span class="line">  |</span><br><span class="line">Redis Lua stock deduction</span><br><span class="line">  |</span><br><span class="line">MQ</span><br><span class="line">  |</span><br><span class="line">Order Worker</span><br><span class="line">  |</span><br><span class="line">MySQL</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Goal</td>
+<td>Smooth traffic spikes, return quickly from requests, and create orders asynchronously in the background</td>
+</tr>
+<tr>
+<td>Solves</td>
+<td>Instant traffic spikes, synchronous order-write pressure, blocking from long-running tasks</td>
+</tr>
+<tr>
+<td>Does not solve</td>
+<td>Duplicate messages, message loss, MQ backlog, stock deducted but order creation failed</td>
+</tr>
+<tr>
+<td>Upgrade signal</td>
+<td>More modules appear, and order, stock, user, and payment services need independent evolution and scaling</td>
+</tr>
+</tbody></table>
+<p>Core path code:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Seckill</span><span class="params">(ctx context.Context, userID <span class="type">int64</span>, skuID, requestID <span class="type">string</span>)</span></span> &#123;</span><br><span class="line">	userKey := fmt.Sprintf(<span class="string">&quot;seckill:user:%d:sku:%s&quot;</span>, userID, skuID)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// In the request phase, only validate eligibility, deduplicate, and pre-deduct stock.</span></span><br><span class="line">	result := redis.Eval(decrStockLua, <span class="string">&quot;stock:&quot;</span>+skuID, userKey)</span><br><span class="line">	<span class="keyword">if</span> result != <span class="string">&quot;ok&quot;</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Publish a message after stock deduction succeeds, then return quickly.</span></span><br><span class="line">	mq.Publish(<span class="string">&quot;order.create&quot;</span>, OrderCreateMessage&#123;UserID: userID, SkuID: skuID, RequestID: requestID&#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ConsumeOrderCreate</span><span class="params">(msg OrderCreateMessage)</span></span> &#123;</span><br><span class="line">	<span class="comment">// Create the order asynchronously. A unique request_id constraint guarantees idempotency.</span></span><br><span class="line">	db.Exec(<span class="string">`</span></span><br><span class="line"><span class="string">		insert into orders(user_id, sku_id, request_id, status)</span></span><br><span class="line"><span class="string">		values (?, ?, ?, &#x27;created&#x27;)</span></span><br><span class="line"><span class="string">		on duplicate key update request_id = request_id</span></span><br><span class="line"><span class="string">	`</span>, msg.UserID, msg.SkuID, msg.RequestID)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Related technology stack:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Role</th>
+<th>JS / Node</th>
+<th>Go</th>
+<th>Java</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Message queue</td>
+<td>Peak shaving, async ordering, service decoupling</td>
+<td>KafkaJS, amqplib, BullMQ</td>
+<td>kafka-go, amqp091-go, Asynq, River</td>
+<td>Spring Kafka, Spring AMQP, RocketMQ Client</td>
+</tr>
+<tr>
+<td>Consumer reliability</td>
+<td>Idempotency, retry, dead letter, duplicate consumption control</td>
+<td>Idempotency Key, Retry, DLQ</td>
+<td>Idempotency Key, Retry, DLQ</td>
+<td>Idempotency Key, Retry, DLQ</td>
+</tr>
+<tr>
+<td>Delayed tasks</td>
+<td>Payment timeout, order closure, stock compensation</td>
+<td>BullMQ, Agenda</td>
+<td>Asynq, River</td>
+<td>Quartz, Spring Batch, RocketMQ Delay Message</td>
+</tr>
+</tbody></table>
+<p>This stage uses MQ for peak shaving. The request path returns quickly, and orders are created asynchronously by workers. Message redelivery, worker restarts, and consumption failures will happen, so order creation must be idempotent.</p>
+<h2 id="Stage-4-Service-Decomposition"><a href="#Stage-4-Service-Decomposition" class="headerlink" title="Stage 4: Service Decomposition"></a>Stage 4: Service Decomposition</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">User</span><br><span class="line">  |</span><br><span class="line">API Gateway</span><br><span class="line">  |-- User Service -&gt; User DB</span><br><span class="line">  |-- Order Service -&gt; Order DB</span><br><span class="line">  |-- Stock Service -&gt; Redis / Stock DB</span><br><span class="line"></span><br><span class="line">Order Service -&gt; MQ -&gt; Order Worker</span><br><span class="line">Order Worker -&gt; Stock Service / Payment Service</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Goal</td>
+<td>Support multi-person collaboration, independent service deployment, and independent service scaling</td>
+</tr>
+<tr>
+<td>Solves</td>
+<td>Coupling among user/order/stock modules, local service scaling, unclear team boundaries</td>
+</tr>
+<tr>
+<td>Does not solve</td>
+<td>Distributed transaction complexity, harder trace debugging, higher service governance cost</td>
+</tr>
+<tr>
+<td>Constraint</td>
+<td>For high concurrency, prioritize cache, peak shaving, rate limiting, and idempotency. Service decomposition is suitable after business complexity, team size, and independent deployment needs grow.</td>
+</tr>
+</tbody></table>
+<p>Core path code:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">CreateSeckillOrder</span><span class="params">(ctx context.Context, userID <span class="type">int64</span>, skuID, requestID <span class="type">string</span>)</span></span> &#123;</span><br><span class="line">	<span class="comment">// The order service first calls the stock service to reserve stock.</span></span><br><span class="line">	reservationID := stockService.Reserve(userID, skuID, requestID)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Create a pending order after stock reservation succeeds.</span></span><br><span class="line">	orderID := orderRepo.CreatePending(userID, skuID, reservationID)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Publish an order event to drive payment, notification, and stock confirmation.</span></span><br><span class="line">	mq.Publish(<span class="string">&quot;order.created&quot;</span>, OrderCreatedEvent&#123;OrderID: orderID, ReservationID: reservationID&#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ReserveStock</span><span class="params">(userID <span class="type">int64</span>, skuID, requestID <span class="type">string</span>)</span></span> <span class="type">string</span> &#123;</span><br><span class="line">	<span class="comment">// The stock service still uses Redis Lua internally to make deduction and reservation atomic.</span></span><br><span class="line">	<span class="keyword">return</span> redis.Eval(reserveStockLua, <span class="string">&quot;stock:&quot;</span>+skuID, <span class="string">&quot;reservation:&quot;</span>+requestID)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">OnOrderCreateFailed</span><span class="params">(reservationID <span class="type">string</span>)</span></span> &#123;</span><br><span class="line">	<span class="comment">// Release reserved stock when order creation fails, preventing stock from being held forever.</span></span><br><span class="line">	stockService.Release(reservationID)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Related technology stack:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Role</th>
+<th>JS / Node</th>
+<th>Go</th>
+<th>Java</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Service communication</td>
+<td>Inter-service RPC / HTTP calls</td>
+<td>gRPC-js, tRPC, OpenAPI</td>
+<td>gRPC-Go, Connect-Go, Resty</td>
+<td>gRPC Java, OpenFeign, Dubbo</td>
+</tr>
+<tr>
+<td>Microservice framework</td>
+<td>Service governance, module organization, team collaboration</td>
+<td>NestJS Microservices, Moleculer</td>
+<td>go-zero, Kratos, Kitex</td>
+<td>Spring Cloud, Dubbo</td>
+</tr>
+<tr>
+<td>Service governance</td>
+<td>Service discovery, configuration, rate limiting, circuit breaking</td>
+<td>Consul, etcd</td>
+<td>Consul, etcd</td>
+<td>Nacos, Eureka, Sentinel, Resilience4j</td>
+</tr>
+<tr>
+<td>Distributed consistency</td>
+<td>Saga, compensation, long-running workflow state</td>
+<td>Temporal TypeScript SDK</td>
+<td>Temporal Go SDK</td>
+<td>Seata, Temporal Java SDK</td>
+</tr>
+</tbody></table>
+<p>This stage splits users, orders, and stock into independent services that can scale separately according to pressure. Cross-service paths require compensation events; otherwise order success, stock failure, and payment failure can lead to inconsistent states.</p>
+<h2 id="Stage-5-Highly-Available-Production-Version"><a href="#Stage-5-Highly-Available-Production-Version" class="headerlink" title="Stage 5: Highly Available Production Version"></a>Stage 5: Highly Available Production Version</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">User</span><br><span class="line">  |</span><br><span class="line">CDN / WAF / LB</span><br><span class="line">  |</span><br><span class="line">API Gateway cluster</span><br><span class="line">  |</span><br><span class="line">Service replicas</span><br><span class="line">  |-- Redis Cluster</span><br><span class="line">  |-- MQ Cluster</span><br><span class="line">  |-- MySQL primary-replica / sharding</span><br><span class="line">  |-- Object Storage</span><br><span class="line"></span><br><span class="line">Observability</span><br><span class="line">  |-- Metrics: Prometheus</span><br><span class="line">  |-- Dashboard: Grafana</span><br><span class="line">  |-- Logs: ELK / Loki</span><br><span class="line">  |-- Tracing: Jaeger / Tempo / SkyWalking</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Goal</td>
+<td>Support high concurrency, failure recovery, capacity expansion, and production troubleshooting</td>
+</tr>
+<tr>
+<td>Solves</td>
+<td>Single points of failure, insufficient capacity, unobservable production issues, unrecoverable services</td>
+</tr>
+<tr>
+<td>Does not solve</td>
+<td>Architecture complexity, operations cost, distributed consistency difficulty</td>
+</tr>
+<tr>
+<td>Suitable for</td>
+<td>Systems with large user volume, core transaction paths, and high availability/disaster recovery requirements</td>
+</tr>
+</tbody></table>
+<p>Core path code:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SeckillHandler</span><span class="params">(ctx context.Context, req SeckillRequest)</span></span> &#123;</span><br><span class="line">	<span class="comment">// Rate limit at the gateway or service entry to protect the backend core path.</span></span><br><span class="line">	<span class="keyword">if</span> !limiter.Allow(req.UserID, req.IP) &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Create a trace for one flash-sale request across gateway, services, MQ, and database.</span></span><br><span class="line">	trace := tracing.Start(<span class="string">&quot;seckill&quot;</span>, req.RequestID)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Execute the business main path.</span></span><br><span class="line">	result := seckillService.Submit(ctx, req.UserID, req.SkuID, req.RequestID)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Record metrics and logs for capacity analysis, troubleshooting, and alerts.</span></span><br><span class="line">	metrics.Record(<span class="string">&quot;seckill&quot;</span>, result)</span><br><span class="line">	logs.Write(req.RequestID, req.UserID, req.SkuID, result)</span><br><span class="line">	trace.End()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Related technology stack:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Role</th>
+<th>JS / Node</th>
+<th>Go</th>
+<th>Java</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Observability</td>
+<td>Metrics, logs, tracing, alerts</td>
+<td>OpenTelemetry JS, prom-client, Pino</td>
+<td>OpenTelemetry Go, Prometheus Client, zap</td>
+<td>Micrometer, Actuator, OpenTelemetry Java Agent</td>
+</tr>
+<tr>
+<td>Performance diagnosis</td>
+<td>CPU, memory, blocking, slow-call analysis</td>
+<td>clinic.js, 0x</td>
+<td>pprof</td>
+<td>JFR, Arthas</td>
+</tr>
+<tr>
+<td>Deployment and orchestration</td>
+<td>Containerization, replicas, rolling releases, scaling</td>
+<td>Docker, Kubernetes, Helm</td>
+<td>Docker, Kubernetes, Helm</td>
+<td>Docker, Kubernetes, Helm</td>
+</tr>
+<tr>
+<td>High-availability infrastructure</td>
+<td>Gateway, load balancing, cache cluster, database cluster</td>
+<td>Nginx, Envoy, Redis Cluster, MQ Cluster</td>
+<td>Nginx, Envoy, Redis Cluster, MQ Cluster</td>
+<td>Nginx, Envoy, Redis Cluster, MQ Cluster</td>
+</tr>
+</tbody></table>
+<p>This stage improves availability through replicas, clusters, rate limiting, and observability. As more components are added, troubleshooting depends on unified traceId, metrics, logs, and alerts.</p>
+<h1 id="How-to-Select-Technologies-and-Design-Architecture-for-Real-Business"><a href="#How-to-Select-Technologies-and-Design-Architecture-for-Real-Business" class="headerlink" title="How to Select Technologies and Design Architecture for Real Business"></a>How to Select Technologies and Design Architecture for Real Business</h1><p>Architecture design should start from business problems, select the core capabilities needed to satisfy those problems, and leave room for future scaling and high availability.</p>
+<p>Decision sequence:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Clarify requirements</span><br><span class="line">-&gt; Select core capabilities</span><br><span class="line">-&gt; Design for future scalability and high availability</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-Clarify-Requirements-Identify-the-Current-Business-Problem-First"><a href="#1-Clarify-Requirements-Identify-the-Current-Business-Problem-First" class="headerlink" title="1. Clarify Requirements: Identify the Current Business Problem First"></a>1. Clarify Requirements: Identify the Current Business Problem First</h2><p>Clarify the business goal, core path, user scale, data consistency requirements, team maintenance capability, and deployment environment.</p>
+<p>Key questions during requirement clarification:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>What to Judge</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>What is the main business path?</td>
+<td>What key steps does the user go through from entry to result?</td>
+</tr>
+<tr>
+<td>What is the current biggest risk?</td>
+<td>Performance, data consistency, security, delivery speed, operations</td>
+</tr>
+<tr>
+<td>How large is the traffic scale?</td>
+<td>QPS, peak traffic, concurrent users, hot data</td>
+</tr>
+<tr>
+<td>How strong must data consistency be?</td>
+<td>Strong consistency, eventual consistency, compensation allowed</td>
+</tr>
+<tr>
+<td>What can the team maintain?</td>
+<td>Monolith, queue, microservices, Kubernetes, cloud-managed services</td>
+</tr>
+<tr>
+<td>What is the deployment environment?</td>
+<td>Local, VPS, cloud provider, Kubernetes, Serverless</td>
+</tr>
+</tbody></table>
+<h2 id="2-Select-Core-Capabilities-That-Match-Business-Needs"><a href="#2-Select-Core-Capabilities-That-Match-Business-Needs" class="headerlink" title="2. Select Core Capabilities That Match Business Needs"></a>2. Select Core Capabilities That Match Business Needs</h2><p>Only introduce capabilities that solve current problems. If there is no clear problem, delay complex components.</p>
+<table>
+<thead>
+<tr>
+<th>Requirement Signal</th>
+<th>Suggested Capability</th>
+<th>Risk If Missing</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Normal CRUD</td>
+<td>Front end, entry layer, application service, Repository, database</td>
+<td>Overengineering slows development</td>
+</tr>
+<tr>
+<td>Login, roles, resource ownership</td>
+<td>Authentication and authorization layer</td>
+<td>Privilege escalation, data leaks</td>
+</tr>
+<tr>
+<td>Images, attachments, exported files</td>
+<td>File and object storage</td>
+<td>Database bloat, hard backups, slow access</td>
+</tr>
+<tr>
+<td>Long-running tasks</td>
+<td>Job Queue</td>
+<td>Request timeout, user waiting, hard failure retry</td>
+</tr>
+<tr>
+<td>Instant high concurrency</td>
+<td>Redis, rate limiting, MQ</td>
+<td>Database overload, API collapse</td>
+</tr>
+<tr>
+<td>Multi-step long workflow</td>
+<td>Workflow Engine</td>
+<td>Lost state, hard failure recovery, chaotic retries</td>
+</tr>
+<tr>
+<td>Progress bar or notification</td>
+<td>SSE / WebSocket</td>
+<td>Poor polling experience, high pressure</td>
+</tr>
+<tr>
+<td>Public production deployment</td>
+<td>Security governance</td>
+<td>Abuse, attacks, secret leakage</td>
+</tr>
+<tr>
+<td>Stable operations</td>
+<td>Observability</td>
+<td>Problems happen without root-cause visibility</td>
+</tr>
+<tr>
+<td>Multi-environment deployment</td>
+<td>Configuration and environment layer</td>
+<td>Configuration chaos, unreproducible environments</td>
+</tr>
+<tr>
+<td>Insufficient operations capacity</td>
+<td>Cloud-managed capabilities</td>
+<td>High self-hosting cost, slow failure recovery</td>
+</tr>
+<tr>
+<td>Complex business rules</td>
+<td>Domain model layer</td>
+<td>Rules scattered across code, harder maintenance later</td>
+</tr>
+<tr>
+<td>Long-term evolution</td>
+<td>Modular boundaries / Clean Architecture / DDD</td>
+<td>Tight coupling, harder changes as features grow</td>
+</tr>
+</tbody></table>
+<h2 id="3-Consider-Future-Scalability-and-High-Availability"><a href="#3-Consider-Future-Scalability-and-High-Availability" class="headerlink" title="3. Consider Future Scalability and High Availability"></a>3. Consider Future Scalability and High Availability</h2><p>Future-oriented design focuses on leaving evolution points in key places while avoiding an overly heavy initial solution.</p>
+<table>
+<thead>
+<tr>
+<th>Future Need</th>
+<th>What to Reserve in Advance</th>
+<th>Upgrade Trigger</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Traffic growth</td>
+<td>Stateless services, cache interfaces, rate-limit points</td>
+<td>Single-machine CPU / DB / network becomes the bottleneck</td>
+</tr>
+<tr>
+<td>Data growth</td>
+<td>Indexes, archiving, partitioning, possibility of read/write splitting</td>
+<td>Slow queries, oversized tables, slower backup and recovery</td>
+</tr>
+<tr>
+<td>High concurrency peaks</td>
+<td>Redis, MQ, queuing, idempotency design</td>
+<td>Peak traffic impacts the core path</td>
+</tr>
+<tr>
+<td>Service high availability</td>
+<td>Health checks, replicas, automatic restarts</td>
+<td>Single-instance failure affects core business</td>
+</tr>
+<tr>
+<td>Troubleshooting</td>
+<td>Logs, metrics, trace id, alerts</td>
+<td>Production issues cannot be located</td>
+</tr>
+<tr>
+<td>Multi-environment delivery</td>
+<td>Config layering, Secret management, CI/CD</td>
+<td>Development, testing, and production configs start to diverge</td>
+</tr>
+<tr>
+<td>Team growth</td>
+<td>Module boundaries, API contracts, coding conventions</td>
+<td>Multiple people frequently conflict in the same module</td>
+</tr>
+<tr>
+<td>Operations complexity</td>
+<td>Cloud-managed services, IaC, standardized deployment</td>
+<td>Self-hosted component maintenance cost becomes too high</td>
+</tr>
+</tbody></table>
+<p>Architecture selection principles:</p>
+<ol>
+<li>Confirm the current bottleneck first, then choose components.</li>
+<li>New components must directly solve a clear problem.</li>
+<li>Component benefits must exceed their development, operations, and troubleshooting costs.</li>
+<li>Architecture complexity must match the team’s maintenance capability.</li>
+<li>Do not introduce heavyweight solutions before there is an actual problem.</li>
+</ol>
+<p>Common mistakes:</p>
+<ul>
+<li>Introducing Kafka, Kubernetes, and microservices before a high-concurrency problem appears.</li>
+<li>Applying full DDD to a normal CRUD project.</li>
+<li>Self-hosting too much infrastructure when the team lacks operations capacity.</li>
+<li>Replacing architecture design with a list of cloud products.</li>
+<li>Listing technical terms without explaining problems, costs, and suitable conditions.</li>
+</ul>
+<h2 id="4-Technology-Selection-for-Common-Scenarios"><a href="#4-Technology-Selection-for-Common-Scenarios" class="headerlink" title="4. Technology Selection for Common Scenarios"></a>4. Technology Selection for Common Scenarios</h2><p>Choose the basic architecture by business scenario first, then add components based on specific capabilities.</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Recommended Architecture / Implementation Shape</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Internal tool / admin dashboard</td>
+<td>Modular monolith + CRUD + RBAC</td>
+<td>Prioritize delivery speed, permission boundaries, and data operation efficiency</td>
+</tr>
+<tr>
+<td>Blog / content site</td>
+<td>CMS / Static Site / CDN / Cache</td>
+<td>Read-heavy; prioritize publishing workflow, cache, and access speed</td>
+</tr>
+<tr>
+<td>SaaS MVP</td>
+<td>Modular monolith + Auth + Tenant Model + Job Queue</td>
+<td>Ensure module boundaries, tenant model, and async tasks first</td>
+</tr>
+<tr>
+<td>E-commerce / transaction</td>
+<td>API + Service + DB + Cache + MQ + Idempotency</td>
+<td>Prioritize stock, orders, payment, and state consistency</td>
+</tr>
+<tr>
+<td>Flash sale / ticketing</td>
+<td>Gateway + Redis + MQ + Worker + DB + Rate Limit</td>
+<td>Prioritize hotspots, peak shaving, idempotency, and compensation</td>
+</tr>
+<tr>
+<td>AI application</td>
+<td>Client -&gt; API / BFF -&gt; Application Service -&gt; Agent Orchestration -&gt; AI Infrastructure</td>
+<td>The application layer handles business use cases; Agent Orchestration handles planning and tool calls. AI Infrastructure includes Model Gateway, Tool Adapters, Memory Store, Queue / Worker</td>
+</tr>
+<tr>
+<td>Complex business with multiple teams</td>
+<td>Modular monolith or microservices + API Contract + Observability</td>
+<td>Prioritize business boundaries, API contracts, and independent delivery</td>
+</tr>
+</tbody></table>
+<p>Add components by capability:</p>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Suggested Addition</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>File upload / export</td>
+<td>Object Storage + Job Queue</td>
+<td>Do not put files directly into the business database; run export tasks asynchronously</td>
+</tr>
+<tr>
+<td>Search</td>
+<td>Search Engine</td>
+<td>Do not put complex search pressure on the primary database</td>
+</tr>
+<tr>
+<td>Notification / email</td>
+<td>Job Queue + Template + Provider Adapter</td>
+<td>Needs retry, templates, and provider isolation</td>
+</tr>
+<tr>
+<td>Realtime progress / online status</td>
+<td>SSE / WebSocket + Redis / MQ</td>
+<td>Distinguish one-way progress updates from bidirectional realtime communication</td>
+</tr>
+<tr>
+<td>Approval flow / long workflow</td>
+<td>State Machine / Workflow Engine</td>
+<td>Needs state recovery, retry, and audit</td>
+</tr>
+<tr>
+<td>Reporting analytics</td>
+<td>OLAP / ETL / Read Replica</td>
+<td>Separate analytical queries from transaction paths</td>
+</tr>
+<tr>
+<td>Third-party integration / Webhook</td>
+<td>Adapter + Signature Verify + Retry + Idempotency</td>
+<td>Prevent duplicates, forgery, and support replay</td>
+</tr>
+<tr>
+<td>Highly available production</td>
+<td>Multi Replica + Observability + Backup + Rollout + Rate Limit</td>
+<td>Cover runtime, recovery, and release risks</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/12/07/ai/agent_sdk_design_en/" rel="prev" title="How I Entered AI and Designed an Agent SDK">
+      <i class="fa fa-chevron-left"></i> How I Entered AI and Designed an Agent SDK
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Goal"><span class="nav-number">1.</span> <span class="nav-text">Goal</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Full-Stack-Architecture-Overview"><span class="nav-number">2.</span> <span class="nav-text">Full-Stack Architecture Overview</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AI-Application-Backend-Supplement"><span class="nav-number">2.1.</span> <span class="nav-text">AI Application Backend Supplement</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Connecting-the-Stack-with-a-Flash-Sale-E-Commerce-System"><span class="nav-number">3.</span> <span class="nav-text">Connecting the Stack with a Flash-Sale E-Commerce System</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-What-Is-the-Business-Scenario"><span class="nav-number">3.1.</span> <span class="nav-text">1. What Is the Business Scenario?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Why-Use-This-Scenario"><span class="nav-number">3.2.</span> <span class="nav-text">2. Why Use This Scenario?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Requirements-and-Capability-Needs-in-This-Scenario"><span class="nav-number">3.3.</span> <span class="nav-text">3. Requirements and Capability Needs in This Scenario</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Flash-Sale-System-Evolution-Path"><span class="nav-number">4.</span> <span class="nav-text">Flash-Sale System Evolution Path</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Stage-1-Monolith"><span class="nav-number">4.1.</span> <span class="nav-text">Stage 1: Monolith</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Stage-2-Introduce-Redis"><span class="nav-number">4.2.</span> <span class="nav-text">Stage 2: Introduce Redis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Stage-3-Introduce-a-Message-Queue"><span class="nav-number">4.3.</span> <span class="nav-text">Stage 3: Introduce a Message Queue</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Stage-4-Service-Decomposition"><span class="nav-number">4.4.</span> <span class="nav-text">Stage 4: Service Decomposition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Stage-5-Highly-Available-Production-Version"><span class="nav-number">4.5.</span> <span class="nav-text">Stage 5: Highly Available Production Version</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#How-to-Select-Technologies-and-Design-Architecture-for-Real-Business"><span class="nav-number">5.</span> <span class="nav-text">How to Select Technologies and Design Architecture for Real Business</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Clarify-Requirements-Identify-the-Current-Business-Problem-First"><span class="nav-number">5.1.</span> <span class="nav-text">1. Clarify Requirements: Identify the Current Business Problem First</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Select-Core-Capabilities-That-Match-Business-Needs"><span class="nav-number">5.2.</span> <span class="nav-text">2. Select Core Capabilities That Match Business Needs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Consider-Future-Scalability-and-High-Availability"><span class="nav-number">5.3.</span> <span class="nav-text">3. Consider Future Scalability and High Availability</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Technology-Selection-for-Common-Scenarios"><span class="nav-number">5.4.</span> <span class="nav-text">4. Technology Selection for Common Scenarios</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
