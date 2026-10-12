@@ -1,5 +1,5 @@
 ---
-title: A Backend Architecture and Technology Stack Map from a Full-Stack Perspective
+title: Backend Architecture and Technology Stack Map
 categories: BackEnd
 date: 2026-10-09
 ---
