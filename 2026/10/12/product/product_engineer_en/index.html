@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="GoalExplore one judgment: product engineering may be a new direction for traditional SDEs in the AI era.  How AI affects the traditional SDLC Where SDEs can move their capability focus in the AI era H">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Product Engineering: An SDE Career Path in the AI Era">
+<meta property="og:url" content="https://lucky-chen.github.io/2026/10/12/product/product_engineer_en/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="GoalExplore one judgment: product engineering may be a new direction for traditional SDEs in the AI era.  How AI affects the traditional SDLC Where SDEs can move their capability focus in the AI era H">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://lucky-chen.github.io/image/product/product_engineer_capability_map.svg">
+<meta property="article:published_time" content="2026-10-11T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-13T11:26:27.918Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lucky-chen.github.io/image/product/product_engineer_capability_map.svg">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2026/10/12/product/product_engineer_en/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Product Engineering: An SDE Career Path in the AI Era | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2026/10/12/product/product_engineer_en/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Product Engineering: An SDE Career Path in the AI Era
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2026-10-12 00:00:00" itemprop="dateCreated datePublished" datetime="2026-10-12T00:00:00+08:00">2026-10-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2026-10-13 19:26:27" itemprop="dateModified" datetime="2026-10-13T19:26:27+08:00">2026-10-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Product/" itemprop="url" rel="index"><span itemprop="name">Product</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Goal"><a href="#Goal" class="headerlink" title="Goal"></a>Goal</h1><p>Explore one judgment: product engineering may be a new direction for traditional SDEs in the AI era.</p>
+<ul>
+<li>How AI affects the traditional SDLC</li>
+<li>Where SDEs can move their capability focus in the AI era</li>
+<li>How to build product engineering capability</li>
+</ul>
+<p>Chinese version: <a href="/i18n/zh/product/product_engineer.html">产品工程：传统 SDE 在 AI 时代的可能职业方向</a></p>
+<span id="more"></span>
+
+<h1 id="What"><a href="#What" class="headerlink" title="What"></a>What</h1><p>A product engineer combines product judgment with end-to-end delivery capability.</p>
+<ul>
+<li>Understands user problems and product goals</li>
+<li>Makes technical decisions through product trade-offs</li>
+<li>Owns delivery from solution to launch</li>
+<li>Evaluates results and iterates from feedback</li>
+</ul>
+<p><img src="/image/product/product_engineer_capability_map.svg" alt="Product Engineer capability map"></p>
+<h1 id="Why"><a href="#Why" class="headerlink" title="Why"></a>Why</h1><h2 id="The-Traditional-Product-Lifecycle"><a href="#The-Traditional-Product-Lifecycle" class="headerlink" title="The Traditional Product Lifecycle"></a>The Traditional Product Lifecycle</h2><p>Start with a common product lifecycle. Each stage pairs a key problem with the value it creates.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Stage</th>
+<th>Key Problem</th>
+<th>Value Created</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Business</td>
+<td>User Demand</td>
+<td>Which user problem is worth solving?</td>
+<td>- Discover real user problems<br>- Clarify needs and pain points</td>
+</tr>
+<tr>
+<td>Business</td>
+<td>Commercial Revenue</td>
+<td>Why is this product worth company investment?</td>
+<td>- Estimate revenue potential<br>- Evaluate profit, growth, or strategic value</td>
+</tr>
+<tr>
+<td>Product</td>
+<td>Solution Definition and Design</td>
+<td>What product solution should address it?</td>
+<td>- Define the product solution<br>- Shape the user experience<br>- Align key trade-offs</td>
+</tr>
+<tr>
+<td>Technology</td>
+<td>Technical Planning</td>
+<td>How can the solution land reliably?</td>
+<td>- Clarify requirements<br>- Design architecture<br>- Create an implementation plan</td>
+</tr>
+<tr>
+<td>Technology</td>
+<td>Implementation</td>
+<td>How do we build it and deliver it to users?</td>
+<td>- Turn plans into software<br>- Ensure quality through testing</td>
+</tr>
+<tr>
+<td>Decision</td>
+<td>Measurement and Iteration</td>
+<td>Did the result match expectations?</td>
+<td>- Validate actual impact<br>- Reduce uncertainty for the next decision<br>- Decide the next product or business move</td>
+</tr>
+</tbody></table>
+<p>Then map these stages to common role categories in an organization.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Problem It Solves</th>
+<th>Value It Creates</th>
+<th>Typical Roles</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Strategic Direction</td>
+<td>Which problem should we solve, and why now?</td>
+<td>Sets direction, defines success, allocates resources, makes trade-offs</td>
+<td>Founder, Executive, Product Leader, Business Owner</td>
+</tr>
+<tr>
+<td>Tactical Planning</td>
+<td>What should we build, and how should we organize the work?</td>
+<td>Turns direction into plans, requirements, designs, priorities, and coordination</td>
+<td>PM, Designer, Tech Lead, Data Analyst</td>
+</tr>
+<tr>
+<td>Execution</td>
+<td>How do we build, launch, operate, and improve it?</td>
+<td>Delivers systems, releases safely, observes feedback, and improves</td>
+<td>SDE, QA, SRE, Support, Sales, Marketing</td>
+</tr>
+</tbody></table>
+<h2 id="AI’s-Impact-on-the-SDLC-Process"><a href="#AI’s-Impact-on-the-SDLC-Process" class="headerlink" title="AI’s Impact on the SDLC Process"></a>AI’s Impact on the SDLC Process</h2><h3 id="What-AI-Does-Well-and-Does-Not-Do-Well"><a href="#What-AI-Does-Well-and-Does-Not-Do-Well" class="headerlink" title="What AI Does Well and Does Not Do Well"></a>What AI Does Well and Does Not Do Well</h3><p>AI’s impact depends mainly on how clear the task boundary is.</p>
+<ul>
+<li>Good at: tasks with clear input, output, rules, and evaluation criteria.<ul>
+<li>Examples: coding, testing, documentation, and routine technical research.</li>
+</ul>
+</li>
+<li>Weak at: complex work where the input, output, constraints, and success criteria are unclear.<ul>
+<li>Examples: problem framing, user context, business trade-offs, product judgment, and final decision making.</li>
+</ul>
+</li>
+</ul>
+<p>Related exploration: <a href="https://lucky-chen.github.io/2025/12/07/ai/agent_sdk_design_en/">AI exploration notes</a></p>
+<h3 id="Impact-on-Different-Role-Layers"><a href="#Impact-on-Different-Role-Layers" class="headerlink" title="Impact on Different Role Layers"></a>Impact on Different Role Layers</h3><p>Using the role layers above, AI affects each layer differently.</p>
+<p>The percentages below come from my own experience and intuition, not from a statistical study. They represent the rough degree to which current AI capabilities can affect each layer.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>AI Impact</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Strategic Direction</td>
+<td>30%</td>
+<td>Strategy depends on context, business judgment, resource allocation, and accountability</td>
+</tr>
+<tr>
+<td>Tactical Planning</td>
+<td>50%</td>
+<td>Planning contains both structured work and ambiguous trade-offs across product, design, data, and technology</td>
+</tr>
+<tr>
+<td>Execution</td>
+<td>70%</td>
+<td>Execution usually has clearer inputs, outputs, rules, and evaluation criteria</td>
+</tr>
+</tbody></table>
+<h3 id="Impact-on-Company-Organization-and-Market-Demand"><a href="#Impact-on-Company-Organization-and-Market-Demand" class="headerlink" title="Impact on Company Organization and Market Demand"></a>Impact on Company Organization and Market Demand</h3><p>This is one reason execution-heavy roles and some middle-layer coordination roles face more pressure during organizational adjustment. Layoffs and role reductions are not only about AI. Hiring cycles, capital cost, over-expansion in previous years, and cost-efficiency goals also matter.</p>
+<p>As organizations become leaner and efficiency expectations rise, a different profile becomes more valuable: people who can handle unclear problems, make cross-functional trade-offs, use AI to increase delivery leverage, and connect product decisions, technical delivery, and business outcomes.</p>
+<p>Evidence from hiring market:</p>
+<ul>
+<li>Skill demand is moving toward AI plus human judgment. <a target="_blank" rel="noopener" href="https://www.weforum.org/publications/the-future-of-jobs-report-2025/in-full/3-skills-outlook/">WEF’s Future of Jobs Report 2025</a> lists AI and big data among fast-growing skills, while also emphasizing analytical thinking, creative thinking, leadership, and collaboration.</li>
+<li>The SWE market is changing at the skill level. <a target="_blank" rel="noopener" href="https://economicgraph.linkedin.com/content/dam/me/economicgraph/en-us/PDF/us-software-engineer-talent-landscape-2026.pdf">LinkedIn’s 2026 U.S. Software Engineer Talent Landscape</a> says new SWE hires emphasize cloud platforms and fast-growing AI-related tools.</li>
+<li>AI demand is not limited to AI developer roles. <a target="_blank" rel="noopener" href="https://www.pwc.com/gx/en/issues/artificial-intelligence/job-barometer/aijb-2026-us.pdf">PwC’s 2026 AI Jobs Barometer</a> shows growing demand for AI-related roles and AI user roles.</li>
+</ul>
+<h2 id="New-Value-Areas-and-Career-Directions-for-SDEs"><a href="#New-Value-Areas-and-Career-Directions-for-SDEs" class="headerlink" title="New Value Areas and Career Directions for SDEs"></a>New Value Areas and Career Directions for SDEs</h2><h3 id="Where-the-New-Direction-Comes-From"><a href="#Where-the-New-Direction-Comes-From" class="headerlink" title="Where the New Direction Comes From"></a>Where the New Direction Comes From</h3><p>From the product lifecycle, a worthwhile direction for SDEs should meet three conditions:</p>
+<ul>
+<li>AI will not do them well in the short term.</li>
+<li>They have a clear place in the product lifecycle.</li>
+<li>SDEs can participate through software engineering leverage.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>AI Short-term Difficulty</th>
+<th>Place in Product Lifecycle</th>
+<th>How SDEs Can Participate</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Strategic Direction</td>
+<td>High: unclear goals, business context, and accountability</td>
+<td>Decides why to build and what outcome matters</td>
+<td>Support research, frame problems, evaluate value</td>
+</tr>
+<tr>
+<td>Tactical Planning</td>
+<td>Medium: mixed structured tasks and ambiguous trade-offs</td>
+<td>Turns direction into product, technical, and execution plans</td>
+<td>Decompose problems, clarify constraints, design solution paths</td>
+</tr>
+<tr>
+<td>Execution</td>
+<td>Low: clearer inputs, outputs, and evaluation criteria</td>
+<td>Turns plans into software and feedback</td>
+<td>Use AI to accelerate coding, testing, and iteration</td>
+</tr>
+</tbody></table>
+<h3 id="What-the-New-Value-Chain-Is"><a href="#What-the-New-Value-Chain-Is" class="headerlink" title="What the New Value Chain Is"></a>What the New Value Chain Is</h3><p>There are two paths:</p>
+<ul>
+<li>Single-layer depth: going deeper in one layer, such as strategy, planning, architecture, or execution.</li>
+<li>Cross-layer connection: connecting strategy, planning, and execution into an outcome loop.</li>
+</ul>
+<p>I would lean toward cross-layer connection.</p>
+<p>Single-layer depth is still valuable, but every layer is being changed by AI. The more interesting opportunity is to connect the layers and turn unclear goals into executable, testable work that AI can help accelerate.</p>
+<p>In typical internet-product teams, Product Engineering is a concrete path to this cross-layer connection.</p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Business Team</th>
+<th>Infra Team</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Domain</td>
+<td>User-facing products and business outcomes</td>
+<td>Internal platforms, tools, and engineering systems</td>
+</tr>
+<tr>
+<td>Role Direction</td>
+<td>Product Engineer</td>
+<td>Platform Engineer / Infrastructure Architect</td>
+</tr>
+<tr>
+<td>Value Chain</td>
+<td>User problem discovery<br>Business value judgment<br>Product solution decomposition<br>AI-assisted delivery</td>
+<td>Internal need discovery<br>Platform value judgment<br>Technical solution decomposition<br>AI-assisted delivery</td>
+</tr>
+<tr>
+<td>Capability Depth</td>
+<td>Heavier focus on business value judgment and product trade-offs</td>
+<td>Heavier focus on architecture, systems, performance, reliability, and code quality</td>
+</tr>
+</tbody></table>
+<p><strong>In the rest of this article, I will focus on Product Engineer instead of Infrastructure Architect.</strong></p>
+<ul>
+<li>I have spent most of my career building depth across application, framework, and system architecture.</li>
+<li>I am now more interested in the Product Engineer direction.</li>
+</ul>
+<h1 id="How"><a href="#How" class="headerlink" title="How"></a>How</h1><p>This section keeps only the high-level practice framework.</p>
+<p>The sequence is: decide whether the direction is worth pursuing, validate whether the solution works, then deliver with quality.</p>
+<p>The difference between a Product Engineer and a pure PM or Tech Lead is the ability to connect discovery to the engineering loop: product hypothesis, prototype, technical trade-off, instrumentation, delivery, and iteration.</p>
+<h2 id="Product-Risk"><a href="#Product-Risk" class="headerlink" title="Product Risk"></a>Product Risk</h2><p>Before spending significant delivery effort, check whether the main product risks are under control.</p>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Key Question</th>
+<th>Method</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>User Value</td>
+<td>Do users really need it?</td>
+<td>Customer interview, usage intent, willingness to pay</td>
+<td>Evidence of user demand</td>
+</tr>
+<tr>
+<td>Usability</td>
+<td>Can users use it smoothly?</td>
+<td>Low-fi prototype, task walkthrough</td>
+<td>Usability risk assessment</td>
+</tr>
+<tr>
+<td>Feasibility</td>
+<td>Can the team build it?</td>
+<td>Technical spike</td>
+<td>Technical feasibility proof</td>
+</tr>
+<tr>
+<td>Viability</td>
+<td>Should the company invest in it?</td>
+<td>Stakeholder review</td>
+<td>Business viability assessment</td>
+</tr>
+</tbody></table>
+<h2 id="Discovery"><a href="#Discovery" class="headerlink" title="Discovery"></a>Discovery</h2><p>Use discovery to reduce uncertainty before committing to a solution.</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Key Question</th>
+<th>Method</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Problem Definition</td>
+<td>Who is the user, what is the scenario, and what pain exists?</td>
+<td>Customer interview, feedback analysis</td>
+<td>Problem statement</td>
+</tr>
+<tr>
+<td>Hypothesis</td>
+<td>What change do we expect?</td>
+<td>Hypothesis modeling</td>
+<td>Testable hypothesis</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>How do we test whether the hypothesis is true?</td>
+<td>Prototype, user testing, A/B experiment</td>
+<td>Validation result</td>
+</tr>
+<tr>
+<td>Metrics</td>
+<td>How do we know whether it works?</td>
+<td>Business metrics, behavior metrics</td>
+<td>Success criteria</td>
+</tr>
+<tr>
+<td>Decision Making</td>
+<td>Should we continue, iterate, or stop?</td>
+<td>Go / iterate / kill review</td>
+<td>Decision</td>
+</tr>
+</tbody></table>
+<h2 id="Delivery"><a href="#Delivery" class="headerlink" title="Delivery"></a>Delivery</h2><p>Use delivery to turn a validated direction into working software and measurable outcomes.</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Key Question</th>
+<th>Method</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Architecture</td>
+<td>How should the validated direction map to a technical structure?</td>
+<td>Architecture design, trade-off review</td>
+<td>Architecture decision</td>
+</tr>
+<tr>
+<td>Build</td>
+<td>How should the solution be implemented?</td>
+<td>Coding, code review, testing, continuous delivery</td>
+<td>Working software</td>
+</tr>
+<tr>
+<td>Measure</td>
+<td>Did the solution work as expected?</td>
+<td>Metrics tracking, user behavior observation</td>
+<td>Outcome signal</td>
+</tr>
+<tr>
+<td>Iterate</td>
+<td>What should change next?</td>
+<td>Data review, feedback review, small iterations</td>
+<td>Next version</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/10/09/backend/full_stack_tech_en/" rel="prev" title="Backend Architecture and Technology Stack Map">
+      <i class="fa fa-chevron-left"></i> Backend Architecture and Technology Stack Map
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Goal"><span class="nav-number">1.</span> <span class="nav-text">Goal</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#What"><span class="nav-number">2.</span> <span class="nav-text">What</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Why"><span class="nav-number">3.</span> <span class="nav-text">Why</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#The-Traditional-Product-Lifecycle"><span class="nav-number">3.1.</span> <span class="nav-text">The Traditional Product Lifecycle</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AI%E2%80%99s-Impact-on-the-SDLC-Process"><span class="nav-number">3.2.</span> <span class="nav-text">AI’s Impact on the SDLC Process</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#What-AI-Does-Well-and-Does-Not-Do-Well"><span class="nav-number">3.2.1.</span> <span class="nav-text">What AI Does Well and Does Not Do Well</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Impact-on-Different-Role-Layers"><span class="nav-number">3.2.2.</span> <span class="nav-text">Impact on Different Role Layers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Impact-on-Company-Organization-and-Market-Demand"><span class="nav-number">3.2.3.</span> <span class="nav-text">Impact on Company Organization and Market Demand</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#New-Value-Areas-and-Career-Directions-for-SDEs"><span class="nav-number">3.3.</span> <span class="nav-text">New Value Areas and Career Directions for SDEs</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Where-the-New-Direction-Comes-From"><span class="nav-number">3.3.1.</span> <span class="nav-text">Where the New Direction Comes From</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#What-the-New-Value-Chain-Is"><span class="nav-number">3.3.2.</span> <span class="nav-text">What the New Value Chain Is</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#How"><span class="nav-number">4.</span> <span class="nav-text">How</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Product-Risk"><span class="nav-number">4.1.</span> <span class="nav-text">Product Risk</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Discovery"><span class="nav-number">4.2.</span> <span class="nav-text">Discovery</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Delivery"><span class="nav-number">4.3.</span> <span class="nav-text">Delivery</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
