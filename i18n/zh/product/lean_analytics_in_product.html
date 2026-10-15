@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="目标English version: Lean Analytics for Product Engineers 接着产品工程师职业方向的话题，本文介绍一套基础的产品判断框架：  产品创新通常经历哪些验证阶段？ 每个阶段需要做出什么定性判断？ 可以用什么量化指标验证这些判断？  本文参考 《精益数据分析》（Lean Analytics）。这本书主要讲如何验证创新想法，也有助于工程师建立产品意识。 推">
+<meta property="og:type" content="website">
+<meta property="og:title" content="面向产品工程师的精益数据分析">
+<meta property="og:url" content="https://lucky-chen.github.io/i18n/zh/product/lean_analytics_in_product.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="目标English version: Lean Analytics for Product Engineers 接着产品工程师职业方向的话题，本文介绍一套基础的产品判断框架：  产品创新通常经历哪些验证阶段？ 每个阶段需要做出什么定性判断？ 可以用什么量化指标验证这些判断？  本文参考 《精益数据分析》（Lean Analytics）。这本书主要讲如何验证创新想法，也有助于工程师建立产品意识。 推">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-10-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-15T07:30:59.970Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://lucky-chen.github.io/i18n/zh/product/lean_analytics_in_product">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : false,
+    lang   : 'en'
+  };
+</script>
+
+  <title>面向产品工程师的精益数据分析 | Chen's Notes
+</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+  
+  
+
+          <div class="content page posts-expand">
+            
+
+    
+    
+    
+    <div class="post-block" lang="en">
+      <header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">面向产品工程师的精益数据分析
+</h1>
+
+<div class="post-meta">
+  
+  <ul class="breadcrumb">
+          
+            <li><a href="/i18n/">I18N</a></li>
+            <li><a href="/i18n/zh/">ZH</a></li>
+            <li><a href="/i18n/zh/product/">PRODUCT</a></li>
+            <li>LEAN_ANALYTICS_IN_PRODUCT</li>
+          
+  </ul>
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+          <h1 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h1><p><span style="color: #007c91; font-weight: 600;">English version:</span> <a href="/2026/10/14/product/lean_analytics_in_product/" style="color: #007c91; border-bottom-color: #007c91; font-weight: 600;">Lean Analytics for Product Engineers</a></p>
+<p>接着产品工程师职业方向的话题，本文介绍一套基础的产品判断框架：</p>
+<ol>
+<li>产品创新通常经历哪些验证阶段？</li>
+<li>每个阶段需要做出什么定性判断？</li>
+<li>可以用什么量化指标验证这些判断？</li>
+</ol>
+<p>本文参考 <a target="_blank" rel="noopener" href="https://www.amazon.sg/dp/1449335675">《精益数据分析》（Lean Analytics）</a>。这本书主要讲如何验证创新想法，也有助于工程师建立产品意识。</p>
+<p>推荐者包括 <a target="_blank" rel="noopener" href="https://www.oreilly.com/library/view/lean-analytics/9781449335687/apc.html">Kevin Weil</a>、<a target="_blank" rel="noopener" href="https://www.oreilly.com/library/view/lean-analytics/9781449335687/pr01.html">Dan Martell</a>、<a target="_blank" rel="noopener" href="https://www.sohu.com/a/115328943_358836">范冰</a>、<a target="_blank" rel="noopener" href="https://www.woshipm.com/pmd/393383.html">张溪梦</a>和<a target="_blank" rel="noopener" href="https://tech.sina.cn/csj/2019-03-05/doc-ihsxncvf9865915.d.html">丁磊</a>。</p>
+<span id="more"></span>
+
+<h1 id="为什么"><a href="#为什么" class="headerlink" title="为什么"></a>为什么</h1><p>软件工程师通常负责产品的技术实现。他们知道如何构建系统，但对产品方向是否可行，可能缺少清晰的判断框架。</p>
+<p>常见缺口包括：</p>
+<ul>
+<li>不知道产品当前处于哪个阶段</li>
+<li>把所有指标看得同样重要</li>
+<li>把功能上线当作产品取得进展</li>
+<li>尚未验证关键的产品假设，就开始优化技术或运营细节</li>
+<li>讨论产品价值、业务风险和用户行为时，缺少共同语言</li>
+</ul>
+<p>本文借助精益数据分析提供一个简明框架：</p>
+<ul>
+<li>根据产品阶段，找出当前最需要验证的问题</li>
+<li>明确这个问题需要什么定性判断</li>
+<li>用量化指标验证产品是否取得进展</li>
+</ul>
+<h1 id="如何做"><a href="#如何做" class="headerlink" title="如何做"></a>如何做</h1><p>核心流程：</p>
+<ol>
+<li>识别产品当前所处的阶段。</li>
+<li>明确该阶段的主要问题。</li>
+<li>明确需要收集哪些证据来回答这个问题。</li>
+<li>选择相应的量化指标。</li>
+<li>根据指标结果，决定继续迭代、调整方向，还是进入下一阶段。</li>
+</ol>
+<blockquote>
+<p>注：更底层的逻辑来自《矛盾论》（识别每个阶段的主要问题）和《实践论》（通过实践检验判断）。感兴趣的读者可阅读《毛泽东选集》中的这两篇文章。</p>
+</blockquote>
+<h1 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h1><p>本文分为四部分：</p>
+<ol>
+<li>产品决策模式：如何验证尚不确定的产品问题，并决定下一步行动。</li>
+<li>指标：如何选择有用的指标。</li>
+<li>阶段：产品创新各阶段的主要问题、OMTM、关注点、通过条件和示例。</li>
+<li>商业模式指标参考：不同商业模式下的各阶段指标参考。</li>
+</ol>
+<h1 id="1-产品决策模式"><a href="#1-产品决策模式" class="headerlink" title="1. 产品决策模式"></a>1. 产品决策模式</h1><h2 id="1-1-根据阶段选择指标"><a href="#1-1-根据阶段选择指标" class="headerlink" title="1.1 根据阶段选择指标"></a>1.1 根据阶段选择指标</h2><p>不同阶段需要不同指标。</p>
+<p>指标应该围绕当前最需要验证的问题来选。处于需求探索阶段的产品，不应优先优化渠道 ROI。留存率低的产品，应先解决用户为什么不再使用的问题。</p>
+<h2 id="1-2-根据指标决定行动"><a href="#1-2-根据指标决定行动" class="headerlink" title="1.2 根据指标决定行动"></a>1.2 根据指标决定行动</h2><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>决策关注点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>指标变差</td>
+<td>定位瓶颈</td>
+</tr>
+<tr>
+<td>指标改善</td>
+<td>判断该阶段的风险是否降低</td>
+</tr>
+<tr>
+<td>指标失真</td>
+<td>结合实际用户行为和访谈反馈重新判断</td>
+</tr>
+<tr>
+<td>指标改善，但业务没有改善</td>
+<td>检查指标是否反映了真正需要解决的问题</td>
+</tr>
+</tbody></table>
+<h2 id="1-3-根据阶段信号申请资源"><a href="#1-3-根据阶段信号申请资源" class="headerlink" title="1.3 根据阶段信号申请资源"></a>1.3 根据阶段信号申请资源</h2><p>各阶段将在第 3 节详细介绍。产品工程师可以根据各阶段的验证结果，向公司申请资源，启动、继续或扩大项目。</p>
+<table>
+<thead>
+<tr>
+<th>阶段信号</th>
+<th>内部资源申请</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>需求探索信号清晰</td>
+<td>申请时间做原型，或针对关键假设开展实验</td>
+</tr>
+<tr>
+<td>用户黏性信号清晰</td>
+<td>申请研发、设计或数据支持，改善核心使用流程</td>
+</tr>
+<tr>
+<td>用户黏性和营收信号都清晰</td>
+<td>以 PMF 证据为依据，申请更多资源</td>
+</tr>
+<tr>
+<td>营收信号清晰</td>
+<td>申请销售、营销、定价支持或基础设施投入</td>
+</tr>
+<tr>
+<td>规模化信号清晰</td>
+<td>申请扩充团队、增加渠道投入、运营支持或平台建设资源</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>注：这与创业者凭借 PMF（产品与市场契合度）证据向投资者或合作伙伴争取资源的思路相似。产品工程师也可以用这些验证结果申请公司内部资源。</p>
+</blockquote>
+<h1 id="2-指标"><a href="#2-指标" class="headerlink" title="2. 指标"></a>2. 指标</h1><p>指标的价值在于帮助团队做决策。</p>
+<h2 id="2-1-什么是好指标"><a href="#2-1-什么是好指标" class="headerlink" title="2.1 什么是好指标"></a>2.1 什么是好指标</h2><table>
+<thead>
+<tr>
+<th>原则</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>能指导行动</td>
+<td>指标变化时，团队知道应该调整什么</td>
+</tr>
+<tr>
+<td>可比较</td>
+<td>能与历史、目标、用户分群或竞争对手进行比较</td>
+</tr>
+<tr>
+<td>比率优先</td>
+<td>相比绝对数量，比率更能反映效率和质量</td>
+</tr>
+<tr>
+<td>简单清晰</td>
+<td>非数据岗位也能理解</td>
+</tr>
+<tr>
+<td>暴露问题</td>
+<td>指标下降能够揭示业务瓶颈</td>
+</tr>
+</tbody></table>
+<h2 id="2-2-OMTM：第一关键指标"><a href="#2-2-OMTM：第一关键指标" class="headerlink" title="2.2 OMTM：第一关键指标"></a>2.2 OMTM：第一关键指标</h2><p>OMTM（One Metric That Matters）是最能反映当前主要风险是否降低的单一指标。</p>
+<p>一个好的 OMTM 应该回答三个问题：</p>
+<ol>
+<li>当前的主要风险是什么？</li>
+<li>哪个指标最能反映这个风险是否改善？</li>
+<li>团队将根据结果采取什么行动？</li>
+</ol>
+<h2 id="2-3-常见指标类型"><a href="#2-3-常见指标类型" class="headerlink" title="2.3 常见指标类型"></a>2.3 常见指标类型</h2><p>这些类型可作为检查清单，不作为本文的主要框架。</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>作用</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>虚荣指标</td>
+<td>展示规模，但不能直接指导决策</td>
+<td>PV、累计注册用户数、累计下载量</td>
+</tr>
+<tr>
+<td>可行动指标</td>
+<td>指导产品或业务决策</td>
+<td>转化率、留存率、CAC、LTV</td>
+</tr>
+<tr>
+<td>先行指标</td>
+<td>提前反映未来结果</td>
+<td>激活率、关键行为完成率、次日留存率</td>
+</tr>
+<tr>
+<td>滞后指标</td>
+<td>反映最终结果</td>
+<td>营收、利润、GMV、流失率</td>
+</tr>
+<tr>
+<td>定性证据</td>
+<td>解释事情为什么发生</td>
+<td>用户访谈、客服反馈、评论文本</td>
+</tr>
+<tr>
+<td>定量证据</td>
+<td>判断规模和变化</td>
+<td>漏斗数据、留存曲线、营收数据</td>
+</tr>
+</tbody></table>
+<h1 id="3-阶段"><a href="#3-阶段" class="headerlink" title="3. 阶段"></a>3. 阶段</h1><p>阶段模型回答两个问题：</p>
+<ol>
+<li>当前业务的主要不确定性是什么？</li>
+<li>需要多少证据才能进入下一阶段？</li>
+</ol>
+<p>以下条件仅供参考。具体指标的达标线取决于商业模式、使用频率、毛利水平、获客周期和产品成熟度。</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>主要问题</th>
+<th>OMTM 参考方向</th>
+<th>进入下一阶段的最低条件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>需求探索（Empathy）</td>
+<td>问题真的存在吗？</td>
+<td>有效访谈数、预约率、人工服务转化率</td>
+<td>已明确目标用户、真实痛点、现有替代方案和行动意愿</td>
+</tr>
+<tr>
+<td>用户黏性（Stickiness）</td>
+<td>用户会持续使用吗？</td>
+<td>激活率、留存率、关键行为完成率</td>
+<td>留存稳定、核心价值清晰，新用户能顺利完成激活</td>
+</tr>
+<tr>
+<td>传播（Virality）</td>
+<td>用户会带来新用户吗？</td>
+<td>分享率、邀请转化率、病毒系数</td>
+<td>受邀用户激活并留存，自然传播降低 CAC</td>
+</tr>
+<tr>
+<td>营收（Revenue）</td>
+<td>产品能赚钱吗？</td>
+<td>付费转化率、LTV/CAC、毛利率</td>
+<td>单位经济模型合理、收入可持续、成本结构可控</td>
+</tr>
+<tr>
+<td>规模化（Scale）</td>
+<td>能高效放大增长吗？</td>
+<td>渠道 ROI、CAC 回收期、利润率</td>
+<td>增长、质量、组织和财务保持可控</td>
+</tr>
+</tbody></table>
+<h2 id="3-1-需求探索：真实问题存在吗？"><a href="#3-1-需求探索：真实问题存在吗？" class="headerlink" title="3.1 需求探索：真实问题存在吗？"></a>3.1 需求探索：真实问题存在吗？</h2><p><strong>步骤 1：主要问题</strong></p>
+<p>目标用户是否确实遇到了值得解决的痛点。</p>
+<p><strong>步骤 2：关注点</strong></p>
+<table>
+<thead>
+<tr>
+<th>关注点</th>
+<th>要判断什么</th>
+<th>证据</th>
+<th>常见误区</th>
+<th>通过信号</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>痛点强度</td>
+<td>问题在具体场景中造成了多大困扰或损失</td>
+<td>访谈反馈、问题发生频率</td>
+<td>只听用户说什么，忽略他们做什么</td>
+<td>用户能清楚描述场景、损失和当前解决办法</td>
+</tr>
+<tr>
+<td>现有替代方案</td>
+<td>用户是否已经投入精力解决问题</td>
+<td>临时方案、付费替代产品、人工流程</td>
+<td>把没有替代方案当作好信号</td>
+<td>用户已经采用临时方案、付费产品或人工流程</td>
+</tr>
+<tr>
+<td>行动意愿</td>
+<td>用户是否愿意付出金钱、时间或迁移成本</td>
+<td>预约率、试用申请、人工服务转化率</td>
+<td>把口头兴趣当作真实需求</td>
+<td>用户留下信息、试用、预约、付费或投入时间</td>
+</tr>
+<tr>
+<td>目标用户</td>
+<td>哪类用户受这个问题影响最大</td>
+<td>不同用户群的访谈反馈</td>
+<td>将痛点强弱不同的用户反馈混在一起求平均</td>
+<td>团队能说清谁有这个痛点、原因是什么、在什么场景下发生</td>
+</tr>
+</tbody></table>
+<p><strong>步骤 3：可选 OMTM</strong></p>
+<p>有效访谈数、预约率或人工服务转化率。根据本轮迭代最需要验证的假设选择一个。</p>
+<p><strong>步骤 4：通过条件</strong></p>
+<ul>
+<li>进入下一阶段：已经明确用户的问题、目标人群、现有解决办法和行动意愿。</li>
+<li>跳过的风险：团队可能为一个想象中的问题构建解决方案。</li>
+</ul>
+<p><strong>示例</strong></p>
+<p>假设产品是一款 AI 代码审查 SaaS。首先要确认研发团队是否确实遇到了审查等待时间长、审查质量不稳定、反复按清单手动检查等问题。单看模型准确率回答不了这些问题。团队已有自编脚本和审查规范、资深工程师反复指出同类问题、用户看过人工演示后主动申请试用，都能为需求判断提供依据。</p>
+<h2 id="3-2-用户黏性：用户会持续使用吗？"><a href="#3-2-用户黏性：用户会持续使用吗？" class="headerlink" title="3.2 用户黏性：用户会持续使用吗？"></a>3.2 用户黏性：用户会持续使用吗？</h2><p><strong>步骤 1：主要问题</strong></p>
+<p>用户是否因为产品创造了真实价值而持续使用。</p>
+<p><strong>步骤 2：关注点</strong></p>
+<table>
+<thead>
+<tr>
+<th>关注点</th>
+<th>要判断什么</th>
+<th>证据</th>
+<th>常见误区</th>
+<th>通过信号</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>激活</td>
+<td>新用户能否首次获得核心价值</td>
+<td>激活率</td>
+<td>把注册当作激活</td>
+<td>新用户能稳定完成核心行为</td>
+</tr>
+<tr>
+<td>留存</td>
+<td>用户是否按预期的使用频率再次使用</td>
+<td>次日、7 日、30 日留存率</td>
+<td>让新增用户增长掩盖留存率低的问题</td>
+<td>核心用户持续使用，间隔符合产品使用场景</td>
+</tr>
+<tr>
+<td>使用深度</td>
+<td>用户是否反复使用产品的核心功能</td>
+<td>核心行为频次、任务完成率</td>
+<td>把任何活跃都当作用户获得了价值</td>
+<td>用户反复通过核心功能完成任务</td>
+</tr>
+<tr>
+<td>关键行为</td>
+<td>哪些行为能预测长期留存</td>
+<td>按行为分组的同期群分析（Cohort Analysis）</td>
+<td>把每次点击都当作有意义的行为</td>
+<td>团队能识别与长期留存强相关的行为</td>
+</tr>
+</tbody></table>
+<p><strong>步骤 3：可选 OMTM</strong></p>
+<p>激活率、留存率或关键行为完成率。先判断瓶颈是新用户未完成核心任务、用户没有再次使用，还是关键行为完成率低，再选择相应指标。</p>
+<p><strong>步骤 4：通过条件</strong></p>
+<ul>
+<li>进入下一阶段：留存稳定、核心价值清晰，新用户能顺利完成核心任务并获得价值。</li>
+<li>跳过的风险：扩大获客通常只会更快暴露用户流失。</li>
+</ul>
+<p><strong>示例</strong></p>
+<p>对于这款 AI 代码审查 SaaS，要看团队试用后是否继续用它审查代码。可选的 OMTM 是每周完成 AI 审查的活跃代码仓库数，用来观察工具是否被持续用于日常审查流程。</p>
+<h2 id="3-3-传播：用户会带来新用户吗？"><a href="#3-3-传播：用户会带来新用户吗？" class="headerlink" title="3.3 传播：用户会带来新用户吗？"></a>3.3 传播：用户会带来新用户吗？</h2><p><strong>步骤 1：主要问题</strong></p>
+<p>现有用户能否通过分享、邀请等行为带来新用户。</p>
+<p><strong>步骤 2：关注点</strong></p>
+<table>
+<thead>
+<tr>
+<th>关注点</th>
+<th>要判断什么</th>
+<th>证据</th>
+<th>常见误区</th>
+<th>通过信号</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>分享</td>
+<td>用户是否有真实的产品分享或邀请动机</td>
+<td>分享率、邀请率</td>
+<td>把分享按钮点击当作真实传播</td>
+<td>分享源于价值、关系、协作或身份表达</td>
+</tr>
+<tr>
+<td>转化</td>
+<td>受邀用户是否接受邀请并激活</td>
+<td>邀请接受率、分享带来的用户激活率</td>
+<td>只看曝光量，忽略转化</td>
+<td>受邀用户激活并留存</td>
+</tr>
+<tr>
+<td>传播闭环</td>
+<td>每个用户能否在合理周期内带来新用户</td>
+<td>病毒系数、传播周期</td>
+<td>只看病毒系数，忽略传播时间</td>
+<td>自然传播降低整体 CAC</td>
+</tr>
+<tr>
+<td>用户质量</td>
+<td>推荐带来的用户是否留存、使用核心功能</td>
+<td>推荐用户留存率、投诉率</td>
+<td>用奖励吸引低质量用户</td>
+<td>新用户的留存、核心行为和投诉情况没有显著恶化</td>
+</tr>
+</tbody></table>
+<p>并非所有业务都必须经历传播阶段。低频、高客单价、重交易的业务可能从用户黏性直接进入营收验证。</p>
+<p><strong>步骤 3：可选 OMTM</strong></p>
+<p>分享率、邀请转化率或病毒系数。根据当前瓶颈是用户不愿分享、受邀用户未激活，还是传播效率低，选择相应指标。</p>
+<p><strong>步骤 4：通过条件</strong></p>
+<ul>
+<li>进入下一阶段：分享有真实动机，受邀用户激活并留存，自然传播在不损害用户质量的情况下降低获客成本。</li>
+<li>跳过的风险：推荐或分享机制可能带来低质量用户，无法形成持续增长。</li>
+</ul>
+<p><strong>示例</strong></p>
+<p>这款 AI 代码审查 SaaS 可以通过团队协作传播。工程师安装工具后，邀请同事参与评论、审批或配置仓库规则，此时可以关注受邀成员的激活率。</p>
+<h2 id="3-4-营收：产品能赚钱吗？"><a href="#3-4-营收：产品能赚钱吗？" class="headerlink" title="3.4 营收：产品能赚钱吗？"></a>3.4 营收：产品能赚钱吗？</h2><p><strong>步骤 1：主要问题</strong></p>
+<p>产品能否持续获得收入。</p>
+<p><strong>步骤 2：关注点</strong></p>
+<table>
+<thead>
+<tr>
+<th>关注点</th>
+<th>要判断什么</th>
+<th>证据</th>
+<th>常见误区</th>
+<th>通过信号</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>付费意愿</td>
+<td>用户是否为产品价值付费</td>
+<td>付费转化率、试用转付费率</td>
+<td>把免费使用当作付费意愿</td>
+<td>用户为产品价值付费</td>
+</tr>
+<tr>
+<td>定价逻辑</td>
+<td>用户是否清楚自己在为什么付费</td>
+<td>ARPU、套餐选择、折扣敏感度</td>
+<td>尚未了解用户认可的价值就测试价格</td>
+<td>团队能解释用户为什么付费、为哪部分价值付费</td>
+</tr>
+<tr>
+<td>收入可持续性</td>
+<td>能否持续获得续费、复购或增购</td>
+<td>续费率、复购率、增购收入</td>
+<td>把一次性付费当作稳定收入</td>
+<td>付费、续费或复购持续发生</td>
+</tr>
+<tr>
+<td>单位经济模型</td>
+<td>单个客户带来的收入能否覆盖获客和交付成本</td>
+<td>LTV/CAC、毛利率、回收期</td>
+<td>让营收增长掩盖不可持续的成本</td>
+<td>客户生命周期内的收入能覆盖获客、履约和服务成本</td>
+</tr>
+</tbody></table>
+<p><strong>步骤 3：可选 OMTM</strong></p>
+<p>付费转化率、LTV/CAC 或毛利率。根据当前风险是付费意愿、获客效率还是交付成本，选择一个。</p>
+<p><strong>步骤 4：通过条件</strong></p>
+<ul>
+<li>进入下一阶段：收入可持续、定价逻辑清晰、单位经济模型合理。</li>
+<li>跳过的风险：增长可能放大一个亏损的商业模式。</li>
+</ul>
+<p><strong>示例</strong></p>
+<p>当持续使用这款工具的团队开始购买团队版或企业版时，就有了营收验证的初步证据。前期可以看试用转付费率；工具融入团队日常工作后，再关注续费率、付费席位增长和 LTV/CAC。</p>
+<h2 id="3-5-规模化：能高效放大增长吗？"><a href="#3-5-规模化：能高效放大增长吗？" class="headerlink" title="3.5 规模化：能高效放大增长吗？"></a>3.5 规模化：能高效放大增长吗？</h2><p><strong>步骤 1：主要问题</strong></p>
+<p>扩大业务规模后，能否保持效率、质量和财务稳定。</p>
+<p><strong>步骤 2：关注点</strong></p>
+<table>
+<thead>
+<tr>
+<th>关注点</th>
+<th>要判断什么</th>
+<th>证据</th>
+<th>常见误区</th>
+<th>通过信号</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>增长效率</td>
+<td>投入增加后，渠道是否仍然有效</td>
+<td>渠道 ROI、CAC 回收期</td>
+<td>让总量增长掩盖单个渠道亏损</td>
+<td>核心渠道 ROI 稳定，CAC 没有快速恶化</td>
+</tr>
+<tr>
+<td>组织效率</td>
+<td>团队扩大后，交付和实验速度是否下降</td>
+<td>人均营收、单位时间完成的实验数</td>
+<td>将增加人手作为主要扩张方式</td>
+<td>交付效率和实验效率没有显著下降</td>
+</tr>
+<tr>
+<td>质量稳定性</td>
+<td>业务量增加后，服务质量是否下降</td>
+<td>投诉率、失败率、履约失败率</td>
+<td>忽略被规模放大的系统性问题</td>
+<td>投诉率、失败率和履约失败率没有显著上升</td>
+</tr>
+<tr>
+<td>盈利能力</td>
+<td>扩大规模后，盈利和现金流能否保持或改善</td>
+<td>利润率、现金流、规模化后的边际成本</td>
+<td>假设规模变大就会自动改善利润</td>
+<td>毛利率、现金流和回收期支持继续投入</td>
+</tr>
+</tbody></table>
+<p><strong>步骤 3：可选 OMTM</strong></p>
+<p>渠道 ROI、CAC 回收期或利润率。根据当前风险是获客效率、现金回收还是盈利能力，选择一个。</p>
+<p><strong>步骤 4：通过条件</strong></p>
+<ul>
+<li>继续扩张：增长、质量、组织和财务保持可控。</li>
+<li>跳过的风险：规模可能放大渠道亏损、质量故障和组织低效。</li>
+</ul>
+<p><strong>示例</strong></p>
+<p>这款 AI 代码审查 SaaS 在留存和营收得到验证后，需要评估能否扩大规模。客户增加会带来接入支持、代码仓库集成和推理成本，此时应关注 CAC 回收期、净收入留存率（NRR）、毛利率和人均营收。</p>
+<h1 id="4-商业模式指标参考"><a href="#4-商业模式指标参考" class="headerlink" title="4. 商业模式指标参考"></a>4. 商业模式指标参考</h1><p>常见商业模式下的各阶段指标参考。</p>
+<h2 id="4-1-电商-交易平台"><a href="#4-1-电商-交易平台" class="headerlink" title="4.1 电商 / 交易平台"></a>4.1 电商 / 交易平台</h2><p>核心逻辑：流量 -&gt; 供给 -&gt; 转化 -&gt; 复购 -&gt; 利润。</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>指标参考</th>
+<th>判断点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>需求探索</td>
+<td>搜索行为、访谈反馈、现有购买渠道、人工接单转化率</td>
+<td>用户已有购买意图或交易行为</td>
+</tr>
+<tr>
+<td>用户黏性</td>
+<td>复购率、购买频次、复购间隔、商品收藏数、弃购召回转化率</td>
+<td>用户有同类商品或交易需求时会再次购买</td>
+</tr>
+<tr>
+<td>传播</td>
+<td>推荐转化率、分享购买转化率、拼团参与率、邀请带来的 GMV</td>
+<td>分享带来新交易</td>
+</tr>
+<tr>
+<td>营收</td>
+<td>GMV、抽佣率、毛利率、补贴率、履约成本、LTV/CAC</td>
+<td>能在交易规模之外看清收入质量</td>
+</tr>
+<tr>
+<td>规模化</td>
+<td>渠道 ROI、CAC 回收期、供给覆盖率、履约失败率、现金周转周期</td>
+<td>扩大获客后，供给、履约和现金流能否跟上</td>
+</tr>
+</tbody></table>
+<h2 id="4-2-SaaS-订阅业务"><a href="#4-2-SaaS-订阅业务" class="headerlink" title="4.2 SaaS / 订阅业务"></a>4.2 SaaS / 订阅业务</h2><p>核心逻辑：获客 -&gt; 激活 -&gt; 使用 -&gt; 留存 -&gt; 付费 -&gt; 扩展。</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>指标参考</th>
+<th>判断点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>需求探索</td>
+<td>用户访谈、任务发生频率、现有工具使用情况、人工处理流程、试用申请数</td>
+<td>用户的日常工作中有反复出现的问题</td>
+</tr>
+<tr>
+<td>用户黏性</td>
+<td>激活率、首次核心任务完成率、WAU/MAU、功能使用深度、同期群留存率</td>
+<td>用户反复通过产品完成核心任务</td>
+</tr>
+<tr>
+<td>传播</td>
+<td>团队成员邀请率、受邀成员激活率、协作带来的新增账号数、团队使用深度</td>
+<td>协作带来目标用户</td>
+</tr>
+<tr>
+<td>营收</td>
+<td>试用转付费率、MRR、ARR、ARPU、流失率、续费率、LTV/CAC</td>
+<td>持续使用能转化为订阅收入</td>
+</tr>
+<tr>
+<td>规模化</td>
+<td>CAC 回收期、NRR、付费席位增长、人均营收、毛利率</td>
+<td>留存、老客户增购和获客效率能够支撑增长</td>
+</tr>
+</tbody></table>
+<h2 id="4-3-UGC-社区"><a href="#4-3-UGC-社区" class="headerlink" title="4.3 UGC / 社区"></a>4.3 UGC / 社区</h2><p>核心逻辑：用户发布内容 -&gt; 内容被阅读或观看 -&gt; 互动带来反馈 -&gt; 创作者持续发布 -&gt; 用户持续留存。</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>指标参考</th>
+<th>判断点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>需求探索</td>
+<td>创作者访谈、现有发布行为、社区参与情况、早期人工运营中的投稿情况</td>
+<td>用户已有创作、内容获取或互动需求</td>
+</tr>
+<tr>
+<td>用户黏性</td>
+<td>创作者留存率、内容消费者留存率、发布频次、阅读或观看深度、互动率</td>
+<td>创作者和内容消费者都持续使用</td>
+</tr>
+<tr>
+<td>传播</td>
+<td>分享率、邀请转化率、内容带来的注册转化率、关注关系增长</td>
+<td>内容或社交关系能带来并留住新用户</td>
+</tr>
+<tr>
+<td>营收</td>
+<td>人均广告收入、创作者变现率、付费社区转化率、抽佣率、LTV/CAC</td>
+<td>变现的同时，持续观察创作者活跃度和用户留存</td>
+</tr>
+<tr>
+<td>规模化</td>
+<td>DAU/MAU、活跃创作者数、优质内容占比、审核通过率、举报率</td>
+<td>用户增长后，内容供给、内容质量和审核能力能否跟上</td>
+</tr>
+</tbody></table>
+
+      </div>
+      
+      
+      
+    </div>
+    
+  <ul class="breadcrumb">
+          
+            <li><a href="/i18n/">I18N</a></li>
+            <li><a href="/i18n/zh/">ZH</a></li>
+            <li><a href="/i18n/zh/product/">PRODUCT</a></li>
+            <li>LEAN_ANALYTICS_IN_PRODUCT</li>
+          
+  </ul>
+
+    
+    
+    
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87"><span class="nav-number">1.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88"><span class="nav-number">2.</span> <span class="nav-text">为什么</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%81%9A"><span class="nav-number">3.</span> <span class="nav-text">如何做</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%85%E5%AE%B9"><span class="nav-number">4.</span> <span class="nav-text">内容</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-%E4%BA%A7%E5%93%81%E5%86%B3%E7%AD%96%E6%A8%A1%E5%BC%8F"><span class="nav-number">5.</span> <span class="nav-text">1. 产品决策模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E6%A0%B9%E6%8D%AE%E9%98%B6%E6%AE%B5%E9%80%89%E6%8B%A9%E6%8C%87%E6%A0%87"><span class="nav-number">5.1.</span> <span class="nav-text">1.1 根据阶段选择指标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-%E6%A0%B9%E6%8D%AE%E6%8C%87%E6%A0%87%E5%86%B3%E5%AE%9A%E8%A1%8C%E5%8A%A8"><span class="nav-number">5.2.</span> <span class="nav-text">1.2 根据指标决定行动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-%E6%A0%B9%E6%8D%AE%E9%98%B6%E6%AE%B5%E4%BF%A1%E5%8F%B7%E7%94%B3%E8%AF%B7%E8%B5%84%E6%BA%90"><span class="nav-number">5.3.</span> <span class="nav-text">1.3 根据阶段信号申请资源</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-%E6%8C%87%E6%A0%87"><span class="nav-number">6.</span> <span class="nav-text">2. 指标</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E4%BB%80%E4%B9%88%E6%98%AF%E5%A5%BD%E6%8C%87%E6%A0%87"><span class="nav-number">6.1.</span> <span class="nav-text">2.1 什么是好指标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-OMTM%EF%BC%9A%E7%AC%AC%E4%B8%80%E5%85%B3%E9%94%AE%E6%8C%87%E6%A0%87"><span class="nav-number">6.2.</span> <span class="nav-text">2.2 OMTM：第一关键指标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E5%B8%B8%E8%A7%81%E6%8C%87%E6%A0%87%E7%B1%BB%E5%9E%8B"><span class="nav-number">6.3.</span> <span class="nav-text">2.3 常见指标类型</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-%E9%98%B6%E6%AE%B5"><span class="nav-number">7.</span> <span class="nav-text">3. 阶段</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E9%9C%80%E6%B1%82%E6%8E%A2%E7%B4%A2%EF%BC%9A%E7%9C%9F%E5%AE%9E%E9%97%AE%E9%A2%98%E5%AD%98%E5%9C%A8%E5%90%97%EF%BC%9F"><span class="nav-number">7.1.</span> <span class="nav-text">3.1 需求探索：真实问题存在吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E7%94%A8%E6%88%B7%E9%BB%8F%E6%80%A7%EF%BC%9A%E7%94%A8%E6%88%B7%E4%BC%9A%E6%8C%81%E7%BB%AD%E4%BD%BF%E7%94%A8%E5%90%97%EF%BC%9F"><span class="nav-number">7.2.</span> <span class="nav-text">3.2 用户黏性：用户会持续使用吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-%E4%BC%A0%E6%92%AD%EF%BC%9A%E7%94%A8%E6%88%B7%E4%BC%9A%E5%B8%A6%E6%9D%A5%E6%96%B0%E7%94%A8%E6%88%B7%E5%90%97%EF%BC%9F"><span class="nav-number">7.3.</span> <span class="nav-text">3.3 传播：用户会带来新用户吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-%E8%90%A5%E6%94%B6%EF%BC%9A%E4%BA%A7%E5%93%81%E8%83%BD%E8%B5%9A%E9%92%B1%E5%90%97%EF%BC%9F"><span class="nav-number">7.4.</span> <span class="nav-text">3.4 营收：产品能赚钱吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-%E8%A7%84%E6%A8%A1%E5%8C%96%EF%BC%9A%E8%83%BD%E9%AB%98%E6%95%88%E6%94%BE%E5%A4%A7%E5%A2%9E%E9%95%BF%E5%90%97%EF%BC%9F"><span class="nav-number">7.5.</span> <span class="nav-text">3.5 规模化：能高效放大增长吗？</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-%E5%95%86%E4%B8%9A%E6%A8%A1%E5%BC%8F%E6%8C%87%E6%A0%87%E5%8F%82%E8%80%83"><span class="nav-number">8.</span> <span class="nav-text">4. 商业模式指标参考</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-%E7%94%B5%E5%95%86-%E4%BA%A4%E6%98%93%E5%B9%B3%E5%8F%B0"><span class="nav-number">8.1.</span> <span class="nav-text">4.1 电商 &#x2F; 交易平台</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-SaaS-%E8%AE%A2%E9%98%85%E4%B8%9A%E5%8A%A1"><span class="nav-number">8.2.</span> <span class="nav-text">4.2 SaaS &#x2F; 订阅业务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-UGC-%E7%A4%BE%E5%8C%BA"><span class="nav-number">8.3.</span> <span class="nav-text">4.3 UGC &#x2F; 社区</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

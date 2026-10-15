@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="GoalChinese version: 面向产品工程师的精益数据分析 Continuing the product engineer career path discussion, this article helps software engineers build a basic product thinking framework:  What validation stages does">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lean Analytics for Product Engineers">
+<meta property="og:url" content="https://lucky-chen.github.io/2026/10/14/product/lean_analytics_in_product/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="GoalChinese version: 面向产品工程师的精益数据分析 Continuing the product engineer career path discussion, this article helps software engineers build a basic product thinking framework:  What validation stages does">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-10-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-15T07:30:59.950Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2026/10/14/product/lean_analytics_in_product/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Lean Analytics for Product Engineers | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2026/10/14/product/lean_analytics_in_product/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Lean Analytics for Product Engineers
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2026-10-14 00:00:00" itemprop="dateCreated datePublished" datetime="2026-10-14T00:00:00+08:00">2026-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2026-10-15 15:30:59" itemprop="dateModified" datetime="2026-10-15T15:30:59+08:00">2026-10-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Product/" itemprop="url" rel="index"><span itemprop="name">Product</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Goal"><a href="#Goal" class="headerlink" title="Goal"></a>Goal</h1><p><span style="color: #007c91; font-weight: 600;">Chinese version:</span> <a href="/i18n/zh/product/lean_analytics_in_product.html" style="color: #007c91; border-bottom-color: #007c91; font-weight: 600;">面向产品工程师的精益数据分析</a></p>
+<p>Continuing the product engineer career path discussion, this article helps software engineers build a basic product thinking framework:</p>
+<ol>
+<li>What validation stages does product innovation usually go through?</li>
+<li>What qualitative judgment should be made at each stage?</li>
+<li>What quantitative metric can be used to validate that judgment?</li>
+</ol>
+<p>This article draws on <a target="_blank" rel="noopener" href="https://www.amazon.sg/dp/1449335675"><em>Lean Analytics</em></a>, a book on validating innovation that also helps engineers develop product thinking.</p>
+<p>Recommended by <a target="_blank" rel="noopener" href="https://www.oreilly.com/library/view/lean-analytics/9781449335687/apc.html">Kevin Weil</a>, <a target="_blank" rel="noopener" href="https://www.oreilly.com/library/view/lean-analytics/9781449335687/pr01.html">Dan Martell</a>, <a target="_blank" rel="noopener" href="https://www.sohu.com/a/115328943_358836">Fan Bing</a>, <a target="_blank" rel="noopener" href="https://www.woshipm.com/pmd/393383.html">Zhang Ximeng</a>, and <a target="_blank" rel="noopener" href="https://tech.sina.cn/csj/2019-03-05/doc-ihsxncvf9865915.d.html">Ding Lei</a>.</p>
+<span id="more"></span>
+
+<h1 id="Why"><a href="#Why" class="headerlink" title="Why"></a>Why</h1><p>Software engineers often join product work from the delivery side. They know how to build the system, but may not have a clear framework for judging whether the product direction itself is valid.</p>
+<p>Common gaps include:</p>
+<ul>
+<li>Not knowing which stage the product is currently in</li>
+<li>Treating all metrics as equally important</li>
+<li>Confusing feature delivery with product progress</li>
+<li>Optimizing technical or operational details before validating the core product risk</li>
+<li>Lacking a shared language for discussing product value, business risk, and user behavior</li>
+</ul>
+<p>This article uses Lean Analytics to provide a simple operating framework:</p>
+<ul>
+<li>Use stages to locate the current product uncertainty</li>
+<li>Use qualitative questions to clarify what needs to be judged</li>
+<li>Use quantitative metrics to validate whether the product is moving forward</li>
+</ul>
+<h1 id="How"><a href="#How" class="headerlink" title="How"></a>How</h1><p>The core process is:</p>
+<ol>
+<li>Identify the current product stage.</li>
+<li>Identify the main question of that stage.</li>
+<li>Choose the evidence that can validate the question.</li>
+<li>Choose the quantitative metric that best represents the evidence.</li>
+<li>Use the metric result to decide whether to keep iterating, change direction, or move to the next stage.</li>
+</ol>
+<blockquote>
+<p>Note: The underlying logic draws on <em>On Contradiction</em> (identify the main question at each stage) and <em>On Practice</em> (test judgments through practice). Interested readers can explore both essays in <em>Selected Works of Mao Zedong</em>.</p>
+</blockquote>
+<h1 id="What"><a href="#What" class="headerlink" title="What"></a>What</h1><p>This article has four parts:</p>
+<ol>
+<li>Product Decision Pattern: how to turn product uncertainty into decisions.</li>
+<li>Metrics: how to choose useful indicators.</li>
+<li>Stages: how product innovation stages map to main questions, OMTM, focus, pass logic, and examples.</li>
+<li>Business Model Metric References: stage-based metric references for different business models.</li>
+</ol>
+<h1 id="1-Product-Decision-Pattern"><a href="#1-Product-Decision-Pattern" class="headerlink" title="1. Product Decision Pattern"></a>1. Product Decision Pattern</h1><h2 id="1-1-Use-Stage-to-Choose-Metrics"><a href="#1-1-Use-Stage-to-Choose-Metrics" class="headerlink" title="1.1 Use Stage to Choose Metrics"></a>1.1 Use Stage to Choose Metrics</h2><p>Different stages require different metrics.</p>
+<p>The metric should serve the current biggest risk. A product in the empathy stage should not optimize channel ROI. A product with weak retention should not treat paid acquisition as the main problem.</p>
+<h2 id="1-2-Use-Metrics-to-Decide-Actions"><a href="#1-2-Use-Metrics-to-Decide-Actions" class="headerlink" title="1.2 Use Metrics to Decide Actions"></a>1.2 Use Metrics to Decide Actions</h2><table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Decision Focus</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>The metric worsens</td>
+<td>Locate the bottleneck</td>
+</tr>
+<tr>
+<td>The metric improves</td>
+<td>Judge whether the stage risk has been reduced</td>
+</tr>
+<tr>
+<td>The metric is distorted</td>
+<td>Return to user behavior and qualitative evidence</td>
+</tr>
+<tr>
+<td>The metric improves but the business does not</td>
+<td>Recheck whether the metric is tied to the right risk</td>
+</tr>
+</tbody></table>
+<h2 id="1-3-Use-Stage-Signals-to-Ask-for-Resources"><a href="#1-3-Use-Stage-Signals-to-Ask-for-Resources" class="headerlink" title="1.3 Use Stage Signals to Ask for Resources"></a>1.3 Use Stage Signals to Ask for Resources</h2><p>The stages are introduced in section 3. For product engineers, stage signals are evidence for asking the company to start, continue, or expand a project.</p>
+<table>
+<thead>
+<tr>
+<th>Stage Signal</th>
+<th>Internal Resource Request</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Empathy signal is clear</td>
+<td>Ask for time to build a prototype or run a focused experiment</td>
+</tr>
+<tr>
+<td>Stickiness signal is clear</td>
+<td>Ask for engineering, design, or data support to improve the product loop</td>
+</tr>
+<tr>
+<td>Stickiness and revenue signals are both clear</td>
+<td>Ask for more resources based on PMF evidence</td>
+</tr>
+<tr>
+<td>Revenue signal is clear</td>
+<td>Ask for sales, marketing, pricing, or infrastructure resources</td>
+</tr>
+<tr>
+<td>Scale signal is clear</td>
+<td>Ask for larger team allocation, channel investment, operations support, or platform work</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>Note: In startup language, these signals are similar to PMF evidence. Founders use PMF evidence to ask investors or partners for more resources; product engineers can use stage evidence to make similar resource requests inside a company.</p>
+</blockquote>
+<h1 id="2-Metrics"><a href="#2-Metrics" class="headerlink" title="2. Metrics"></a>2. Metrics</h1><p>Metrics are useful only when they help a team make a decision.</p>
+<h2 id="2-1-What-Makes-a-Good-Metric"><a href="#2-1-What-Makes-a-Good-Metric" class="headerlink" title="2.1 What Makes a Good Metric"></a>2.1 What Makes a Good Metric</h2><table>
+<thead>
+<tr>
+<th>Principle</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Actionable</td>
+<td>When the metric changes, the team knows what to adjust</td>
+</tr>
+<tr>
+<td>Comparable</td>
+<td>It can be compared with history, targets, segments, or competitors</td>
+</tr>
+<tr>
+<td>Ratio first</td>
+<td>Ratios show efficiency and quality better than raw volume</td>
+</tr>
+<tr>
+<td>Simple and clear</td>
+<td>Non-data roles can understand it</td>
+</tr>
+<tr>
+<td>Problem-revealing</td>
+<td>A decline can expose the business bottleneck</td>
+</tr>
+</tbody></table>
+<h2 id="2-2-OMTM-One-Metric-That-Matters"><a href="#2-2-OMTM-One-Metric-That-Matters" class="headerlink" title="2.2 OMTM: One Metric That Matters"></a>2.2 OMTM: One Metric That Matters</h2><p>OMTM is the one metric that best represents whether the current main risk is being reduced.</p>
+<p>A good OMTM should answer three questions:</p>
+<ol>
+<li>What is the current main risk?</li>
+<li>Which metric best shows whether that risk is improving?</li>
+<li>What action will the team take based on the result?</li>
+</ol>
+<h2 id="2-3-Common-Metric-Types"><a href="#2-3-Common-Metric-Types" class="headerlink" title="2.3 Common Metric Types"></a>2.3 Common Metric Types</h2><p>These types are useful as a checklist, not as the main framework.</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Role</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Vanity metrics</td>
+<td>Show scale but do not directly guide decisions</td>
+<td>PV, total registered users, cumulative downloads</td>
+</tr>
+<tr>
+<td>Action metrics</td>
+<td>Guide product or business action</td>
+<td>Conversion rate, retention rate, CAC, LTV</td>
+</tr>
+<tr>
+<td>Leading indicators</td>
+<td>Signal future outcomes early</td>
+<td>Activation rate, key action completion rate, day-1 retention</td>
+</tr>
+<tr>
+<td>Lagging indicators</td>
+<td>Reflect final outcomes</td>
+<td>Revenue, profit, GMV, churn rate</td>
+</tr>
+<tr>
+<td>Qualitative evidence</td>
+<td>Explain why something happens</td>
+<td>User interviews, support feedback, review text</td>
+</tr>
+<tr>
+<td>Quantitative evidence</td>
+<td>Judge scale and change</td>
+<td>Funnel data, retention curves, revenue data</td>
+</tr>
+</tbody></table>
+<h1 id="3-Stages"><a href="#3-Stages" class="headerlink" title="3. Stages"></a>3. Stages</h1><p>The stage model answers two questions:</p>
+<ol>
+<li>What is the main uncertainty of the current business?</li>
+<li>How much evidence is enough to move to the next stage?</li>
+</ol>
+<p>The standards below are directional. The actual threshold depends on business model, usage frequency, margin structure, acquisition cycle, and product maturity.</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Core Question</th>
+<th>OMTM Tendency</th>
+<th>Minimum Standard for the Next Stage</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Empathy</td>
+<td>Does the problem really exist?</td>
+<td>Valid interviews, reservation rate, manual conversion rate</td>
+<td>Clear target users, real pain, existing alternatives, willingness to act</td>
+</tr>
+<tr>
+<td>Stickiness</td>
+<td>Do users keep using it?</td>
+<td>Activation rate, retention rate, key action completion rate</td>
+<td>Stable retention, clear core value, repeatable activation path</td>
+</tr>
+<tr>
+<td>Virality</td>
+<td>Do users bring new users?</td>
+<td>Share rate, invitation conversion rate, viral coefficient</td>
+<td>Invited users activate and retain, organic spread reduces CAC</td>
+</tr>
+<tr>
+<td>Revenue</td>
+<td>Can it make money?</td>
+<td>Paid conversion rate, LTV/CAC, gross margin</td>
+<td>Acceptable unit economics, repeatable revenue, controllable cost structure</td>
+</tr>
+<tr>
+<td>Scale</td>
+<td>Can growth be amplified efficiently?</td>
+<td>Channel ROI, CAC payback period, profit margin</td>
+<td>Growth, quality, organization, and finance remain controlled</td>
+</tr>
+</tbody></table>
+<h2 id="3-1-Empathy-Does-a-Real-Problem-Exist"><a href="#3-1-Empathy-Does-a-Real-Problem-Exist" class="headerlink" title="3.1 Empathy: Does a Real Problem Exist?"></a>3.1 Empathy: Does a Real Problem Exist?</h2><p><strong>Step 1: Main Question</strong></p>
+<p>Whether the target user has a real, painful problem worth solving.</p>
+<p><strong>Step 2: Focus</strong></p>
+<table>
+<thead>
+<tr>
+<th>Focus</th>
+<th>What to Judge</th>
+<th>Evidence</th>
+<th>Common Mistake</th>
+<th>Pass Signal</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Problem intensity</td>
+<td>Whether the problem is painful in a concrete scenario</td>
+<td>Interview signal, problem frequency</td>
+<td>Listening to what users say instead of observing what they do</td>
+<td>Users describe the scenario, loss, and current workaround clearly</td>
+</tr>
+<tr>
+<td>Existing alternatives</td>
+<td>Whether users already spend effort solving the problem</td>
+<td>Current workaround, paid alternative, manual process</td>
+<td>Treating no alternative as a good sign</td>
+<td>Users already use a workaround, paid product, or manual process</td>
+</tr>
+<tr>
+<td>Willingness to act</td>
+<td>Whether users will spend money, time, or switching cost</td>
+<td>Reservation rate, trial request, manual conversion rate</td>
+<td>Treating verbal interest as real demand</td>
+<td>Users leave information, try, reserve, pay, or spend time</td>
+</tr>
+<tr>
+<td>Target users</td>
+<td>Which segment feels the pain most strongly</td>
+<td>Segment-level interview signal</td>
+<td>Averaging feedback across weak and strong users</td>
+<td>The team can explain who feels the pain most, why, and when</td>
+</tr>
+</tbody></table>
+<p><strong>Step 3: Possible OMTM</strong></p>
+<p>Valid interviews, reservation rate, or manual conversion rate. Choose one based on the riskiest assumption in the current iteration.</p>
+<p><strong>Step 4: Pass Logic</strong></p>
+<ul>
+<li>Move forward when: the problem, target user, existing alternative, and willingness to act are clear.</li>
+<li>Risk of skipping: the team may build a solution for an imagined problem.</li>
+</ul>
+<p><strong>Example</strong></p>
+<p>Suppose the product is an AI code review SaaS. At this stage, the team should not start by measuring model accuracy alone. The first question is whether engineering teams already suffer from review delay, inconsistent review quality, or repeated manual checklist work. Strong evidence would include teams using custom scripts, written review rules, senior engineers spending repeated time on similar comments, or trial requests after seeing a manual demo.</p>
+<h2 id="3-2-Stickiness-Do-Users-Keep-Using-It"><a href="#3-2-Stickiness-Do-Users-Keep-Using-It" class="headerlink" title="3.2 Stickiness: Do Users Keep Using It?"></a>3.2 Stickiness: Do Users Keep Using It?</h2><p><strong>Step 1: Main Question</strong></p>
+<p>Whether users keep using the product because it creates real value.</p>
+<p><strong>Step 2: Focus</strong></p>
+<table>
+<thead>
+<tr>
+<th>Focus</th>
+<th>What to Judge</th>
+<th>Evidence</th>
+<th>Common Mistake</th>
+<th>Pass Signal</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Activation</td>
+<td>Whether new users can reach the first core value</td>
+<td>Activation rate</td>
+<td>Treating registration as activation</td>
+<td>New users can consistently complete the core action</td>
+</tr>
+<tr>
+<td>Retention</td>
+<td>Whether users return within the expected usage cycle</td>
+<td>Day-1, day-7, day-30 retention</td>
+<td>Letting new user growth hide weak retention</td>
+<td>Core users keep returning within a reasonable cycle</td>
+</tr>
+<tr>
+<td>Usage depth</td>
+<td>Whether repeated usage happens on the core value path</td>
+<td>Core action frequency, task completion rate</td>
+<td>Treating any activity as core value usage</td>
+<td>Users repeatedly use the core value path</td>
+</tr>
+<tr>
+<td>Key behavior</td>
+<td>Which behavior predicts long-term retention</td>
+<td>Behavior cohort analysis</td>
+<td>Treating every click as meaningful behavior</td>
+<td>The team can identify behaviors strongly related to long-term retention</td>
+</tr>
+</tbody></table>
+<p><strong>Step 3: Possible OMTM</strong></p>
+<p>Activation rate, retention rate, or key action completion rate. Choose one based on whether the bottleneck is first value, repeat usage, or a specific retained-user behavior.</p>
+<p><strong>Step 4: Pass Logic</strong></p>
+<ul>
+<li>Move forward when: retention is stable, core value is clear, and new users can repeatedly reach that value.</li>
+<li>Risk of skipping: scaling acquisition usually only exposes churn faster.</li>
+</ul>
+<p><strong>Example</strong></p>
+<p>For the AI code review SaaS, stickiness depends on whether teams repeatedly run reviews through the product after the first trial. A useful OMTM may be weekly active repositories with completed AI reviews, because it ties usage to the actual review workflow instead of counting logins or page views.</p>
+<h2 id="3-3-Virality-Do-Users-Bring-New-Users"><a href="#3-3-Virality-Do-Users-Bring-New-Users" class="headerlink" title="3.3 Virality: Do Users Bring New Users?"></a>3.3 Virality: Do Users Bring New Users?</h2><p><strong>Step 1: Main Question</strong></p>
+<p>Whether user behavior can create new users without relying only on paid acquisition.</p>
+<p><strong>Step 2: Focus</strong></p>
+<table>
+<thead>
+<tr>
+<th>Focus</th>
+<th>What to Judge</th>
+<th>Evidence</th>
+<th>Common Mistake</th>
+<th>Pass Signal</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Sharing</td>
+<td>Whether users share or invite for a real product reason</td>
+<td>Share rate, invitation rate</td>
+<td>Treating share-button clicks as real spread</td>
+<td>Sharing comes from value, relationship, collaboration, or identity expression</td>
+</tr>
+<tr>
+<td>Conversion</td>
+<td>Whether invited users accept and activate</td>
+<td>Invitation acceptance rate, share-to-activation rate</td>
+<td>Celebrating exposure without conversion</td>
+<td>Invited users activate and retain</td>
+</tr>
+<tr>
+<td>Viral loop</td>
+<td>Whether each user brings in new users within a reasonable cycle</td>
+<td>Viral coefficient, propagation cycle</td>
+<td>Reading viral coefficient without propagation time</td>
+<td>Organic spread reduces overall CAC</td>
+</tr>
+<tr>
+<td>User quality</td>
+<td>Whether referred users retain and behave like good users</td>
+<td>Referred-user retention, complaint rate</td>
+<td>Driving low-quality users through rewards</td>
+<td>New user quality, retention, and complaints do not worsen significantly</td>
+</tr>
+</tbody></table>
+<p>Not every business must pass through the virality stage. Low-frequency, high-ticket, transaction-heavy businesses may move from stickiness directly to revenue validation.</p>
+<p><strong>Step 3: Possible OMTM</strong></p>
+<p>Share rate, invitation conversion rate, or viral coefficient. Choose one based on whether the current risk is motivation, conversion, loop efficiency, or referred-user quality.</p>
+<p><strong>Step 4: Pass Logic</strong></p>
+<ul>
+<li>Move forward when: sharing has a real motivation, invited users activate and retain, and organic spread lowers acquisition cost without damaging quality.</li>
+<li>Risk of skipping: referral or sharing mechanisms may bring low-quality users without sustainable growth.</li>
+</ul>
+<p><strong>Example</strong></p>
+<p>For the AI code review SaaS, virality may come from collaboration rather than public sharing. If one engineer installs the tool and then invites teammates to comment, approve, or configure repository rules, workspace invite activation becomes more meaningful than generic share rate.</p>
+<h2 id="3-4-Revenue-Can-It-Make-Money"><a href="#3-4-Revenue-Can-It-Make-Money" class="headerlink" title="3.4 Revenue: Can It Make Money?"></a>3.4 Revenue: Can It Make Money?</h2><p><strong>Step 1: Main Question</strong></p>
+<p>Whether product value can become repeatable revenue.</p>
+<p><strong>Step 2: Focus</strong></p>
+<table>
+<thead>
+<tr>
+<th>Focus</th>
+<th>What to Judge</th>
+<th>Evidence</th>
+<th>Common Mistake</th>
+<th>Pass Signal</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Payment intent</td>
+<td>Whether users pay for the product value</td>
+<td>Paid conversion rate, trial-to-paid rate</td>
+<td>Treating free usage as willingness to pay</td>
+<td>Users pay for the product value</td>
+</tr>
+<tr>
+<td>Pricing logic</td>
+<td>Whether users understand what value they are paying for</td>
+<td>ARPU, plan selection, discount sensitivity</td>
+<td>Testing price without understanding perceived value</td>
+<td>The team can explain why users pay and which value they pay for</td>
+</tr>
+<tr>
+<td>Revenue repeatability</td>
+<td>Whether payment repeats through renewal, repurchase, or expansion</td>
+<td>Renewal rate, repeat purchase rate, expansion revenue</td>
+<td>Treating one-time payment as repeatable revenue</td>
+<td>Payment, renewal, or repeat purchase is not accidental</td>
+</tr>
+<tr>
+<td>Unit economics</td>
+<td>Whether revenue can cover acquisition and delivery cost</td>
+<td>LTV/CAC, gross margin, payback period</td>
+<td>Letting revenue growth hide unsustainable cost</td>
+<td>LTV covers CAC, fulfillment cost, and service cost</td>
+</tr>
+</tbody></table>
+<p><strong>Step 3: Possible OMTM</strong></p>
+<p>Paid conversion rate, LTV/CAC, or gross margin. Choose one based on whether the current risk is payment intent, acquisition efficiency, or delivery cost.</p>
+<p><strong>Step 4: Pass Logic</strong></p>
+<ul>
+<li>Move forward when: revenue is repeatable, pricing logic is clear, and unit economics are acceptable.</li>
+<li>Risk of skipping: growth may amplify an unprofitable business model.</li>
+</ul>
+<p><strong>Example</strong></p>
+<p>For the AI code review SaaS, revenue validation begins when repeated review usage turns into paid team or company accounts. Trial-to-paid rate may be the first useful metric, but renewal rate, expansion seats, and LTV/CAC become more important once teams depend on the tool in their engineering workflow.</p>
+<h2 id="3-5-Scale-Can-Growth-Be-Amplified-Efficiently"><a href="#3-5-Scale-Can-Growth-Be-Amplified-Efficiently" class="headerlink" title="3.5 Scale: Can Growth Be Amplified Efficiently?"></a>3.5 Scale: Can Growth Be Amplified Efficiently?</h2><p><strong>Step 1: Main Question</strong></p>
+<p>Whether growth can be amplified without losing efficiency, quality, or financial control.</p>
+<p><strong>Step 2: Focus</strong></p>
+<table>
+<thead>
+<tr>
+<th>Focus</th>
+<th>What to Judge</th>
+<th>Evidence</th>
+<th>Common Mistake</th>
+<th>Pass Signal</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Growth efficiency</td>
+<td>Whether channels keep working as spend increases</td>
+<td>Channel ROI, CAC payback period</td>
+<td>Letting total growth hide channel-level losses</td>
+<td>Core channel ROI is stable, and CAC does not deteriorate quickly</td>
+</tr>
+<tr>
+<td>Organizational efficiency</td>
+<td>Whether delivery and experiment speed remain healthy</td>
+<td>Revenue per employee, experiment throughput</td>
+<td>Using headcount growth as the main scaling method</td>
+<td>Delivery efficiency and experiment efficiency do not decline significantly</td>
+</tr>
+<tr>
+<td>Quality stability</td>
+<td>Whether more volume creates proportional quality problems</td>
+<td>Complaint rate, failure rate, fulfillment failure rate</td>
+<td>Ignoring systemic problems amplified by scale</td>
+<td>Complaints, failures, and fulfillment issues do not worsen proportionally with scale</td>
+</tr>
+<tr>
+<td>Profitability</td>
+<td>Whether larger scale improves or preserves financial health</td>
+<td>Profit margin, cash flow, marginal cost at scale</td>
+<td>Assuming bigger scale automatically improves profit</td>
+<td>Gross margin, cash flow, and payback period support continued investment</td>
+</tr>
+</tbody></table>
+<p><strong>Step 3: Possible OMTM</strong></p>
+<p>Channel ROI, CAC payback period, or profit margin. Choose one based on whether the current risk is acquisition efficiency, cash recovery, or profitability.</p>
+<p><strong>Step 4: Pass Logic</strong></p>
+<ul>
+<li>Keep scaling when: growth, quality, organization, and finance remain controlled.</li>
+<li>Risk of skipping: scale may amplify channel losses, quality failures, and organizational inefficiency.</li>
+</ul>
+<p><strong>Example</strong></p>
+<p>For the AI code review SaaS, scale should be judged after retention and revenue are working. At this stage, CAC payback, NRR, gross margin, and revenue per employee matter because growth may increase onboarding support, repository integration work, and inference cost.</p>
+<h1 id="4-Business-Model-Metric-References"><a href="#4-Business-Model-Metric-References" class="headerlink" title="4. Business Model Metric References"></a>4. Business Model Metric References</h1><p>Stage-based metric references for common business models.</p>
+<h2 id="4-1-E-commerce-Transaction-Platform"><a href="#4-1-E-commerce-Transaction-Platform" class="headerlink" title="4.1 E-commerce / Transaction Platform"></a>4.1 E-commerce / Transaction Platform</h2><p>Core logic: traffic -&gt; supply -&gt; conversion -&gt; repeat purchase -&gt; profit.</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Metric References</th>
+<th>Judgment Point</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Empathy</td>
+<td>Search behavior, interview signal, existing purchase path, manual order conversion</td>
+<td>Users already have purchase intent or existing transaction behavior</td>
+</tr>
+<tr>
+<td>Stickiness</td>
+<td>Repeat purchase rate, purchase frequency, reorder interval, saved items, cart recovery</td>
+<td>Users return for the category or transaction need</td>
+</tr>
+<tr>
+<td>Virality</td>
+<td>Referral conversion rate, share-to-purchase rate, group-buy participation, invite-driven GMV</td>
+<td>Sharing creates new transactions</td>
+</tr>
+<tr>
+<td>Revenue</td>
+<td>GMV, take rate, gross margin, subsidy rate, fulfillment cost, LTV/CAC</td>
+<td>Revenue quality is visible beyond transaction volume</td>
+</tr>
+<tr>
+<td>Scale</td>
+<td>Channel ROI, CAC payback period, supply coverage, fulfillment failure rate, cash conversion cycle</td>
+<td>Growth can be evaluated across acquisition, supply, fulfillment, and cash flow</td>
+</tr>
+</tbody></table>
+<h2 id="4-2-SaaS-Subscription-Business"><a href="#4-2-SaaS-Subscription-Business" class="headerlink" title="4.2 SaaS / Subscription Business"></a>4.2 SaaS / Subscription Business</h2><p>Core logic: acquisition -&gt; activation -&gt; usage -&gt; retention -&gt; payment -&gt; expansion.</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Metric References</th>
+<th>Judgment Point</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Empathy</td>
+<td>Problem interviews, workflow frequency, current tool usage, manual workaround, trial request</td>
+<td>Users already have a repeated workflow problem</td>
+</tr>
+<tr>
+<td>Stickiness</td>
+<td>Activation rate, first core task completion rate, WAU/MAU, feature usage depth, cohort retention</td>
+<td>Users repeatedly complete the core workflow</td>
+</tr>
+<tr>
+<td>Virality</td>
+<td>Workspace invite rate, invite activation rate, collaboration-created accounts, team adoption depth</td>
+<td>Collaboration brings in qualified users</td>
+</tr>
+<tr>
+<td>Revenue</td>
+<td>Trial-to-paid rate, MRR, ARR, ARPU, churn rate, renewal rate, LTV/CAC</td>
+<td>Usage converts into recurring revenue</td>
+</tr>
+<tr>
+<td>Scale</td>
+<td>CAC payback period, NRR, seat expansion, revenue per employee, gross margin</td>
+<td>Growth is supported by retention, expansion, and efficient acquisition</td>
+</tr>
+</tbody></table>
+<h2 id="4-3-UGC-Community"><a href="#4-3-UGC-Community" class="headerlink" title="4.3 UGC / Community"></a>4.3 UGC / Community</h2><p>Core logic: users create content -&gt; content is consumed -&gt; interaction gives feedback -&gt; creators keep contributing -&gt; the community retains.</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Metric References</th>
+<th>Judgment Point</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Empathy</td>
+<td>Creator interviews, existing publishing behavior, community participation, manual content contribution</td>
+<td>Users already have creation, discovery, or interaction needs</td>
+</tr>
+<tr>
+<td>Stickiness</td>
+<td>Creator retention, consumer retention, posting frequency, consumption depth, interaction rate</td>
+<td>Creators and consumers both keep returning</td>
+</tr>
+<tr>
+<td>Virality</td>
+<td>Share rate, invite conversion rate, content-driven signup rate, follow graph growth</td>
+<td>Content or relationships bring in new retained users</td>
+</tr>
+<tr>
+<td>Revenue</td>
+<td>Ad revenue per user, creator monetization rate, paid community conversion, take rate, LTV/CAC</td>
+<td>Monetization can be tracked without losing creator and consumer signals</td>
+</tr>
+<tr>
+<td>Scale</td>
+<td>DAU/MAU, active creators, high-quality content ratio, moderation pass rate, report rate</td>
+<td>Growth can be evaluated across activity, supply, quality, and moderation</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/10/12/product/product_engineer_en/" rel="prev" title="Product Engineering: An SDE Career Path in the AI Era">
+      <i class="fa fa-chevron-left"></i> Product Engineering: An SDE Career Path in the AI Era
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Goal"><span class="nav-number">1.</span> <span class="nav-text">Goal</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Why"><span class="nav-number">2.</span> <span class="nav-text">Why</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#How"><span class="nav-number">3.</span> <span class="nav-text">How</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#What"><span class="nav-number">4.</span> <span class="nav-text">What</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-Product-Decision-Pattern"><span class="nav-number">5.</span> <span class="nav-text">1. Product Decision Pattern</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-Use-Stage-to-Choose-Metrics"><span class="nav-number">5.1.</span> <span class="nav-text">1.1 Use Stage to Choose Metrics</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-Use-Metrics-to-Decide-Actions"><span class="nav-number">5.2.</span> <span class="nav-text">1.2 Use Metrics to Decide Actions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-Use-Stage-Signals-to-Ask-for-Resources"><span class="nav-number">5.3.</span> <span class="nav-text">1.3 Use Stage Signals to Ask for Resources</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-Metrics"><span class="nav-number">6.</span> <span class="nav-text">2. Metrics</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-What-Makes-a-Good-Metric"><span class="nav-number">6.1.</span> <span class="nav-text">2.1 What Makes a Good Metric</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-OMTM-One-Metric-That-Matters"><span class="nav-number">6.2.</span> <span class="nav-text">2.2 OMTM: One Metric That Matters</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-Common-Metric-Types"><span class="nav-number">6.3.</span> <span class="nav-text">2.3 Common Metric Types</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-Stages"><span class="nav-number">7.</span> <span class="nav-text">3. Stages</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-Empathy-Does-a-Real-Problem-Exist"><span class="nav-number">7.1.</span> <span class="nav-text">3.1 Empathy: Does a Real Problem Exist?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-Stickiness-Do-Users-Keep-Using-It"><span class="nav-number">7.2.</span> <span class="nav-text">3.2 Stickiness: Do Users Keep Using It?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-Virality-Do-Users-Bring-New-Users"><span class="nav-number">7.3.</span> <span class="nav-text">3.3 Virality: Do Users Bring New Users?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-Revenue-Can-It-Make-Money"><span class="nav-number">7.4.</span> <span class="nav-text">3.4 Revenue: Can It Make Money?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-Scale-Can-Growth-Be-Amplified-Efficiently"><span class="nav-number">7.5.</span> <span class="nav-text">3.5 Scale: Can Growth Be Amplified Efficiently?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-Business-Model-Metric-References"><span class="nav-number">8.</span> <span class="nav-text">4. Business Model Metric References</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-E-commerce-Transaction-Platform"><span class="nav-number">8.1.</span> <span class="nav-text">4.1 E-commerce &#x2F; Transaction Platform</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-SaaS-Subscription-Business"><span class="nav-number">8.2.</span> <span class="nav-text">4.2 SaaS &#x2F; Subscription Business</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-UGC-Community"><span class="nav-number">8.3.</span> <span class="nav-text">4.3 UGC &#x2F; Community</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
