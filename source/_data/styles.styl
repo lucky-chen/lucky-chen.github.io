@@ -1,0 +1,14 @@
+.post-body {
+  > p {
+    margin-bottom: 12px;
+
+    &:has(+ ul), &:has(+ ol) {
+      margin-bottom: 8px;
+    }
+  }
+
+  > ul, > ol {
+    margin-top: 0;
+    margin-bottom: 14px;
+  }
+}
