@@ -6,13 +6,13 @@ date: 2026-10-12
 
 # Goal
 
+<span style="color: #007c91; font-weight: 600;">Chinese version:</span> <a href="/i18n/zh/product/product_engineer.html" style="color: #007c91; border-bottom-color: #007c91; font-weight: 600;">产品工程：传统 SDE 在 AI 时代的可能职业方向</a>
+
 Explore one judgment: product engineering may be a new direction for traditional SDEs in the AI era.
 
 - How AI affects the traditional SDLC
 - Where SDEs can move their capability focus in the AI era
 - How to build product engineering capability
-
-Chinese version: [产品工程：传统 SDE 在 AI 时代的可能职业方向](/i18n/zh/product/product_engineer.html)
 
 <!-- more -->
 

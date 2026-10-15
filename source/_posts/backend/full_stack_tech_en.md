@@ -6,13 +6,13 @@ date: 2026-10-09
 
 # Goal
 
+<span style="color: #007c91; font-weight: 600;">Chinese version:</span> <a href="/i18n/zh/backend/full_stack_tech.html" style="color: #007c91; border-bottom-color: #007c91; font-weight: 600;">全栈视角下的后端技术栈地图</a>
+
 Get a fast overview of full-stack architecture, with a focus on backend systems.
 
 1. A high-level architecture and technology stack map for full-stack projects.
 2. A flash-sale e-commerce case study to connect the architecture with key backend technologies.
 3. Practical references for project technology selection and architecture design.
-
-Chinese version: [全栈视角下的后端技术栈地图](/i18n/zh/backend/full_stack_tech.html)
 
 <!-- more -->
 

@@ -8,13 +8,13 @@ lang: en
 
 # Background
 
+<span style="color: #007c91; font-weight: 600;">Chinese version:</span> <a href="/i18n/zh/ai/agent-sdk-design.html" style="color: #007c91; border-bottom-color: #007c91; font-weight: 600;">我进入 AI 领域的方式，以及 Agent SDK 的设计</a>
+
 This article is about how to enter a new field quickly. The method used here is **seeking truth from facts**, with three steps: **investigation**, **practice**, and **iteration through review**. The concrete example in this article is agent engineering in the AI domain.
 
 - **Investigation**: what problems appeared when entering the AI field, how to approach it, and what initial assumptions were formed through investigation
 - **Conclusions**: what core judgments were formed after investigation and practice
 - **Practical engineering**: how those judgments were derived, designed, and validated through a real agent engineering project
-
-Chinese version: [我进入 AI 领域的方式，以及 Agent SDK 的设计](/i18n/zh/ai/agent-sdk-design.html)
 
 <!-- more -->
 

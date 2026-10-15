@@ -6,13 +6,13 @@ date: 2026-10-09
 
 # 目标
 
+<span style="color: #007c91; font-weight: 600;">English version:</span> <a href="/2026/10/09/backend/full_stack_tech_en/" style="color: #007c91; border-bottom-color: #007c91; font-weight: 600;">Backend Architecture and Technology Stack Map</a>
+
 快速了解全栈，尤其是后端技术栈。
 
 1. 全栈项目整体架构和技术栈地图。
 2. 电商秒杀系统案例，串联整体架构和关键技术。
 3. 具体项目选型和架构设计参考。
-
-English version: [A Backend Technology Map from a Full-Stack Perspective](/2026/10/09/backend/full_stack_tech_en/)
 
 <!-- more -->
 
