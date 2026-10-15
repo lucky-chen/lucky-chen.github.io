@@ -28,7 +28,7 @@
 <meta property="og:description" content="目标English version: Backend Architecture and Technology Stack Map 快速了解全栈，尤其是后端技术栈。  全栈项目整体架构和技术栈地图。 电商秒杀系统案例，串联整体架构和关键技术。 具体项目选型和架构设计参考。">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2026-10-08T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-10-15T07:32:34.482Z">
+<meta property="article:modified_time" content="2026-10-15T07:47:14.206Z">
 <meta property="article:author" content="lucky_chen">
 <meta name="twitter:card" content="summary">
 
@@ -187,7 +187,7 @@
       
       
       <div class="post-body">
-          <h1 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h1><p><span style="color: #007c91; font-weight: 600;">English version:</span> <a href="/2026/10/09/backend/full_stack_tech_en/" style="color: #007c91; border-bottom-color: #007c91; font-weight: 600;">Backend Architecture and Technology Stack Map</a></p>
+          <h1 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h1><p><strong>English version: <a href="/2026/10/09/backend/full_stack_tech_en/">Backend Architecture and Technology Stack Map</a></strong></p>
 <p>快速了解全栈，尤其是后端技术栈。</p>
 <ol>
 <li>全栈项目整体架构和技术栈地图。</li>
@@ -360,13 +360,13 @@
 <td>Guardrails、Moderation、Eval、Token Budget、Prompt Audit、Model Router</td>
 </tr>
 </tbody></table>
-<h1 id="用电商秒杀系统串起来"><a href="#用电商秒杀系统串起来" class="headerlink" title="用电商秒杀系统串起来"></a>用电商秒杀系统串起来</h1><h2 id="1-业务场景是什么"><a href="#1-业务场景是什么" class="headerlink" title="1. 业务场景是什么"></a>1. 业务场景是什么</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">100 台手机限量抢购</span><br><span class="line">大量用户同时请求</span><br><span class="line">系统要保证性能、数据一致性和安全性</span><br></pre></td></tr></table></figure>
+<h1 id="用电商秒杀系统串起来"><a href="#用电商秒杀系统串起来" class="headerlink" title="用电商秒杀系统串起来"></a>用电商秒杀系统串起来</h1><h2 id="业务场景是什么"><a href="#业务场景是什么" class="headerlink" title="业务场景是什么"></a>业务场景是什么</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">100 台手机限量抢购</span><br><span class="line">大量用户同时请求</span><br><span class="line">系统要保证性能、数据一致性和安全性</span><br></pre></td></tr></table></figure>
 
-<h2 id="2-为什么用这个场景"><a href="#2-为什么用这个场景" class="headerlink" title="2. 为什么用这个场景"></a>2. 为什么用这个场景</h2><p>秒杀系统适合作为后端架构案例，因为它同时包含业务闭环和系统质量要求。业务上要完成登录、资格校验、扣库存、下单、支付和取消；系统上要处理高并发、防超卖、幂等、削峰、补偿、扩容和排障。</p>
+<h2 id="为什么用这个场景"><a href="#为什么用这个场景" class="headerlink" title="为什么用这个场景"></a>为什么用这个场景</h2><p>秒杀系统适合作为后端架构案例，因为它同时包含业务闭环和系统质量要求。业务上要完成登录、资格校验、扣库存、下单、支付和取消；系统上要处理高并发、防超卖、幂等、削峰、补偿、扩容和排障。</p>
 <p>用这个场景串后端技术栈，关键是把问题拆开，再看每类问题由哪一层后端能力解决：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">业务问题 → 功能需求 → 业务层 / 领域层 / 数据层</span><br><span class="line">系统问题 → 非功能需求 → 接入层 / 缓存 / MQ / 可观测性 / 部署运行</span><br></pre></td></tr></table></figure>
 
-<h2 id="3-这个场景的需求和能力要求"><a href="#3-这个场景的需求和能力要求" class="headerlink" title="3. 这个场景的需求和能力要求"></a>3. 这个场景的需求和能力要求</h2><p>这个场景的需求可以拆成两类：功能需求负责完成业务闭环，非功能需求负责保证系统在高流量、故障和业务边界条件下仍然稳定且正确。</p>
+<h2 id="这个场景的需求和能力要求"><a href="#这个场景的需求和能力要求" class="headerlink" title="这个场景的需求和能力要求"></a>这个场景的需求和能力要求</h2><p>这个场景的需求可以拆成两类：功能需求负责完成业务闭环，非功能需求负责保证系统在高流量、故障和业务边界条件下仍然稳定且正确。</p>
 <p>功能需求：</p>
 <table>
 <thead>
@@ -815,7 +815,7 @@
 <p>判断顺序：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">业务需求</span><br><span class="line">→ 技术需求</span><br><span class="line">→ 云厂商能力</span><br></pre></td></tr></table></figure>
 
-<h2 id="1-业务需求：先澄清当前业务"><a href="#1-业务需求：先澄清当前业务" class="headerlink" title="1. 业务需求：先澄清当前业务"></a>1. 业务需求：先澄清当前业务</h2><p>业务需求澄清重点看会影响架构形态的因素：核心链路、读写模式、一致性、状态复杂度、外部依赖、权限边界和交付约束。</p>
+<h2 id="业务需求：先澄清当前业务"><a href="#业务需求：先澄清当前业务" class="headerlink" title="业务需求：先澄清当前业务"></a>业务需求：先澄清当前业务</h2><p>业务需求澄清重点看会影响架构形态的因素：核心链路、读写模式、一致性、状态复杂度、外部依赖、权限边界和交付约束。</p>
 <table>
 <thead>
 <tr>
@@ -860,8 +860,8 @@
 <td>决定单体、模块化、微服务、K8s、Serverless、云托管</td>
 </tr>
 </tbody></table>
-<h2 id="2-技术需求：再选择后端能力"><a href="#2-技术需求：再选择后端能力" class="headerlink" title="2. 技术需求：再选择后端能力"></a>2. 技术需求：再选择后端能力</h2><p>技术需求来自业务需求和非功能压力。先把业务需求映射到后端能力，再用性能、可用性、扩展性和定量指标判断是否需要升级架构。</p>
-<h3 id="2-1-业务需求到技术能力"><a href="#2-1-业务需求到技术能力" class="headerlink" title="2.1 业务需求到技术能力"></a>2.1 业务需求到技术能力</h3><table>
+<h2 id="技术需求：再选择后端能力"><a href="#技术需求：再选择后端能力" class="headerlink" title="技术需求：再选择后端能力"></a>技术需求：再选择后端能力</h2><p>技术需求来自业务需求和非功能压力。先把业务需求映射到后端能力，再用性能、可用性、扩展性和定量指标判断是否需要升级架构。</p>
+<h3 id="业务需求到技术能力"><a href="#业务需求到技术能力" class="headerlink" title="业务需求到技术能力"></a>业务需求到技术能力</h3><table>
 <thead>
 <tr>
 <th>需求信号</th>
@@ -910,7 +910,7 @@
 <td>规则收敛、状态转换、长期演进</td>
 </tr>
 </tbody></table>
-<h3 id="2-2-非功能需求到技术能力"><a href="#2-2-非功能需求到技术能力" class="headerlink" title="2.2 非功能需求到技术能力"></a>2.2 非功能需求到技术能力</h3><table>
+<h3 id="非功能需求到技术能力"><a href="#非功能需求到技术能力" class="headerlink" title="非功能需求到技术能力"></a>非功能需求到技术能力</h3><table>
 <thead>
 <tr>
 <th>技术诉求</th>
@@ -975,7 +975,7 @@
 <li>用云厂商产品列表代替架构设计。</li>
 <li>罗列技术名词，缺少问题、代价和适用条件。</li>
 </ul>
-<h3 id="2-3-定量指标"><a href="#2-3-定量指标" class="headerlink" title="2.3 定量指标"></a>2.3 定量指标</h3><p>架构选型需要结合当前压力数据和增长速度。下面的区间是经验参考，真实判断要结合业务类型、接口复杂度、数据模型、机器规格和团队运维能力。</p>
+<h3 id="定量指标"><a href="#定量指标" class="headerlink" title="定量指标"></a>定量指标</h3><p>架构选型需要结合当前压力数据和增长速度。下面的区间是经验参考，真实判断要结合业务类型、接口复杂度、数据模型、机器规格和团队运维能力。</p>
 <table>
 <thead>
 <tr>
@@ -1056,7 +1056,7 @@
 </tr>
 </tbody></table>
 <p>定量指标的作用是判断“当前瓶颈在哪里”。如果 DB 慢，先看慢查询和索引；如果峰值冲击大，先看限流和削峰；如果任务积压，先看消费能力；如果问题不可见，先补日志、指标和链路追踪。</p>
-<h2 id="3-云厂商能力：最后决定托管还是自建"><a href="#3-云厂商能力：最后决定托管还是自建" class="headerlink" title="3. 云厂商能力：最后决定托管还是自建"></a>3. 云厂商能力：最后决定托管还是自建</h2><p>云厂商能力适合作为基础设施的托管实现。选型时先判断需要什么能力，再判断托管还是自建。</p>
+<h2 id="云厂商能力：最后决定托管还是自建"><a href="#云厂商能力：最后决定托管还是自建" class="headerlink" title="云厂商能力：最后决定托管还是自建"></a>云厂商能力：最后决定托管还是自建</h2><p>云厂商能力适合作为基础设施的托管实现。选型时先判断需要什么能力，再判断托管还是自建。</p>
 <table>
 <thead>
 <tr>
@@ -1192,7 +1192,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87"><span class="nav-number">1.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%A8%E6%A0%88%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88"><span class="nav-number">2.</span> <span class="nav-text">全栈架构总览</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AI-%E5%BA%94%E7%94%A8%E5%90%8E%E7%AB%AF%E8%A1%A5%E5%85%85"><span class="nav-number">2.1.</span> <span class="nav-text">AI 应用后端补充</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%94%A8%E7%94%B5%E5%95%86%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E4%B8%B2%E8%B5%B7%E6%9D%A5"><span class="nav-number">3.</span> <span class="nav-text">用电商秒杀系统串起来</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">3.1.</span> <span class="nav-text">1. 业务场景是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%9C%BA%E6%99%AF"><span class="nav-number">3.2.</span> <span class="nav-text">2. 为什么用这个场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E8%BF%99%E4%B8%AA%E5%9C%BA%E6%99%AF%E7%9A%84%E9%9C%80%E6%B1%82%E5%92%8C%E8%83%BD%E5%8A%9B%E8%A6%81%E6%B1%82"><span class="nav-number">3.3.</span> <span class="nav-text">3. 这个场景的需求和能力要求</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E6%BC%94%E8%BF%9B%E8%B7%AF%E7%BA%BF"><span class="nav-number">4.</span> <span class="nav-text">秒杀系统演进路线</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%80%EF%BC%9A%E5%8D%95%E4%BD%93%E7%89%88"><span class="nav-number">4.1.</span> <span class="nav-text">阶段一：单体版</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%BA%8C%EF%BC%9A%E5%BC%95%E5%85%A5-Redis"><span class="nav-number">4.2.</span> <span class="nav-text">阶段二：引入 Redis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%89%EF%BC%9A%E5%BC%95%E5%85%A5%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97"><span class="nav-number">4.3.</span> <span class="nav-text">阶段三：引入消息队列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E5%9B%9B%EF%BC%9A%E6%9C%8D%E5%8A%A1%E6%8B%86%E5%88%86"><span class="nav-number">4.4.</span> <span class="nav-text">阶段四：服务拆分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%BA%94%EF%BC%9A%E9%AB%98%E5%8F%AF%E7%94%A8%E7%94%9F%E4%BA%A7%E7%89%88"><span class="nav-number">4.5.</span> <span class="nav-text">阶段五：高可用生产版</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E4%B8%9A%E5%8A%A1%E5%A6%82%E4%BD%95%E9%80%89%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%9E%B6%E6%9E%84"><span class="nav-number">5.</span> <span class="nav-text">实际业务如何选型设计架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E4%B8%9A%E5%8A%A1%E9%9C%80%E6%B1%82%EF%BC%9A%E5%85%88%E6%BE%84%E6%B8%85%E5%BD%93%E5%89%8D%E4%B8%9A%E5%8A%A1"><span class="nav-number">5.1.</span> <span class="nav-text">1. 业务需求：先澄清当前业务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%8A%80%E6%9C%AF%E9%9C%80%E6%B1%82%EF%BC%9A%E5%86%8D%E9%80%89%E6%8B%A9%E5%90%8E%E7%AB%AF%E8%83%BD%E5%8A%9B"><span class="nav-number">5.2.</span> <span class="nav-text">2. 技术需求：再选择后端能力</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E4%B8%9A%E5%8A%A1%E9%9C%80%E6%B1%82%E5%88%B0%E6%8A%80%E6%9C%AF%E8%83%BD%E5%8A%9B"><span class="nav-number">5.2.1.</span> <span class="nav-text">2.1 业务需求到技术能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E9%9D%9E%E5%8A%9F%E8%83%BD%E9%9C%80%E6%B1%82%E5%88%B0%E6%8A%80%E6%9C%AF%E8%83%BD%E5%8A%9B"><span class="nav-number">5.2.2.</span> <span class="nav-text">2.2 非功能需求到技术能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-%E5%AE%9A%E9%87%8F%E6%8C%87%E6%A0%87"><span class="nav-number">5.2.3.</span> <span class="nav-text">2.3 定量指标</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E4%BA%91%E5%8E%82%E5%95%86%E8%83%BD%E5%8A%9B%EF%BC%9A%E6%9C%80%E5%90%8E%E5%86%B3%E5%AE%9A%E6%89%98%E7%AE%A1%E8%BF%98%E6%98%AF%E8%87%AA%E5%BB%BA"><span class="nav-number">5.3.</span> <span class="nav-text">3. 云厂商能力：最后决定托管还是自建</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87"><span class="nav-number">1.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%A8%E6%A0%88%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88"><span class="nav-number">2.</span> <span class="nav-text">全栈架构总览</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AI-%E5%BA%94%E7%94%A8%E5%90%8E%E7%AB%AF%E8%A1%A5%E5%85%85"><span class="nav-number">2.1.</span> <span class="nav-text">AI 应用后端补充</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%94%A8%E7%94%B5%E5%95%86%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E4%B8%B2%E8%B5%B7%E6%9D%A5"><span class="nav-number">3.</span> <span class="nav-text">用电商秒杀系统串起来</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">3.1.</span> <span class="nav-text">业务场景是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%9C%BA%E6%99%AF"><span class="nav-number">3.2.</span> <span class="nav-text">为什么用这个场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%99%E4%B8%AA%E5%9C%BA%E6%99%AF%E7%9A%84%E9%9C%80%E6%B1%82%E5%92%8C%E8%83%BD%E5%8A%9B%E8%A6%81%E6%B1%82"><span class="nav-number">3.3.</span> <span class="nav-text">这个场景的需求和能力要求</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E6%BC%94%E8%BF%9B%E8%B7%AF%E7%BA%BF"><span class="nav-number">4.</span> <span class="nav-text">秒杀系统演进路线</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%80%EF%BC%9A%E5%8D%95%E4%BD%93%E7%89%88"><span class="nav-number">4.1.</span> <span class="nav-text">阶段一：单体版</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%BA%8C%EF%BC%9A%E5%BC%95%E5%85%A5-Redis"><span class="nav-number">4.2.</span> <span class="nav-text">阶段二：引入 Redis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%89%EF%BC%9A%E5%BC%95%E5%85%A5%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97"><span class="nav-number">4.3.</span> <span class="nav-text">阶段三：引入消息队列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E5%9B%9B%EF%BC%9A%E6%9C%8D%E5%8A%A1%E6%8B%86%E5%88%86"><span class="nav-number">4.4.</span> <span class="nav-text">阶段四：服务拆分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%BA%94%EF%BC%9A%E9%AB%98%E5%8F%AF%E7%94%A8%E7%94%9F%E4%BA%A7%E7%89%88"><span class="nav-number">4.5.</span> <span class="nav-text">阶段五：高可用生产版</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E4%B8%9A%E5%8A%A1%E5%A6%82%E4%BD%95%E9%80%89%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%9E%B6%E6%9E%84"><span class="nav-number">5.</span> <span class="nav-text">实际业务如何选型设计架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E9%9C%80%E6%B1%82%EF%BC%9A%E5%85%88%E6%BE%84%E6%B8%85%E5%BD%93%E5%89%8D%E4%B8%9A%E5%8A%A1"><span class="nav-number">5.1.</span> <span class="nav-text">业务需求：先澄清当前业务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E9%9C%80%E6%B1%82%EF%BC%9A%E5%86%8D%E9%80%89%E6%8B%A9%E5%90%8E%E7%AB%AF%E8%83%BD%E5%8A%9B"><span class="nav-number">5.2.</span> <span class="nav-text">技术需求：再选择后端能力</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E9%9C%80%E6%B1%82%E5%88%B0%E6%8A%80%E6%9C%AF%E8%83%BD%E5%8A%9B"><span class="nav-number">5.2.1.</span> <span class="nav-text">业务需求到技术能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9E%E5%8A%9F%E8%83%BD%E9%9C%80%E6%B1%82%E5%88%B0%E6%8A%80%E6%9C%AF%E8%83%BD%E5%8A%9B"><span class="nav-number">5.2.2.</span> <span class="nav-text">非功能需求到技术能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E9%87%8F%E6%8C%87%E6%A0%87"><span class="nav-number">5.2.3.</span> <span class="nav-text">定量指标</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%91%E5%8E%82%E5%95%86%E8%83%BD%E5%8A%9B%EF%BC%9A%E6%9C%80%E5%90%8E%E5%86%B3%E5%AE%9A%E6%89%98%E7%AE%A1%E8%BF%98%E6%98%AF%E8%87%AA%E5%BB%BA"><span class="nav-number">5.3.</span> <span class="nav-text">云厂商能力：最后决定托管还是自建</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
