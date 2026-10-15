@@ -1165,7 +1165,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #4eff34;
+  background: #4bff83;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -2389,4 +2389,16 @@ hr {
 }
 .sub-menu .menu-item {
   display: inline-block;
+}
+.post-body > p {
+  margin-bottom: 12px;
+}
+.post-body > p:has(+ ul,
++ ol) {
+  margin-bottom: 8px;
+}
+.post-body > ul,
+.post-body > ol {
+  margin-top: 0;
+  margin-bottom: 12px;
 }
