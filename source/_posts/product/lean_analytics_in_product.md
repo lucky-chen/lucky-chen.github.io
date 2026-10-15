@@ -6,7 +6,7 @@ date: 2026-10-14
 
 # Goal
 
-<span style="color: #007c91; font-weight: 600;">Chinese version:</span> <a href="/i18n/zh/product/lean_analytics_in_product.html" style="color: #007c91; border-bottom-color: #007c91; font-weight: 600;">面向产品工程师的精益数据分析</a>
+**Chinese version: [面向产品工程师的精益数据分析](/i18n/zh/product/lean_analytics_in_product.html)**
 
 Continuing the product engineer career path discussion, this article helps software engineers build a basic product thinking framework:
 
@@ -61,15 +61,15 @@ This article has four parts:
 3. Stages: how product innovation stages map to main questions, OMTM, focus, pass logic, and examples.
 4. Business Model Metric References: stage-based metric references for different business models.
 
-# 1. Product Decision Pattern
+## Product Decision Pattern
 
-## 1.1 Use Stage to Choose Metrics
+### Use Stage to Choose Metrics
 
 Different stages require different metrics.
 
 The metric should serve the current biggest risk. A product in the empathy stage should not optimize channel ROI. A product with weak retention should not treat paid acquisition as the main problem.
 
-## 1.2 Use Metrics to Decide Actions
+### Use Metrics to Decide Actions
 
 | Situation | Decision Focus |
 |---|---|
@@ -78,9 +78,9 @@ The metric should serve the current biggest risk. A product in the empathy stage
 | The metric is distorted | Return to user behavior and qualitative evidence |
 | The metric improves but the business does not | Recheck whether the metric is tied to the right risk |
 
-## 1.3 Use Stage Signals to Ask for Resources
+### Use Stage Signals to Ask for Resources
 
-The stages are introduced in section 3. For product engineers, stage signals are evidence for asking the company to start, continue, or expand a project.
+The stages are introduced in the Stages section below. For product engineers, stage signals are evidence for asking the company to start, continue, or expand a project.
 
 | Stage Signal | Internal Resource Request |
 |---|---|
@@ -93,11 +93,11 @@ The stages are introduced in section 3. For product engineers, stage signals are
 > Note: In startup language, these signals are similar to PMF evidence. Founders use PMF evidence to ask investors or partners for more resources; product engineers can use stage evidence to make similar resource requests inside a company.
 
 
-# 2. Metrics
+## Metrics
 
 Metrics are useful only when they help a team make a decision.
 
-## 2.1 What Makes a Good Metric
+### What Makes a Good Metric
 
 | Principle | Meaning |
 |---|---|
@@ -107,7 +107,7 @@ Metrics are useful only when they help a team make a decision.
 | Simple and clear | Non-data roles can understand it |
 | Problem-revealing | A decline can expose the business bottleneck |
 
-## 2.2 OMTM: One Metric That Matters
+### OMTM: One Metric That Matters
 
 OMTM is the one metric that best represents whether the current main risk is being reduced.
 
@@ -117,7 +117,7 @@ A good OMTM should answer three questions:
 2. Which metric best shows whether that risk is improving?
 3. What action will the team take based on the result?
 
-## 2.3 Common Metric Types
+### Common Metric Types
 
 These types are useful as a checklist, not as the main framework.
 
@@ -131,7 +131,7 @@ These types are useful as a checklist, not as the main framework.
 | Quantitative evidence | Judge scale and change | Funnel data, retention curves, revenue data |
 
 
-# 3. Stages
+## Stages
 
 The stage model answers two questions:
 
@@ -148,7 +148,7 @@ The standards below are directional. The actual threshold depends on business mo
 | Revenue | Can it make money? | Paid conversion rate, LTV/CAC, gross margin | Acceptable unit economics, repeatable revenue, controllable cost structure |
 | Scale | Can growth be amplified efficiently? | Channel ROI, CAC payback period, profit margin | Growth, quality, organization, and finance remain controlled |
 
-## 3.1 Empathy: Does a Real Problem Exist?
+### Empathy: Does a Real Problem Exist?
 
 **Step 1: Main Question**
 
@@ -176,7 +176,7 @@ Valid interviews, reservation rate, or manual conversion rate. Choose one based 
 
 Suppose the product is an AI code review SaaS. At this stage, the team should not start by measuring model accuracy alone. The first question is whether engineering teams already suffer from review delay, inconsistent review quality, or repeated manual checklist work. Strong evidence would include teams using custom scripts, written review rules, senior engineers spending repeated time on similar comments, or trial requests after seeing a manual demo.
 
-## 3.2 Stickiness: Do Users Keep Using It?
+### Stickiness: Do Users Keep Using It?
 
 **Step 1: Main Question**
 
@@ -204,7 +204,7 @@ Activation rate, retention rate, or key action completion rate. Choose one based
 
 For the AI code review SaaS, stickiness depends on whether teams repeatedly run reviews through the product after the first trial. A useful OMTM may be weekly active repositories with completed AI reviews, because it ties usage to the actual review workflow instead of counting logins or page views.
 
-## 3.3 Virality: Do Users Bring New Users?
+### Virality: Do Users Bring New Users?
 
 **Step 1: Main Question**
 
@@ -234,7 +234,7 @@ Share rate, invitation conversion rate, or viral coefficient. Choose one based o
 
 For the AI code review SaaS, virality may come from collaboration rather than public sharing. If one engineer installs the tool and then invites teammates to comment, approve, or configure repository rules, workspace invite activation becomes more meaningful than generic share rate.
 
-## 3.4 Revenue: Can It Make Money?
+### Revenue: Can It Make Money?
 
 **Step 1: Main Question**
 
@@ -262,7 +262,7 @@ Paid conversion rate, LTV/CAC, or gross margin. Choose one based on whether the 
 
 For the AI code review SaaS, revenue validation begins when repeated review usage turns into paid team or company accounts. Trial-to-paid rate may be the first useful metric, but renewal rate, expansion seats, and LTV/CAC become more important once teams depend on the tool in their engineering workflow.
 
-## 3.5 Scale: Can Growth Be Amplified Efficiently?
+### Scale: Can Growth Be Amplified Efficiently?
 
 **Step 1: Main Question**
 
@@ -291,11 +291,11 @@ Channel ROI, CAC payback period, or profit margin. Choose one based on whether t
 For the AI code review SaaS, scale should be judged after retention and revenue are working. At this stage, CAC payback, NRR, gross margin, and revenue per employee matter because growth may increase onboarding support, repository integration work, and inference cost.
 
 
-# 4. Business Model Metric References
+## Business Model Metric References
 
 Stage-based metric references for common business models.
 
-## 4.1 E-commerce / Transaction Platform
+### E-commerce / Transaction Platform
 
 Core logic: traffic -> supply -> conversion -> repeat purchase -> profit.
 
@@ -307,7 +307,7 @@ Core logic: traffic -> supply -> conversion -> repeat purchase -> profit.
 | Revenue | GMV, take rate, gross margin, subsidy rate, fulfillment cost, LTV/CAC | Revenue quality is visible beyond transaction volume |
 | Scale | Channel ROI, CAC payback period, supply coverage, fulfillment failure rate, cash conversion cycle | Growth can be evaluated across acquisition, supply, fulfillment, and cash flow |
 
-## 4.2 SaaS / Subscription Business
+### SaaS / Subscription Business
 
 Core logic: acquisition -> activation -> usage -> retention -> payment -> expansion.
 
@@ -319,7 +319,7 @@ Core logic: acquisition -> activation -> usage -> retention -> payment -> expans
 | Revenue | Trial-to-paid rate, MRR, ARR, ARPU, churn rate, renewal rate, LTV/CAC | Usage converts into recurring revenue |
 | Scale | CAC payback period, NRR, seat expansion, revenue per employee, gross margin | Growth is supported by retention, expansion, and efficient acquisition |
 
-## 4.3 UGC / Community
+### UGC / Community
 
 Core logic: users create content -> content is consumed -> interaction gives feedback -> creators keep contributing -> the community retains.
 

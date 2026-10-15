@@ -6,7 +6,7 @@ date: 2026-10-12
 
 # 目标
 
-<span style="color: #007c91; font-weight: 600;">English version:</span> <a href="/2026/10/12/product/product_engineer_en/" style="color: #007c91; border-bottom-color: #007c91; font-weight: 600;">Product Engineering: An SDE Career Path in the AI Era</a>
+**English version: [Product Engineering: An SDE Career Path in the AI Era](/2026/10/12/product/product_engineer_en/)**
 
 探讨随着 AI 改变软件开发成本结构，为什么产品工程可能成为传统 SDE 在 AI 时代的一个职业方向。
 

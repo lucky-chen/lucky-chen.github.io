@@ -6,7 +6,7 @@ date: 2026-10-09
 
 # 目标
 
-<span style="color: #007c91; font-weight: 600;">English version:</span> <a href="/2026/10/09/backend/full_stack_tech_en/" style="color: #007c91; border-bottom-color: #007c91; font-weight: 600;">Backend Architecture and Technology Stack Map</a>
+**English version: [Backend Architecture and Technology Stack Map](/2026/10/09/backend/full_stack_tech_en/)**
 
 快速了解全栈，尤其是后端技术栈。
 
@@ -58,7 +58,7 @@ AI 应用后端通常是在传统后端链路上增加模型调用、上下文�
 
 # 用电商秒杀系统串起来
 
-## 1. 业务场景是什么
+## 业务场景是什么
 
 ```text
 100 台手机限量抢购
@@ -66,7 +66,7 @@ AI 应用后端通常是在传统后端链路上增加模型调用、上下文�
 系统要保证性能、数据一致性和安全性
 ```
 
-## 2. 为什么用这个场景
+## 为什么用这个场景
 
 秒杀系统适合作为后端架构案例，因为它同时包含业务闭环和系统质量要求。业务上要完成登录、资格校验、扣库存、下单、支付和取消；系统上要处理高并发、防超卖、幂等、削峰、补偿、扩容和排障。
 
@@ -77,7 +77,7 @@ AI 应用后端通常是在传统后端链路上增加模型调用、上下文�
 系统问题 → 非功能需求 → 接入层 / 缓存 / MQ / 可观测性 / 部署运行
 ```
 
-## 3. 这个场景的需求和能力要求
+## 这个场景的需求和能力要求
 
 这个场景的需求可以拆成两类：功能需求负责完成业务闭环，非功能需求负责保证系统在高流量、故障和业务边界条件下仍然稳定且正确。
 
@@ -424,7 +424,7 @@ func SeckillHandler(ctx context.Context, req SeckillRequest) {
 → 云厂商能力
 ```
 
-## 1. 业务需求：先澄清当前业务
+## 业务需求：先澄清当前业务
 
 业务需求澄清重点看会影响架构形态的因素：核心链路、读写模式、一致性、状态复杂度、外部依赖、权限边界和交付约束。
 
@@ -440,11 +440,11 @@ func SeckillHandler(ctx context.Context, req SeckillRequest) {
 | 是否需要实时交互 | 决定轮询、SSE、WebSocket、MQ、Redis Pub/Sub |
 | 团队和部署约束是什么 | 决定单体、模块化、微服务、K8s、Serverless、云托管 |
 
-## 2. 技术需求：再选择后端能力
+## 技术需求：再选择后端能力
 
 技术需求来自业务需求和非功能压力。先把业务需求映射到后端能力，再用性能、可用性、扩展性和定量指标判断是否需要升级架构。
 
-### 2.1 业务需求到技术能力
+### 业务需求到技术能力
 
 | 需求信号 | 技术能力 | 解决的问题 |
 |---|---|---|
@@ -457,7 +457,7 @@ func SeckillHandler(ctx context.Context, req SeckillRequest) {
 | 第三方集成 | Adapter、Signature Verify、Retry、Idempotency | 防伪造、防重复、失败恢复 |
 | 复杂业务规则 | Domain Model、DDD、业务状态机 | 规则收敛、状态转换、长期演进 |
 
-### 2.2 非功能需求到技术能力
+### 非功能需求到技术能力
 
 | 技术诉求 | 技术能力 | 升级信号 |
 |---|---|---|
@@ -486,7 +486,7 @@ func SeckillHandler(ctx context.Context, req SeckillRequest) {
 - 用云厂商产品列表代替架构设计。
 - 罗列技术名词，缺少问题、代价和适用条件。
 
-### 2.3 定量指标
+### 定量指标
 
 架构选型需要结合当前压力数据和增长速度。下面的区间是经验参考，真实判断要结合业务类型、接口复杂度、数据模型、机器规格和团队运维能力。
 
@@ -509,7 +509,7 @@ func SeckillHandler(ctx context.Context, req SeckillRequest) {
 
 定量指标的作用是判断“当前瓶颈在哪里”。如果 DB 慢，先看慢查询和索引；如果峰值冲击大，先看限流和削峰；如果任务积压，先看消费能力；如果问题不可见，先补日志、指标和链路追踪。
 
-## 3. 云厂商能力：最后决定托管还是自建
+## 云厂商能力：最后决定托管还是自建
 
 云厂商能力适合作为基础设施的托管实现。选型时先判断需要什么能力，再判断托管还是自建。
 

@@ -6,7 +6,7 @@ date: 2026-10-12
 
 # Goal
 
-<span style="color: #007c91; font-weight: 600;">Chinese version:</span> <a href="/i18n/zh/product/product_engineer.html" style="color: #007c91; border-bottom-color: #007c91; font-weight: 600;">产品工程：传统 SDE 在 AI 时代的可能职业方向</a>
+**Chinese version: [产品工程：传统 SDE 在 AI 时代的可能职业方向](/i18n/zh/product/product_engineer.html)**
 
 Explore one judgment: product engineering may be a new direction for traditional SDEs in the AI era.
 

@@ -8,7 +8,7 @@ lang: en
 
 # Background
 
-<span style="color: #007c91; font-weight: 600;">Chinese version:</span> <a href="/i18n/zh/ai/agent-sdk-design.html" style="color: #007c91; border-bottom-color: #007c91; font-weight: 600;">我进入 AI 领域的方式，以及 Agent SDK 的设计</a>
+**Chinese version: [我进入 AI 领域的方式，以及 Agent SDK 的设计](/i18n/zh/ai/agent-sdk-design.html)**
 
 This article is about how to enter a new field quickly. The method used here is **seeking truth from facts**, with three steps: **investigation**, **practice**, and **iteration through review**. The concrete example in this article is agent engineering in the AI domain.
 
@@ -319,4 +319,4 @@ When entering a new field, the priority is not to chase trends first. The priori
 
 `Agent SDK`, as one of the earliest engineering foundations produced by this methodology, already shows that this direction is valid, that the architectural structure is complete, and that it can continue evolving as a shared base for later projects.
 
-Chinese version: [我进入 AI 领域的方式，以及 Agent SDK 的设计](/zh/agent-sdk-design/)
+**Chinese version: [我进入 AI 领域的方式，以及 Agent SDK 的设计](/i18n/zh/ai/agent-sdk-design.html)**

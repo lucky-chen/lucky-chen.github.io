@@ -6,7 +6,7 @@ date: 2026-10-09
 
 # Goal
 
-<span style="color: #007c91; font-weight: 600;">Chinese version:</span> <a href="/i18n/zh/backend/full_stack_tech.html" style="color: #007c91; border-bottom-color: #007c91; font-weight: 600;">全栈视角下的后端技术栈地图</a>
+**Chinese version: [全栈视角下的后端技术栈地图](/i18n/zh/backend/full_stack_tech.html)**
 
 Get a fast overview of full-stack architecture, with a focus on backend systems.
 
@@ -58,7 +58,7 @@ An AI application backend usually adds model calls, context retrieval, tool call
 
 # Connecting the Stack with a Flash-Sale E-Commerce System
 
-## 1. What Is the Business Scenario?
+## What Is the Business Scenario?
 
 ```text
 100 phones available for limited-time purchase
@@ -66,7 +66,7 @@ A large number of users submit requests at the same time
 The system must guarantee performance, data consistency, and security
 ```
 
-## 2. Why Use This Scenario?
+## Why Use This Scenario?
 
 A flash-sale system is a useful backend architecture case because it includes both a complete business flow and system quality requirements. On the business side, it needs login, eligibility checks, stock decrement, order creation, payment, and cancellation. On the system side, it needs concurrency control, oversell prevention, idempotency, traffic spike buffering, compensation, scaling, and troubleshooting.
 
@@ -77,7 +77,7 @@ Business problem -> functional requirement -> application layer / domain layer /
 System problem -> non-functional requirement -> ingress layer / cache / MQ / observability / deployment runtime
 ```
 
-## 3. Requirements and Capability Needs in This Scenario
+## Requirements and Capability Needs in This Scenario
 
 The requirements in this scenario can be divided into two categories: functional requirements complete the business flow, while non-functional requirements keep the system stable and correct under high traffic, failures, and business edge cases.
 
@@ -130,7 +130,7 @@ Async order phase
 
 # Flash-Sale System Evolution Path
 
-## Stage 1: Monolith
+## Stage One: Monolith
 
 ```text
 User -> Nginx -> Spring Boot / Gin monolith -> MySQL
@@ -176,7 +176,7 @@ Related technology stack:
 
 This stage completes the loop of reading stock, decrementing stock, and creating orders. As concurrency increases, requests hit the database directly, and stock row locks plus order writes become bottlenecks.
 
-## Stage 2: Introduce Redis
+## Stage Two: Introduce Redis
 
 ```text
 User
@@ -223,7 +223,7 @@ Related technology stack:
 
 This stage moves hot stock decrement from the database to Redis, improving stock checks and decrement throughput. Orders are still written synchronously to the database, so database writes still block when request peaks continue to grow.
 
-## Stage 3: Introduce a Message Queue
+## Stage Three: Introduce a Message Queue
 
 ```text
 User
@@ -286,7 +286,7 @@ This stage uses MQ to buffer traffic spikes. The request path returns quickly, a
 
 Production systems must also handle the failure point where stock has been decremented but the message publish fails. A common pattern is to write the pending event to a local message table / Outbox first, let a background job publish it to MQ, and use reconciliation scans to catch events that were not published successfully. Consumers should use `message_id`, `request_id`, or a unique order constraint to guarantee idempotency and avoid duplicate orders from duplicate messages.
 
-## Stage 4: Service Decomposition
+## Stage Four: Service Decomposition
 
 ```text
 User
@@ -345,7 +345,7 @@ This stage splits users, orders, and stock into independent services that can sc
 
 After service decomposition, order, stock, and payment usually cannot rely on a single database transaction. The cross-service flow should be managed by a Saga state machine, for example `INIT -> STOCK_RESERVED -> ORDER_CREATED -> PAID -> DONE`. When any step fails, the flow enters a compensation state to release stock, close the order, or cancel payment. Compensation can also fail, so it needs retries, idempotency, and an operator intervention path.
 
-## Stage 5: Highly Available Production Version
+## Stage Five: Highly Available Production Version
 
 ```text
 User
@@ -419,7 +419,7 @@ Business requirements
 -> Cloud provider capabilities
 ```
 
-## 1. Business Requirements: Clarify the Current Business First
+## Business Requirements: Clarify the Current Business First
 
 Business requirement discovery should focus on factors that affect architecture shape: core path, read/write pattern, consistency, state complexity, external dependencies, permission boundaries, and delivery constraints.
 
@@ -435,11 +435,11 @@ Business requirement discovery should focus on factors that affect architecture 
 | Is realtime interaction needed? | Determines polling, SSE, WebSocket, MQ, and Redis Pub/Sub |
 | What are the team and delivery constraints? | Determines monolith, modular design, microservices, Kubernetes, Serverless, and managed services |
 
-## 2. Technical Requirements: Select Backend Capabilities
+## Technical Requirements: Select Backend Capabilities
 
 Technical requirements come from business requirements and non-functional load. First map business requirements to backend capabilities, then use performance, availability, scalability, and quantitative signals to judge whether the architecture needs to evolve.
 
-### 2.1 From Business Requirements to Technical Capabilities
+### From Business Requirements to Technical Capabilities
 
 | Requirement Signal | Technical Capability | Problem Solved |
 |---|---|---|
@@ -452,7 +452,7 @@ Technical requirements come from business requirements and non-functional load. 
 | Third-party integration | Adapter, Signature Verification, Retry, Idempotency | Request authenticity, deduplication, failure recovery |
 | Complex business rules | Domain Model, DDD, business state machine | Rule centralization, state transitions, long-term evolution |
 
-### 2.2 From Non-Functional Requirements to Technical Capabilities
+### From Non-Functional Requirements to Technical Capabilities
 
 | Technical Need | Technical Capability | Upgrade Signal |
 |---|---|---|
@@ -481,7 +481,7 @@ Common mistakes:
 - Replacing architecture design with a list of cloud products.
 - Listing technical terms without explaining problems, costs, and suitable conditions.
 
-### 2.3 Quantitative Signals
+### Quantitative Signals
 
 Architecture selection needs current load data and growth rate. The ranges below are experience-based references; real judgment depends on business type, API complexity, data model, instance size, and team maintenance capability.
 
@@ -504,7 +504,7 @@ Architecture selection needs current load data and growth rate. The ranges below
 
 Quantitative signals identify the current bottleneck. If the database is slow, check slow queries and indexes first. If spikes are the problem, check rate limiting and traffic buffering. If jobs accumulate, check consumer capacity. If issues are invisible, add logs, metrics, and tracing first.
 
-## 3. Cloud Provider Capabilities: Decide Managed or Self-Managed
+## Cloud Provider Capabilities: Decide Managed or Self-Managed
 
 Cloud provider capabilities are managed implementations of infrastructure capabilities. Selection should start from the needed capability, then decide whether to use a managed service or operate it yourself.
 
