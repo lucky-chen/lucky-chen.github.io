@@ -23,33 +23,23 @@ date: 2026-01-12
 
 # 需求定义与拆解
 
-从需求角度看，这套 `Agent SDK` 要解决的，不是某个单点功能问题，而是一组 agent 系统在真实工程里反复出现的共性需求。目标是把这些需求收敛成共享基础能力，让上层项目不再重复建设运行时底座，而是基于统一边界继续扩展。
+SDK 需要提供以下可复用的运行时能力：
 
-- **统一的运行时承载能力需求**：agent 系统不能只停留在一次性模型调用。只要进入多轮对话、工具调用、状态承接和结果回写场景，就需要有一套统一能力来承接会话生命周期、执行过程和运行状态。否则每个项目都要各自处理这些基础问题，成本高，也难以保持一致。
-
-- **稳定的外部接口边界需求**：上层项目需要的是稳定、清晰、可复用的接入方式，而不是直接面对内部实现细节。换句话说，外部首先需要的是边界稳定，而不是能力堆叠。只有先有一致的接入方式，后续能力扩展、运行时演进和多项目复用才有基础。
-
-- **可控的 agent 编排与执行控制需求**：不同请求需要不同执行路径，执行过程也需要明确的停止条件、失败处理和状态更新机制。因此，系统需要统一的编排与执行控制能力，避免把执行决策散落在业务逻辑、临时规则和 prompt 里。否则系统一旦变复杂，行为就很难稳定。
-
-- **上下文治理需求**：多轮 agent 系统天然依赖上下文，但上下文并不是一个简单的大输入。历史对话、阶段记忆、检索结果和上下文预算约束各不相同，如果混在一起处理，系统会快速失去可解释性和可维护性。因此，外部真正需要的不是“更多上下文”，而是可治理的上下文能力。
-
-- **MCP / Tool 接入与执行需求**：agent 不只是生成文本，还需要接入和调用外部能力。因此，工具注册、工具发现、调用分发和执行过程需要成为共享基础能力，而不是由每个项目各自重复建设。只有这样，外部能力接入才不会在不同项目里演变成一套套彼此割裂的私有实现。
-
-- **权限控制与安全边界需求**：工具调用和外部能力接入天然带来权限和安全问题。系统不仅要“能执行”，还要能明确哪些操作允许执行、哪些操作必须被阻断。没有这一层边界，能力越强，风险越大。
-
-- **模型接入与抽象能力需求**：模型能力是 agent 系统的重要输入，但上层项目不应该直接处理不同模型和不同接入方式的差异。外部真正需要的是统一的模型接入能力，让模型切换、调用方式差异和结果归一化都能被收敛到共享边界之后。
-
-- **过程跟踪与运行事实记录需求**：AI 系统不能只看最终结果。执行过程、关键事件、工具调用、失败位置和资源消耗都需要被记录下来，系统才具备可追踪、可分析和可验证的基础。没有运行事实，结果好坏很难判断，问题也很难定位。
-
-- **后续能力演进需求**：这套 SDK 不会停留在当前能力边界。后续还会继续扩展 retrieval、memory、checkpoint、compression、multi-agent 等能力，因此一开始就需要预留清晰的演进空间。否则每次能力扩展都会重新冲击现有结构，长期维护成本会持续升高。
+- **运行时承载**：管理会话生命周期、多轮执行、运行状态和结果写回。
+- **API 边界**：提供稳定的会话与执行接口，隔离内部实现变化。
+- **编排与执行控制**：根据请求选择执行路径，管理停止条件、失败处理和状态更新。
+- **Context Management**：区分会话历史、阶段记忆和检索结果，按预算装配与裁剪上下文。
+- **MCP / Tool 接入与执行**：管理工具注册、发现、调用分发和执行。
+- **权限控制**：在执行前判断操作权限，并限制执行环境。
+- **模型接入**：封装 provider 差异，统一模型调用和输出格式。
+- **过程记录**：记录执行步骤、工具调用、失败位置和资源消耗，支持问题定位。
+- **扩展能力**：为 retrieval、memory、checkpoint、compression 和 multi-agent 保留接口。
 
 # 架构设计
 
 ## 整体架构
 
-在需求问题被定义清楚以后，下一步是把这些问题落到一套可实现、可扩展的技术架构上。整体上，这套 SDK 采用分层 runtime 架构，各层分别承接接口、控制、编排、上下文、能力接入、模型集成、观测和数据持久化等职责。
-
-整体架构如下：
+SDK 采用分层 runtime 架构，分别管理接口、生命周期、编排、上下文、工具、模型接入、观测与持久化。
 
 ```text
 +----------------------------+
@@ -72,13 +62,13 @@ date: 2026-01-12
              v
 +----------------------------+
 |    Agent Orchestration     |
-| chat / react / peo         |
+| chat / ReAct / peo         |
 +----------------------------+
      |            |            \
       v            v             v
 +-------------+ +-------------+ +------------------+
 |   Context   | | Capability  | |      Model       |
-| Governance  | | and Tooling | |   Integration    |
+| Management  | | and Tooling | |   Integration    |
 +-------------+ +-------------+ +------------------+
        \                            /
         \                          /
@@ -98,173 +88,173 @@ date: 2026-01-12
 ## Application Layer
 
 职责：
-1. 承接终端入口或外部应用入口，解决 SDK 缺少可直接使用入口形态的问题
-2. 负责用户输入输出和运行时接入，解决交互层与内部运行时能力耦合的问题
+
+- 提供终端和外部应用入口，处理用户输入输出并调用运行时。
 
 包含模块：
-- `TerminalSessionDemo`：提供终端交互入口，负责读取输入、调用运行时接口并展示结果
-- External Application Integrations：承接外部应用或宿主系统接入 SDK 的入口形态
+
+- `TerminalSessionDemo`：读取终端输入、调用 runtime API 并展示结果。
+- External Application Integrations：将 SDK 接入外部应用或宿主系统。
 
 ## Interface Layer
 
 职责：
-1. 对外暴露稳定的会话和执行接口，解决外部接入边界不稳定的问题
-2. 屏蔽内部运行时细节，避免上层项目直接耦合内部实现
+
+- 对外提供稳定的会话和执行接口，隐藏内部运行时实现。
 
 包含模块：
-- `Api`：定义并暴露 SDK 对外接口边界
-- `RuntimeApi`：定义 session 创建、打开、关闭等稳定生命周期接口
-- `ISession`：定义会话读取、运行状态查询和执行入口
-- Agent / Session API Contracts：统一对外暴露的 contract，约束外部如何接入 SDK
+
+- `Api`：定义 SDK 对外接口。
+- `RuntimeApi`：提供 session 创建、打开和关闭接口。
+- `ISession`：提供会话读取、状态查询和执行入口。
+- Agent / Session API Contracts：约定 Agent 和 session API 的调用方式。
 
 ## Runtime Controller Layer
 
 职责：
-1. 承接 session 生命周期，解决多轮系统缺少统一运行单元的问题
-2. 收口执行过程和运行状态，解决执行控制散落在外部的问题
-3. 统一结果归一化和运行时调度，解决运行过程缺少统一承接边界的问题
+
+- 管理 session 生命周期、执行过程与运行状态。
+- 调度运行并统一返回结果格式。
 
 包含模块：
-- `Runtime`：负责运行时初始化、session 生命周期管理和统一入口调度
-- `AgentSession`：负责单个 session 的执行主链路、状态承接和结果归一化
-- `RunCheckpoint`：为 checkpoint、resume 和后台执行等后续能力预留恢复边界
+
+- `Runtime`：初始化运行时，管理 session 生命周期并分发请求。
+- `AgentSession`：执行单个 session 的请求，更新状态并统一结果格式。
+- `RunCheckpoint`：为 checkpoint、resume 和后台执行预留恢复接口。
 
 ## Agent Orchestration Layer
 
 职责：
-1. 负责 agent 路由和执行模式编排，解决不同请求需要不同执行路径的问题
-2. 为不同请求选择合适的执行路径，避免所有请求都被单一路径处理
+
+- 根据请求特点和运行状态选择执行模式。
 
 包含模块：
-- `AgentSelector`：负责根据请求特点和运行状态选择执行模式
-- `ChatAgent`：承接直接对话类请求，适合不需要复杂迭代的场景
-- `ReActAgent`：承接带工具调用和观察反馈的迭代执行路径
-- `PEOAgent`：承接 plan-execute-observe 分阶段执行路径
-- `MultiAgentProtocol`：为多 agent 协作预留协议边界
 
-## Context Governance Layer
+- `AgentSelector`：选择执行模式。
+- `ChatAgent`：处理直接对话请求。
+- `ReActAgent`：循环调用工具，并根据观察结果继续执行。
+- `PEOAgent`：按 plan-execute-observe 分阶段执行。
+- `MultiAgentProtocol`：为多 agent 协作预留协议接口。
+
+## Context Management Layer
 
 职责：
-1. 管理多轮系统中的上下文来源，解决多种上下文输入混杂的问题
-2. 控制上下文装配、预算和裁剪方式，解决上下文不可治理、不可维护的问题
+
+- 管理会话历史、阶段记忆和检索结果。
+- 按预算装配和裁剪上下文。
 
 包含模块：
-- `SessionTranscript`：承接会话历史，提供多轮上下文基础
-- `RuntimeMemory`：承接阶段记忆和摘要信息
-- `RetrievalProvider`：提供检索型上下文输入能力
-- `ContextAssembler`：统一装配不同来源的上下文
-- `ContextBudgetPolicy`：控制上下文预算、裁剪和边界约束
+
+- `SessionTranscript`：保存会话历史，供后续轮次使用。
+- `RuntimeMemory`：保存 agent memory（阶段记忆和摘要）。
+- `RetrievalProvider`：获取检索结果。
+- `ContextAssembler`：装配不同来源的上下文。
+- `ContextBudgetPolicy`：控制上下文预算和裁剪策略。
 
 ## Capability and Tooling Layer
 
 职责：
-1. 承接外部能力接入与调用，解决工具和外部能力无法统一纳入系统的问题
-2. 统一工具注册、分发和执行边界，避免不同项目各自重复建设工具接入能力
-3. 管理权限控制与执行环境，解决能力调用中的安全边界和环境隔离问题
+
+- 管理工具注册、发现、调用分发与执行。
+- 执行权限检查，约束工具运行环境。
 
 包含模块：
-- `McpGateway`：统一承接工具调用请求并分发到具体执行路径
-- `McpToolRegistry`：管理工具注册、发现和查找
-- `RuntimePermissionPolicy`：在执行前完成权限判断和能力约束
-- `ExecutionEnvironment`：负责工具在本地、沙箱或远端环境中的执行边界
+
+- `McpGateway`：接收工具调用请求并分发执行。
+- `McpToolRegistry`：管理工具注册、发现和查找。
+- `RuntimePermissionPolicy`：执行前检查权限和能力约束。
+- `ExecutionEnvironment`：定义本地、沙箱和远端执行环境。
 
 ## Model Integration Layer
 
 职责：
-1. 统一模型接入方式，解决不同模型调用方式不一致的问题
-2. 屏蔽不同模型和 provider 差异，避免上层项目直接处理底层模型差异
+
+- 封装 provider 和调用方式的差异，统一模型接口与输出。
 
 包含模块：
-- `ModelFactory`：统一创建模型实例并选择接入方式
-- Provider Adapters：屏蔽不同模型服务和 provider 差异
-- `StreamingEventAdapter`：统一流式输出事件和结果归一化方式
+
+- `ModelFactory`：创建模型实例并选择接入方式。
+- Provider Adapters：适配不同 provider 的接口。
+- `StreamingEventAdapter`：统一流式事件与输出格式。
 
 ## Observability Layer
 
 职责：
-1. 记录运行过程和关键事件，解决系统只能看到结果、看不到过程的问题
-2. 汇总可观测数据和运行指标，提供可追踪、可分析、可验证基础
+
+- 记录关键事件、调用链和运行指标，支持追踪与诊断。
 
 包含模块：
-- `Trace`：记录关键执行事件和调用链路
-- `Metrics`：统计运行指标、资源消耗和调用情况
-- Diagnostics / Usage：补充运行诊断信息和使用事实
+
+- `Trace`：记录关键事件和调用链。
+- `Metrics`：统计运行指标、资源消耗和调用情况。
+- Diagnostics / Usage：提供诊断信息和使用记录。
 
 ## Data Layer
 
 职责：
-1. 承接运行时数据持久化，解决运行事实无法稳定沉淀的问题
-2. 统一 transcript、memory、checkpoint、trace、metrics 等数据落盘边界，为后续能力演进提供稳定数据基础
+
+- 通过统一接口持久化 transcript、memory、checkpoint、trace 和 metrics。
 
 包含模块：
-- `Storage`：定义统一的数据持久化接口
-- File / Remote Persistence Backends：承接文件型或远端型持久化实现
+
+- `Storage`：定义持久化接口。
+- File / Remote Persistence Backends：实现文件或远端存储。
 
 # 当前实现状态
 
-当前实现状态可以概括为下表：
-
 | Layer | 模块 | 当前状态 | 说明 |
 | --- | --- | --- | --- |
-| `Application Layer` | `TerminalSessionDemo` | 基础实现 | 已提供终端交互入口，可用于手动运行和验证 session 流程 |
-| `Interface Layer` | `Api` / `RuntimeApi` / `ISession` | 基础实现 | 已形成 session-oriented 接口边界，但仍属于基础实现形态 |
-| `Interface Layer` | `AgentApi` / `IAgent` | 基础实现 | 已提供 direct-agent 入口，作为 session API 之外的补充能力 |
-| `Runtime Controller Layer` | `Runtime` / `AgentSession` | 基础实现 | 已承接 session 生命周期、执行主链路、状态更新和结果归一化，但复杂运行控制场景仍待扩展 |
-| `Runtime Controller Layer` | `RunCheckpoint` | 部分完成 | 已预留 checkpoint 边界，但恢复、重试、后台执行等能力仍待扩展 |
-| `Agent Orchestration Layer` | `AgentSelector` / intent routing | 部分完成 | 已具备路径选择能力，但策略和模式仍可继续扩展 |
-| `Agent Orchestration Layer` | `ChatAgent` / `ReActAgent` / `PEOAgent` | 基础实现 | 三类主要执行路径均已落地，但仍属于基础编排能力实现 |
-| `Agent Orchestration Layer` | `MultiAgentProtocol` | 预留扩展 | 已在架构中预留，但尚未进入当前主实现路径 |
-| `Context Governance Layer` | `SessionTranscript` / `RuntimeMemory` / `ContextAssembler` / `ContextBudgetPolicy` | 部分完成 | 已形成多轮历史、阶段记忆、上下文装配和预算控制的基础实现，但复杂场景下的细化治理仍待扩展 |
-| `Context Governance Layer` | `RetrievalProvider` | 部分完成 | 已有检索接入边界，但更完整、更严谨的 retrieval / RAG 场景实现仍待扩展 |
-| `Capability and Tooling Layer` | `McpGateway` / `McpToolRegistry` / `RuntimePermissionPolicy` / `ExecutionEnvironment` | 基础实现 | 工具接入、调用分发、权限控制和执行环境边界已经形成，但仍属于基础实现 |
-| `Model Integration Layer` | `ModelFactory` / `StreamingEventAdapter` | 基础实现 | 已具备统一模型接入和流式事件适配能力，但模型侧能力仍可继续扩展 |
-| `Model Integration Layer` | Provider Adapters | 部分完成 | mock 与现有 provider 已接入，但 provider 覆盖面仍可继续扩展 |
-| `Observability Layer` | `Trace` / `Metrics` | 基础实现 | 关键运行事件和运行指标已进入主路径，但观测深度仍可继续增强 |
-| `Observability Layer` | Diagnostics / Usage | 部分完成 | 已有基础运行事实记录，但更完整诊断视图仍待扩展 |
-| `Data Layer` | `Storage` / File Persistence | 基础实现 | 已形成统一存储接口和文件型持久化实现，但数据层能力仍以基础落盘为主 |
-| `Data Layer` | Remote Persistence Backends | 预留扩展 | 架构边界已出现，但远端存储实现尚未展开 |
+| `Application Layer` | `TerminalSessionDemo` | 基础实现 | 提供终端入口，可手动运行并验证 session 流程。 |
+| `Interface Layer` | `Api` / `RuntimeApi` / `ISession` | 基础实现 | 提供面向 session 的接口。 |
+| `Interface Layer` | `AgentApi` / `IAgent` | 基础实现 | 提供 session API 之外的直接 agent 调用入口。 |
+| `Runtime Controller Layer` | `Runtime` / `AgentSession` | 基础实现 | 支持 session 生命周期、执行、状态更新与结果格式统一；复杂运行控制仍待扩展。 |
+| `Runtime Controller Layer` | `RunCheckpoint` | 部分完成 | 已预留 checkpoint 接口；恢复、重试和后台执行尚未完成。 |
+| `Agent Orchestration Layer` | `AgentSelector` / intent routing | 部分完成 | 支持执行路径选择。 |
+| `Agent Orchestration Layer` | `ChatAgent` / `ReActAgent` / `PEOAgent` | 基础实现 | 已实现三类执行路径。 |
+| `Agent Orchestration Layer` | `MultiAgentProtocol` | 预留扩展 | 已预留协议，尚未接入当前执行流程。 |
+| `Context Management Layer` | `SessionTranscript` / `RuntimeMemory` / `ContextAssembler` / `ContextBudgetPolicy` | 部分完成 | 支持历史、阶段记忆、上下文装配和预算控制；复杂场景处理仍待完善。 |
+| `Context Management Layer` | `RetrievalProvider` | 部分完成 | 已定义检索接口；完整 retrieval / RAG 流程尚待实现。 |
+| `Capability and Tooling Layer` | `McpGateway` / `McpToolRegistry` / `RuntimePermissionPolicy` / `ExecutionEnvironment` | 基础实现 | 支持工具接入、分发、权限控制和执行环境定义。 |
+| `Model Integration Layer` | `ModelFactory` / `StreamingEventAdapter` | 基础实现 | 支持统一模型调用与流式事件适配。 |
+| `Model Integration Layer` | Provider Adapters | 部分完成 | 已接入 mock 和现有 provider，覆盖范围有限。 |
+| `Observability Layer` | `Trace` / `Metrics` | 基础实现 | 已记录执行流程中的关键事件与指标。 |
+| `Observability Layer` | Diagnostics / Usage | 部分完成 | 已有基础运行记录；完整诊断视图尚未实现。 |
+| `Data Layer` | `Storage` / File Persistence | 基础实现 | 已实现存储接口和文件持久化。 |
+| `Data Layer` | Remote Persistence Backends | 预留扩展 | 已预留接口，尚未实现远端存储。 |
 
-# 经验与对比
+# 设计原则与对照
 
-## SDK 设计与实现的经验
+## SDK 设计原则
 
-- **基础共享能力**：`Agent SDK` 面对的不是单点问题，而是一组经常一起出现的问题，包括接口边界、执行控制、上下文治理、工具接入、模型调用、可观测性和数据持久化。框架的价值，在于把这些问题拆开治理，并沉淀成共享基础设施。
-- **能力控制**：`Agent SDK` 不只是负责把外部能力接进来，还需要对能力使用过程进行控制，包括 MCP 接入边界、工具注册与分发、权限判断和执行环境约束。没有这一层控制，能力接入越多，系统越容易失控。
-- **记忆管理**：多轮 agent 系统天然需要历史承接和阶段记忆，但这些信息不能无限堆积，也不能简单混在一起。`Agent SDK` 需要把 transcript、memory、retrieval 和 context budget 作为独立问题管理。
-- **场景承接**：`Agent SDK` 的重点不在于单独提供模型接入能力，而在于承接真实场景里的多轮状态、工具执行、权限约束、记忆管理和结果回写，把这些能力组织成一套可以实际运行的系统。
+- **区分共享运行时与业务逻辑**：SDK 管理会话、执行和能力接入，应用定义业务任务与规则。
+- **集中执行控制**：工具调用经过注册、分发、权限检查和执行环境约束。
+- **分别管理上下文来源**：transcript、agent memory 和 retrieval 各自维护，由预算策略决定当前轮次使用的内容。
 
-## 与业界 Agent SDK 的对比
+## 与业界 Agent SDK 的对照维度
 
-相同点：
+- **运行控制**：会话生命周期、执行模式、状态更新、停止与恢复。
+- **能力覆盖**：工具和模型接入、多 agent、长期记忆与权限策略。
+- **运行保障**：追踪、持久化及复杂场景的稳定性。
 
-- **处理同类问题**：都在处理同一类底层工程问题，包括多轮运行时承载、工具调用组织、权限边界管理、运行过程记录，以及如何在不确定模型行为之上建立相对稳定的系统控制。
-- **具备相似架构骨架**：都需要稳定接口边界、统一运行时承载、编排与路由能力、工具与模型接入能力、观测和持久化能力。
+当前项目主要用于梳理运行时分层与接口职责。恢复、重试、后台执行、多 agent 和远端持久化等能力仍有待实现，具体状态见上表。
 
-不同点：
+## 与既有工程经验的对照
 
-- **成熟度与能力深度不同**：相比业界成熟 SDK，这套实现目前仍然是基础版本，在策略成熟度、能力覆盖面、复杂场景稳定性、多 agent、长期记忆、复杂权限治理等方面还有明显差距。
-- **目标侧重点不同**：这套 SDK 当前的重点，是验证 agent 系统在工程层面应当具备怎样的架构边界、运行时分层和能力组织方式，而不是优先追求能力完善度。
+沿用的工程方法：
 
-## 与既有工程经验的对比
+- 明确需求与系统边界，区分 SDK 职责和应用职责。
+- 通过稳定接口隔离内部实现变化。
+- 分离执行控制、能力接入和数据持久化。
 
-相同点：
+Agent 系统需要额外关注：
 
-- **问题与需求分析**：系统首先要回答解决什么问题、服务什么对象、边界在哪里，这和传统软件开发的起点是一致的。
-- **对外接口要稳定**：外部怎么接入、内部怎么演进，这在传统 SDK、中间层、平台系统里本来就是核心问题。
-- **能力要被统一组织**：哪些能力应该抽成共享能力，哪些能力应该留给上层业务，这和传统平台型系统的能力设计问题相通。
-- **模块要有清晰分层**：接口层、控制层、能力层、数据层如何划分，依赖关系如何约束，这和传统架构设计问题本质一致。
-- **运行时系统问题相通**：生命周期管理、能力边界、状态承接、可观测性和数据持久化，本质上都属于传统运行时系统长期面对的问题。
-
-不同点：
-
-- **LLM 不确定性**：模型输出天然带有概率性，同样输入不一定产生完全一致的结果，这会直接影响控制、调试和验证方式。
-- **上下文动态性**：上下文会随着会话历史、记忆、检索结果和预算约束不断变化，输入本身就是动态演化的。这里不仅是上下文变多的问题，更是记忆管理更复杂的问题，包括哪些历史需要保留、哪些内容需要压缩、哪些信息应该进入当前轮执行。
-- **执行路径动态性**：是否调用工具、调用什么工具、是否继续执行、何时停止，很多时候都要在运行时动态决定。
-- **开放能力边界**：agent 系统会主动接入外部工具、外部数据源和执行环境，这会显著放大权限控制和安全治理难度。
-- **验证要求更高**：不能只验证结果，还要验证过程、状态和运行事实是否可信、可追溯。
+- **LLM 输出的不确定性**：输出变化会影响执行控制、调试和结果验证。
+- **动态上下文**：每轮根据历史、记忆、检索结果和预算选择输入，决定保留、压缩或移除哪些内容。
+- **动态执行路径**：运行时决定工具调用、后续步骤和停止时机。
+- **外部操作约束**：访问数据源和执行工具时检查权限、限制执行环境，并记录结果与状态变化。
 
 # 范围与限制
 
-这套项目将会话生命周期、执行控制、上下文、工具、模型接入、观测和持久化组织成可复用的 SDK 边界。实现状态表区分了基础实现、部分完成和预留扩展；这些记录尚不足以证明生产环境成熟度。
+本文描述项目的运行时设计与实现记录；状态表中的基础实现、部分完成和预留扩展不代表已达到生产可用要求。
 
 完整技术地图见 [AI 入门总览：四层技术框架](/i18n/zh/ai/ai-overview.html)。模型研发与推理基础设施在总览中分别讨论。
