@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="GoalEnglish version: Getting Started with AI: A Four-Layer Technology Map 面向初学者，以大模型为中心建立应用与产品、模型、推理与基础设施、CUDA 与 GPU 四层概要知识框架。突出核心概念及其关系，按从模型应用到训练原理、推理运行、底层计算的视角组织，并提供原理、源码与项目资料入口，便于按需查阅和深入。    Layer">
+<meta property="og:type" content="website">
+<meta property="og:title" content="大模型入门总览：四层技术框架">
+<meta property="og:url" content="https://lucky-chen.github.io/i18n/zh/ai/ai-overview.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="GoalEnglish version: Getting Started with AI: A Four-Layer Technology Map 面向初学者，以大模型为中心建立应用与产品、模型、推理与基础设施、CUDA 与 GPU 四层概要知识框架。突出核心概念及其关系，按从模型应用到训练原理、推理运行、底层计算的视角组织，并提供原理、源码与项目资料入口，便于按需查阅和深入。    Layer">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-12-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-24T13:07:23.423Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://lucky-chen.github.io/i18n/zh/ai/ai-overview">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : false,
+    lang   : 'en'
+  };
+</script>
+
+  <title>大模型入门总览：四层技术框架 | Chen's Notes
+</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+  
+  
+
+          <div class="content page posts-expand">
+            
+
+    
+    
+    
+    <div class="post-block" lang="en">
+      <header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">大模型入门总览：四层技术框架
+</h1>
+
+<div class="post-meta">
+  
+  <ul class="breadcrumb">
+          
+            <li><a href="/i18n/">I18N</a></li>
+            <li><a href="/i18n/zh/">ZH</a></li>
+            <li><a href="/i18n/zh/ai/">AI</a></li>
+            <li>AI-OVERVIEW</li>
+          
+  </ul>
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+          <h1 id="Goal"><a href="#Goal" class="headerlink" title="Goal"></a>Goal</h1><p><strong>English version: <a href="/2025/12/07/ai/ai_overview_en/">Getting Started with AI: A Four-Layer Technology Map</a></strong></p>
+<p>面向初学者，以大模型为中心建立应用与产品、模型、推理与基础设施、CUDA 与 GPU 四层概要知识框架。突出核心概念及其关系，按从模型应用到训练原理、推理运行、底层计算的视角组织，并提供原理、源码与项目资料入口，便于按需查阅和深入。</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>主要问题</th>
+<th>核心模块</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Application and Product</td>
+<td>如何用模型完成业务任务？</td>
+<td>Agents and Workflows；Data and Knowledge Integration；Tools and External Systems</td>
+</tr>
+<tr>
+<td>Model</td>
+<td>模型如何工作、能力如何形成？</td>
+<td>Transformer Architecture and Tokenizers、Pretraining、Post-Training、Model Evaluation</td>
+</tr>
+<tr>
+<td>Inference and Infrastructure</td>
+<td>如何支撑模型训练与推理？</td>
+<td>Training Systems、Runtime Infrastructure、Inference Systems（本文重点）</td>
+</tr>
+<tr>
+<td>CUDA and GPU</td>
+<td>模型计算如何落到设备？</td>
+<td>GPU Execution、Memory and Performance</td>
+</tr>
+</tbody></table>
+<span id="more"></span>
+
+<h1 id="领域知识框架"><a href="#领域知识框架" class="headerlink" title="领域知识框架"></a>领域知识框架</h1><p>图中按从应用到模型、推理和底层计算的学习顺序排列。下方通过回答生成与模型训练两条流程串联各层关系，再按岗位方向说明学习重点与掌握程度；各模块的资料入口见后续章节。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">应用与产品 / Application and Product</span><br><span class="line">├─ Agents and Workflows：组织上下文与执行过程，复用任务能力</span><br><span class="line">├─ Data and Knowledge Integration：建设信息资产，为模型提供相关知识</span><br><span class="line">└─ Tools and External Systems：连接外部能力，执行操作并回传结果</span><br><span class="line"></span><br><span class="line">模型 / Model</span><br><span class="line">├─ Transformer Architecture and Tokenizers：将文本表示为向量，计算下一 token 的预测分布</span><br><span class="line">├─ Pretraining：通过大规模数据和预测目标学习通用能力</span><br><span class="line">├─ Post-Training：通过示范、偏好与奖励反馈调整模型行为</span><br><span class="line">└─ Model Evaluation：衡量模型能力、训练效果与适用边界</span><br><span class="line"></span><br><span class="line">推理与基础设施 / Inference and Infrastructure</span><br><span class="line">├─ Training Systems：训练框架与分布式训练，本文略述</span><br><span class="line">├─ Runtime Infrastructure：资源调度、通信、存储与容错，本文略述</span><br><span class="line">└─ Inference Systems：Inference Pipeline、Cache Management、Scheduling and Compute Optimization，本文重点</span><br><span class="line"></span><br><span class="line">底层计算 / CUDA and GPU</span><br><span class="line">├─ GPU Execution：通过 GPU kernel 执行 tensor 运算</span><br><span class="line">└─ Memory and Performance：通过存储组织和数据复用提高计算效率</span><br></pre></td></tr></table></figure>
+
+<h2 id="一个-Prompt-如何生成回答？"><a href="#一个-Prompt-如何生成回答？" class="headerlink" title="一个 Prompt 如何生成回答？"></a>一个 Prompt 如何生成回答？</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">用户输入 Prompt</span><br><span class="line">    ↓</span><br><span class="line">应用层 / Agents and Workflows：组织 Prompt、会话历史与记忆，按需加载 Skills、加入检索或工具结果</span><br><span class="line">    ↓</span><br><span class="line">模型层 / Tokenizer：将模型输入编码为 token IDs</span><br><span class="line">    ↓</span><br><span class="line">推理层 / Prefill：执行 Transformer，建立 KV cache，计算下一 token 的概率分布</span><br><span class="line">    ↓</span><br><span class="line">推理层 / token 选择与 Decode：选择 token，再计算下一 token 的概率分布；复用并更新 KV cache，循环直到停止</span><br><span class="line">    │</span><br><span class="line">    └─ 每轮模型计算由 GPU kernel 执行 tensor 运算</span><br><span class="line">    ↓</span><br><span class="line">模型层 / Tokenizer：将生成的 token IDs 解码为文本</span><br><span class="line">    ↓</span><br><span class="line">应用层：返回回答；涉及工具调用时，执行工具并将结果加入上下文，继续调用模型</span><br></pre></td></tr></table></figure>
+
+<h2 id="模型如何训练出来？"><a href="#模型如何训练出来？" class="headerlink" title="模型如何训练出来？"></a>模型如何训练出来？</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">模型层 / Transformer 与 Tokenizer：确定模型结构和文本编码方式</span><br><span class="line">    ↓</span><br><span class="line">模型层 / 预训练数据：采集、清洗去重、质量过滤、划分数据集，记录配比与版本并进行 Tokenization</span><br><span class="line">    ↓</span><br><span class="line">模型层 / Pretraining：按预测目标计算损失，通过 Backpropagation 与 Optimizer 反复更新参数</span><br><span class="line">    │</span><br><span class="line">    └─ 训练框架调度 GPU kernel，对 tensor 执行运算</span><br><span class="line">    ↓</span><br><span class="line">得到预训练模型</span><br><span class="line">    ↓</span><br><span class="line">模型层 / Post-Training：采集、标注和维护示范、偏好与奖励数据，开展 SFT、偏好优化或强化学习</span><br><span class="line">    │</span><br><span class="line">    └─ 继续由训练框架与底层计算完成参数更新</span><br><span class="line">    ↓</span><br><span class="line">模型层 / Model Evaluation：验证能力与边界，反馈到数据和训练方法的调整</span><br><span class="line">    ↓</span><br><span class="line">推理层 / Inference Pipeline：加载模型，供应用层调用</span><br></pre></td></tr></table></figure>
+
+<h2 id="岗位能力与学习重点"><a href="#岗位能力与学习重点" class="headerlink" title="岗位能力与学习重点"></a>岗位能力与学习重点</h2><p>参考 <a target="_blank" rel="noopener" href="https://talent.deepseek.com/">DeepSeek</a>、<a target="_blank" rel="noopener" href="https://seed.bytedance.com/zh/career">字节 Seed</a> 与 <a target="_blank" rel="noopener" href="https://www.anthropic.com/careers/jobs">Anthropic</a> 的招聘岗位，按职责归纳为以下四个大方向，并对应四层知识框架列出学习顺序与掌握程度。厂商的岗位名称与职责边界不同，实际岗位可能覆盖多个方向；AI 底层计算与性能优化也可能归入 AI 系统与基础设施团队。</p>
+<p>掌握程度：了解＝知道用途与边界；理解＝能解释机制与权衡；掌握＝能独立实现和排障。</p>
+<table>
+<thead>
+<tr>
+<th>岗位方向</th>
+<th>相关岗位</th>
+<th>工作内容</th>
+<th>学习顺序和程度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AI 应用研发</td>
+<td>AI 产品开发工程师<br>Agent 工程师</td>
+<td>围绕业务任务<br>组织模型、知识与工具<br>开发和交付 AI 应用</td>
+<td>→ 应用（掌握）<br>→ 模型（理解）<br>→ 推理与基础设施（理解）<br>→ 底层计算（了解）</td>
+</tr>
+<tr>
+<td>模型算法研发</td>
+<td>预训练算法工程师<br>后训练算法工程师<br>多模态算法工程师</td>
+<td>研究模型结构、数据与训练方法<br>通过实验和评测提升模型能力</td>
+<td>→ 模型（掌握）<br>→ 推理与基础设施（理解）<br>→ 底层计算（理解）<br>→ 应用（了解）</td>
+</tr>
+<tr>
+<td>AI 系统与基础设施</td>
+<td>训练框架工程师<br>推理系统工程师</td>
+<td>建设训练、推理与数据平台<br>保障模型运行的效率、规模与稳定性</td>
+<td>→ 模型（理解）<br>→ 底层计算（理解）<br>→ 推理与基础设施（掌握）<br>→ 应用（了解）</td>
+</tr>
+<tr>
+<td>AI 底层计算与性能优化</td>
+<td>GPU Kernel 工程师<br>AI 编译器工程师</td>
+<td>开发和优化算子、通信与编译组件<br>提升模型在硬件上的计算效率</td>
+<td>→ 模型（理解）<br>→ 底层计算（掌握）<br>→ 推理与基础设施（理解）<br>→ 应用（了解）</td>
+</tr>
+</tbody></table>
+<h1 id="Application-and-Product-Layer"><a href="#Application-and-Product-Layer" class="headerlink" title="Application and Product Layer"></a>Application and Product Layer</h1><p>通过任务方法复用、执行编排和外部能力接入完成业务任务。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Data and Knowledge Integration → Agents and Workflows ↔ Tools and External Systems</span><br></pre></td></tr></table></figure>
+
+<h2 id="Agents-and-Workflows"><a href="#Agents-and-Workflows" class="headerlink" title="Agents and Workflows"></a>Agents and Workflows</h2><p><strong>解决的问题</strong>：如何把用户任务组织成能维持上下文、调用工具、更新状态并判断何时结束的执行过程。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Agent：由模型动态决定步骤和工具使用，以完成任务</span><br><span class="line">├─ Context management：Prompt、历史、记忆与 Context compaction</span><br><span class="line">├─ 执行控制：模型调用、工具执行、状态更新与终止</span><br><span class="line">├─ 能力复用：Skills、工具与 Subagents</span><br><span class="line">└─ 相关形态：Workflow 通过预定义路径组织执行，可与 Agent 组合</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>概念与原理</th>
+<th>代码与示例</th>
+<th>工程案例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>上下文组织与更新</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Context engineering</a>：信息选择、压缩与记忆</td>
+<td><a href="/i18n/zh/ai/agent-sdk-design.html">现有 SDK 架构</a>：Context、Memory、Transcript</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/multi-agent-research-system">Anthropic Research</a>：上下文隔离与信息汇总（生产经验）</td>
+</tr>
+<tr>
+<td>执行控制</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>：执行模式与工具循环</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/deepseek-harness">deepseek-harness</a>：运行时与插件；<code>sdlc</code>：业务 Workflow</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/multi-agent-research-system">Anthropic Research</a>：任务分解与执行可靠性（生产经验）</td>
+</tr>
+</tbody></table>
+<h3 id="Skills"><a href="#Skills" class="headerlink" title="Skills"></a>Skills</h3><p><strong>解决的问题</strong>：如何把任务方法和领域经验保存为可复用的能力，并在任务需要时交给通用 Agent 使用。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Skills：将任务方法、指令与资源封装为可复用能力</span><br><span class="line">├─ 任务封装：指令、参考资料、脚本与模板</span><br><span class="line">├─ 发现与加载：元数据匹配、按需读取与渐进加载</span><br><span class="line">└─ 执行与维护：使用资源完成任务，根据反馈更新 Skill</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>概念与原理</th>
+<th>代码与示例</th>
+<th>工程案例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>任务封装</td>
+<td><a target="_blank" rel="noopener" href="https://agentskills.io/home">官方说明</a>：目录、元数据与资源结构</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/anthropics/skills">anthropics/skills</a>：指令、脚本与模板</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills">Claude 文档 Skills</a>：PDF 能力的资源拆分（产品实现经验）</td>
+</tr>
+<tr>
+<td>按需加载与执行</td>
+<td><a target="_blank" rel="noopener" href="https://agentskills.io/home">官方说明</a>：发现与加载机制</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/anthropics/skills">文档 Skill 实现</a>：查看资源引用和脚本调用</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills">渐进加载设计</a>：按任务装配所需内容（产品实现经验）</td>
+</tr>
+</tbody></table>
+<h2 id="Data-and-Knowledge-Integration"><a href="#Data-and-Knowledge-Integration" class="headerlink" title="Data and Knowledge Integration"></a>Data and Knowledge Integration</h2><p><strong>解决的问题</strong>：如何建设可持续更新的信息资产，让模型或 Agent 获得任务所需的相关知识。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Data and Knowledge Integration：建设信息资产，为模型提供相关知识</span><br><span class="line">├─ 数据接入与维护：采集、清洗、组织与更新</span><br><span class="line">├─ 来源与权限：来源追溯、版本、访问权限与适用范围</span><br><span class="line">└─ Retrieval-augmented generation（RAG）：分块、索引、检索与重排，将相关内容加入上下文</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>概念与原理</th>
+<th>代码与示例</th>
+<th>工程案例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据接入与检索</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/contextual-retrieval">Contextual Retrieval</a>：分块、索引、上下文补充与重排</td>
+<td><a target="_blank" rel="noopener" href="https://platform.claude.com/cookbook/capabilities-contextual-embeddings-guide">RAG Cookbook</a>：资料处理、检索与对比实验</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<h2 id="Tools-and-External-Systems"><a href="#Tools-and-External-Systems" class="headerlink" title="Tools and External Systems"></a>Tools and External Systems</h2><p><strong>解决的问题</strong>：如何让模型或 Agent 调用外部系统的能力，并将执行结果用于后续任务。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Tools and External Systems：连接外部能力，执行操作并回传结果</span><br><span class="line">├─ 工具定义：能力描述、输入输出与权限</span><br><span class="line">├─ Tool Calling：模型表达调用意图，应用执行并回传结果</span><br><span class="line">└─ Model Context Protocol（MCP）：标准化接入外部工具与资源</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>概念与原理</th>
+<th>代码与示例</th>
+<th>工程案例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>工具接入与执行</td>
+<td><a target="_blank" rel="noopener" href="https://modelcontextprotocol.io/docs/learn/architecture">MCP 架构</a>：工具、资源与协议边界</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/modelcontextprotocol/servers">MCP Servers</a>：参考工具与资源实现</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/code-execution-with-mcp">Anthropic MCP 代码执行</a>：按需加载工具、过滤中间数据（工程方案与实验）</td>
+</tr>
+</tbody></table>
+<h1 id="Model-Layer"><a href="#Model-Layer" class="headerlink" title="Model Layer"></a>Model Layer</h1><p>理解文本如何进入模型、模型能力如何通过数据与训练形成，以及如何验证能力边界。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Transformer Architecture and Tokenizers → Pretraining → Post-Training → Model Evaluation</span><br></pre></td></tr></table></figure>
+
+<h2 id="Transformer-Architecture-and-Tokenizers"><a href="#Transformer-Architecture-and-Tokenizers" class="headerlink" title="Transformer Architecture and Tokenizers"></a>Transformer Architecture and Tokenizers</h2><p><strong>解决的问题</strong>：模型如何将文本表示为数值，并预测下一 token。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Transformer Architecture and Tokenizers：将文本表示为向量，计算下一 token 的预测分布</span><br><span class="line">├─ 文本表示：Tokenization、token IDs 与 embedding</span><br><span class="line">├─ Transformer 计算：Positional encoding、Attention 与 Feed-forward network</span><br><span class="line">└─ Next-token prediction：概率分布、token 选择与自回归生成</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>概念与原理</th>
+<th>代码与示例</th>
+<th>工程案例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文本表示</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/learn/llm-course/en/chapter1/1">HF LLM Course</a>：Tokenizer、token 与模型输入</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/karpathy/nanochat">nanochat</a>：Tokenizer 与 embedding</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Transformer 计算</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1706.03762">Transformer 原始论文</a>：Attention、Positional encoding 与网络结构</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/karpathy/nanochat">nanochat</a>：Transformer 模型实现</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/html/2412.19437v2">DeepSeek-V3 §2</a>：MLA、MoE、MTP；<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2501.08313">MiniMax-01</a>：混合注意力（进阶模型报告）</td>
+</tr>
+<tr>
+<td>Next-token prediction</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/learn/llm-course/en/chapter1/1">HF LLM Course</a>：自回归模型与生成</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/karpathy/nanochat">nanochat</a>：预测分布、采样与生成循环</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p>多模态扩展：<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2502.13923">Qwen2.5-VL</a>介绍视觉与语言模型设计；<a target="_blank" rel="noopener" href="https://qwenlm.github.io/blog/qwen2.5-omni/">Qwen2.5-Omni</a>介绍音频、视频与流式语音生成。</p>
+<h2 id="Pretraining"><a href="#Pretraining" class="headerlink" title="Pretraining"></a>Pretraining</h2><p><strong>解决的问题</strong>：如何从大规模数据中学习通用能力，并让训练结果可以比较和追溯。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Pretraining：通过 Next-token prediction 从大规模数据学习通用能力</span><br><span class="line">├─ 数据准备：来源选择、清洗去重、质量过滤与 Tokenization</span><br><span class="line">├─ 数据管理：数据集划分、配比与版本记录</span><br><span class="line">└─ 训练目标与优化：Next-token prediction、Loss、Backpropagation 与参数更新</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>概念与原理</th>
+<th>代码与示例</th>
+<th>工程案例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据准备与管理</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2406.17557">FineWeb</a>：清洗、去重与质量实验</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/datatrove">DataTrove</a>：处理流水线；<a target="_blank" rel="noopener" href="https://github.com/huggingface/smollm/blob/main/text/pretraining/README.md">SmolLM</a>：数据依赖与阶段配置</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2407.21783">Llama 3</a>：数据构造；<a target="_blank" rel="noopener" href="https://qwenlm.github.io/blog/qwen3/">Qwen3</a>：数据扩展与训练阶段（模型项目报告）</td>
+</tr>
+<tr>
+<td>训练目标与优化</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/learn/llm-course/en/chapter7/6">HF 从零训练语言模型</a>：目标、损失与训练过程</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/pytorch/examples">PyTorch Examples</a>：训练循环；<a target="_blank" rel="noopener" href="https://github.com/huggingface/smollm/blob/main/text/pretraining/README.md">SmolLM</a>：训练配方与检查点</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2407.21783">Llama 3</a>：训练设计与规模化经验（模型项目报告）</td>
+</tr>
+</tbody></table>
+<p>训练框架负责数据加载、批次计算与 automatic differentiation；分布式训练作为规模化实现按需深入。</p>
+<h2 id="Post-Training"><a href="#Post-Training" class="headerlink" title="Post-Training"></a>Post-Training</h2><p><strong>解决的问题</strong>：如何让预训练模型更好地遵循指令、满足偏好、进行推理或适配具体业务任务。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Post-Training：通过示范、偏好与奖励反馈调整模型行为</span><br><span class="line">├─ 数据与反馈：示范回答、偏好标注与奖励信号的采集、审核及版本管理</span><br><span class="line">├─ 训练方法</span><br><span class="line">│  ├─ Supervised fine-tuning（SFT）：从示范回答学习</span><br><span class="line">│  ├─ Preference optimization：通过 Direct preference optimization（DPO）等方法学习回答偏好</span><br><span class="line">│  └─ Reinforcement learning（RL）：使用人类偏好、可验证结果等奖励信号</span><br><span class="line">├─ 微调方式：Full fine-tuning 或 Parameter-efficient fine-tuning（PEFT），如 Low-rank adaptation（LoRA）</span><br><span class="line">└─ 迭代反馈：结果验证、失败案例与数据调整</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>概念与原理</th>
+<th>代码与示例</th>
+<th>工程案例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>任务数据与反馈建设</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/learn/smol-course/unit0/1">HF Smol Course</a>：示范与偏好数据</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl">TRL</a>：样本格式与数据处理</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2501.12948">DeepSeek-R1</a>：冷启动、数据构造与蒸馏（模型研发经验）</td>
+</tr>
+<tr>
+<td>训练方法</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2203.02155">InstructGPT</a>：SFT、奖励模型与 RLHF；<a target="_blank" rel="noopener" href="https://huggingface.co/learn/smol-course/unit0/1">HF Smol Course</a>：偏好对齐</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl">TRL</a>：SFT、DPO 等训练器；<a target="_blank" rel="noopener" href="https://github.com/verl-project/verl">verl</a>：强化学习训练配方</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2501.12948">DeepSeek-R1</a>：通过 Reinforcement learning 提升推理能力；<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2503.14476">DAPO</a>：训练稳定性（模型训练实验）</td>
+</tr>
+<tr>
+<td>参数更新与迭代</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/learn/smol-course/unit0/1">HF Smol Course</a>：任务微调入口</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl">TRL</a>：参数高效微调集成</td>
+<td><a target="_blank" rel="noopener" href="https://www.minimax.io/news/minimax-m1-technical-seminar-2">MiniMax-M1 技术分享</a>：数值精度、奖励与数据质量的调整经验</td>
+</tr>
+</tbody></table>
+<h2 id="Model-Evaluation"><a href="#Model-Evaluation" class="headerlink" title="Model Evaluation"></a>Model Evaluation</h2><p><strong>解决的问题</strong>：如何判断模型具备哪些能力、训练是否有效，以及评测结论能用于哪些场景。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Model Evaluation：衡量模型能力、训练效果与适用边界</span><br><span class="line">├─ 评测设计：能力目标、任务、指标与统一条件</span><br><span class="line">├─ 评测执行：模型运行与结果评分</span><br><span class="line">└─ 结果分析：能力比较、错误分析与结论适用范围</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>概念与原理</th>
+<th>代码与示例</th>
+<th>工程案例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>评测设计</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2211.09110">HELM</a>：场景、指标与覆盖范围</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/EleutherAI/lm-evaluation-harness">lm-evaluation-harness</a>：任务定义</td>
+<td><a target="_blank" rel="noopener" href="https://openai.com/index/introducing-simpleqa/">OpenAI SimpleQA</a>：事实性问题构建与评分（评测项目经验）</td>
+</tr>
+<tr>
+<td>评测执行与结果分析</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2211.09110">HELM</a>：多维比较与结论限制</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/EleutherAI/lm-evaluation-harness">lm-evaluation-harness</a>：模型接入与运行；<a target="_blank" rel="noopener" href="https://github.com/openai/simple-evals">simple-evals</a>：评分实现</td>
+<td><a target="_blank" rel="noopener" href="https://openai.com/index/introducing-simpleqa/">OpenAI SimpleQA</a>：拒答与校准；结论限定于短答案事实性</td>
+</tr>
+</tbody></table>
+<h1 id="Inference-and-Infrastructure-Layer"><a href="#Inference-and-Infrastructure-Layer" class="headerlink" title="Inference and Infrastructure Layer"></a>Inference and Infrastructure Layer</h1><p>包含 Training Systems、Runtime Infrastructure 与 Inference Systems。Runtime Infrastructure 为训练和推理提供资源与运行支撑。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Training Systems（训练框架、分布式训练）</span><br><span class="line">    ↑</span><br><span class="line">Runtime Infrastructure（资源调度、通信、存储与容错）</span><br><span class="line">    ↓</span><br><span class="line">Inference Systems</span><br><span class="line">├─ Inference Pipeline</span><br><span class="line">├─ Cache Management</span><br><span class="line">└─ Scheduling and Compute Optimization</span><br></pre></td></tr></table></figure>
+
+<p>本文只关注推理，介绍生成流程、Cache Management 及 Scheduling and Compute Optimization 如何影响延迟、吞吐和显存占用。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer">DeepInfer</a> 是支撑 DeepSeek 生产推理的框架，整合模型运行时、采样、异步调度与优化 kernel。</p>
+<h2 id="Inference-Pipeline"><a href="#Inference-Pipeline" class="headerlink" title="Inference Pipeline"></a>Inference Pipeline</h2><p><strong>解决的问题</strong>：一次模型调用如何处理完整输入，再逐步生成输出并结束。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Inference Pipeline：处理输入并逐 token 生成输出</span><br><span class="line">├─ Prefill：处理输入，建立 KV cache，计算下一 token 的概率分布</span><br><span class="line">├─ Decode：处理新增 token，复用并更新 KV cache，计算下一 token 的概率分布</span><br><span class="line">└─ 生成控制：token 选择、停止条件与输出返回</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>概念与原理</th>
+<th>代码与示例</th>
+<th>工程案例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Prefill</td>
+<td><a target="_blank" rel="noopener" href="https://tvm.apache.org/docs/how_to/tutorials/optimize_llm.html">TVM LLM 教程</a>：输入处理与首个预测</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/vllm-project/vllm">vLLM</a>、<a target="_blank" rel="noopener" href="https://github.com/sgl-project/sglang">SGLang</a>：通用执行路径；<a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer">DeepInfer</a>：模型运行时与离线推理</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/open-infra-index/blob/main/202502OpenSourceWeek/day_6_one_more_thing_deepseekV3R1_inference_system_overview.md">DeepSeek inference system</a>：Prefill/decode disaggregation 与并行配置（线上经验）</td>
+</tr>
+<tr>
+<td>Decode 与生成控制</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/llm_tutorial_optimization">HF 推理教程</a>：自回归生成、采样与缓存</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/sgl-project/sglang">SGLang</a>：生成循环；<a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer">DeepInfer</a>：采样、Speculative decoding 与输出控制</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/open-infra-index/blob/main/202502OpenSourceWeek/day_6_one_more_thing_deepseekV3R1_inference_system_overview.md">DeepSeek inference system</a>：阶段性能与延迟目标（线上经验）</td>
+</tr>
+</tbody></table>
+<h2 id="Cache-Management"><a href="#Cache-Management" class="headerlink" title="Cache Management"></a>Cache Management</h2><p><strong>解决的问题</strong>：如何复用已计算的 Key 和 Value，避免每生成一个 token 都重新处理全部输入，同时控制 KV cache 的显存开销。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Cache Management：复用已缓存的 Key 和 Value，管理显存开销</span><br><span class="line">├─ 缓存复用：Prefill 缓存 Key 和 Value，Decode 读取并更新</span><br><span class="line">├─ 显存管理：缓存块分配、分页与碎片控制</span><br><span class="line">└─ 缓存生命周期：按条件共享、跨请求复用、保留与释放</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>概念与原理</th>
+<th>代码与示例</th>
+<th>工程案例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>缓存复用</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/kv_cache">Transformers Cache</a>：缓存建立、更新与复用</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/kv_cache">Cache 代码示例</a>：观察不同策略下的生成</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md#kv-cache-storage">DeepInfer 部署 Q&amp;A</a>：跨请求缓存复用、存储与保留周期（线上设计经验，完整缓存系统未开源）</td>
+</tr>
+<tr>
+<td>显存管理</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2309.06180">PagedAttention</a>：分页、共享与碎片问题</td>
+<td><a target="_blank" rel="noopener" href="https://docs.vllm.ai/en/stable/design/paged_attention/">vLLM 设计说明</a>与<a target="_blank" rel="noopener" href="https://github.com/vllm-project/vllm">代码</a>：缓存块与读取实现</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/open-infra-index/blob/main/202502OpenSourceWeek/day_6_one_more_thing_deepseekV3R1_inference_system_overview.md">DeepSeek inference system</a>：Decode Load Balancer、KV cache 占用与线上缓存命中（线上经验）</td>
+</tr>
+</tbody></table>
+<h2 id="Scheduling-and-Compute-Optimization"><a href="#Scheduling-and-Compute-Optimization" class="headerlink" title="Scheduling and Compute Optimization"></a>Scheduling and Compute Optimization</h2><p><strong>解决的问题</strong>：如何在显存和计算资源约束下提高吞吐、控制延迟，并验证优化对输出效果的影响。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Scheduling and Compute Optimization：在资源约束下平衡吞吐、延迟与输出效果</span><br><span class="line">├─ Continuous batching：生成过程中动态加入与移除请求</span><br><span class="line">├─ 低精度计算：权重与 KV cache 的 Quantization、硬件支持与效果权衡</span><br><span class="line">└─ 效果验证：吞吐、延迟、显存占用与输出效果</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>概念与原理</th>
+<th>代码与示例</th>
+<th>工程案例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Continuous batching</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/continuous_batching">HF Continuous Batching</a>：动态加入与退出</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/sgl-project/sglang">SGLang</a>：批次组织；<a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer">DeepInfer</a>：CPU 批调度与设备执行重叠的异步调度</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/open-infra-index/blob/main/202502OpenSourceWeek/day_6_one_more_thing_deepseekV3R1_inference_system_overview.md">DeepSeek inference system</a>：批次拆分与计算通信重叠（线上经验）；<a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md#data-parallel-load-balancing">DeepInfer 部署 Q&amp;A</a>：按负载分配请求与计算预算；<a target="_blank" rel="noopener" href="https://www.lmsys.org/blog/2025-07-17-mtp/">SGLang MTP</a>：解码优化实验</td>
+</tr>
+<tr>
+<td>低精度计算</td>
+<td><a target="_blank" rel="noopener" href="https://docs.vllm.ai/en/stable/features/quantization/">vLLM Quantization</a>：格式、精度与硬件支持</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/vllm-project/vllm">vLLM</a>：量化配置与推理对比</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<h1 id="CUDA-and-GPU-Layer"><a href="#CUDA-and-GPU-Layer" class="headerlink" title="CUDA and GPU Layer"></a>CUDA and GPU Layer</h1><p>上层训练框架与推理运行时以 tensor 运算组织模型计算；本层关注其 GPU 执行与内存性能。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPU Execution ↔ Memory and Performance</span><br></pre></td></tr></table></figure>
+
+<h2 id="GPU-Execution"><a href="#GPU-Execution" class="headerlink" title="GPU Execution"></a>GPU Execution</h2><p><strong>解决的问题</strong>：训练框架或推理运行时组织的 tensor 运算，如何通过 GPU kernel 并行执行。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">GPU Execution：通过 GPU kernel 执行 tensor 运算</span><br><span class="line">├─ 计算表示：tensor 与算子</span><br><span class="line">├─ 算子实现：计算库调用、编译器与 kernel</span><br><span class="line">└─ 设备执行：thread、thread block、warp 与 streaming multiprocessor（SM）</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>概念与原理</th>
+<th>代码与示例</th>
+<th>工程案例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>算子实现</td>
+<td><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/cublas/">cuBLAS</a>：矩阵计算库与 CUDA 的关系</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/triton-lang/triton">Triton</a>：基础 kernel；<a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/FlashMLA">FlashMLA</a>：Attention kernel</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer/blob/main/README.md">DeepInfer</a>：将 FlashMLA、DeepGEMM 等 kernel 组件整合到模型运行时（生产框架说明）</td>
+</tr>
+<tr>
+<td>设备执行</td>
+<td><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/cuda-programming-guide/">CUDA Programming Guide</a>：kernel、线程组织与执行模型</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/cuda-samples">CUDA Samples</a>：线程、同步与异步执行</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/html/2412.19437v2">DeepSeek-V3 §3.2.2</a>：Warp 分工、PTX 与通信计算重叠（进阶实现经验）</td>
+</tr>
+</tbody></table>
+<h2 id="Memory-and-Performance"><a href="#Memory-and-Performance" class="headerlink" title="Memory and Performance"></a>Memory and Performance</h2><p><strong>解决的问题</strong>：数据放在哪里、如何搬运和复用，才能减少模型计算中的内存开销与等待。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Memory and Performance：通过存储组织和数据复用提高计算效率</span><br><span class="line">├─ Memory hierarchy：寄存器、共享内存、显存的容量与带宽</span><br><span class="line">├─ 数据搬运与复用：分块、中间数据复用与按需重计算</span><br><span class="line">└─ 性能验证：计算耗时、显存占用与数值效果</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>概念与原理</th>
+<th>代码与示例</th>
+<th>工程案例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Memory hierarchy</td>
+<td><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/cuda-programming-guide/">CUDA Programming Guide</a>：内存层次与访问方式</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepGEMM">DeepGEMM</a>：低精度矩阵计算及性能测试</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/html/2412.19437v2">DeepSeek-V3 §3.3</a>：低精度存储与累加精度（进阶实现经验）</td>
+</tr>
+<tr>
+<td>数据搬运与复用</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2205.14135">FlashAttention</a>：分块与减少内存访问</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Dao-AILab/flash-attention">FlashAttention 代码</a>：Attention 数据复用</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/html/2412.19437v2">DeepSeek-V3 §3.2.3</a>：激活重计算与内存开销权衡（进阶实现经验）</td>
+</tr>
+</tbody></table>
+
+      </div>
+      
+      
+      
+    </div>
+    
+  <ul class="breadcrumb">
+          
+            <li><a href="/i18n/">I18N</a></li>
+            <li><a href="/i18n/zh/">ZH</a></li>
+            <li><a href="/i18n/zh/ai/">AI</a></li>
+            <li>AI-OVERVIEW</li>
+          
+  </ul>
+
+    
+    
+    
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Goal"><span class="nav-number">1.</span> <span class="nav-text">Goal</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A2%86%E5%9F%9F%E7%9F%A5%E8%AF%86%E6%A1%86%E6%9E%B6"><span class="nav-number">2.</span> <span class="nav-text">领域知识框架</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA-Prompt-%E5%A6%82%E4%BD%95%E7%94%9F%E6%88%90%E5%9B%9E%E7%AD%94%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">一个 Prompt 如何生成回答？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E5%A6%82%E4%BD%95%E8%AE%AD%E7%BB%83%E5%87%BA%E6%9D%A5%EF%BC%9F"><span class="nav-number">2.2.</span> <span class="nav-text">模型如何训练出来？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B2%97%E4%BD%8D%E8%83%BD%E5%8A%9B%E4%B8%8E%E5%AD%A6%E4%B9%A0%E9%87%8D%E7%82%B9"><span class="nav-number">2.3.</span> <span class="nav-text">岗位能力与学习重点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Application-and-Product-Layer"><span class="nav-number">3.</span> <span class="nav-text">Application and Product Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Agents-and-Workflows"><span class="nav-number">3.1.</span> <span class="nav-text">Agents and Workflows</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Skills"><span class="nav-number">3.1.1.</span> <span class="nav-text">Skills</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Data-and-Knowledge-Integration"><span class="nav-number">3.2.</span> <span class="nav-text">Data and Knowledge Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tools-and-External-Systems"><span class="nav-number">3.3.</span> <span class="nav-text">Tools and External Systems</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Model-Layer"><span class="nav-number">4.</span> <span class="nav-text">Model Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Transformer-Architecture-and-Tokenizers"><span class="nav-number">4.1.</span> <span class="nav-text">Transformer Architecture and Tokenizers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pretraining"><span class="nav-number">4.2.</span> <span class="nav-text">Pretraining</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Post-Training"><span class="nav-number">4.3.</span> <span class="nav-text">Post-Training</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Model-Evaluation"><span class="nav-number">4.4.</span> <span class="nav-text">Model Evaluation</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Inference-and-Infrastructure-Layer"><span class="nav-number">5.</span> <span class="nav-text">Inference and Infrastructure Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Inference-Pipeline"><span class="nav-number">5.1.</span> <span class="nav-text">Inference Pipeline</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cache-Management"><span class="nav-number">5.2.</span> <span class="nav-text">Cache Management</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scheduling-and-Compute-Optimization"><span class="nav-number">5.3.</span> <span class="nav-text">Scheduling and Compute Optimization</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CUDA-and-GPU-Layer"><span class="nav-number">6.</span> <span class="nav-text">CUDA and GPU Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#GPU-Execution"><span class="nav-number">6.1.</span> <span class="nav-text">GPU Execution</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Memory-and-Performance"><span class="nav-number">6.2.</span> <span class="nav-text">Memory and Performance</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

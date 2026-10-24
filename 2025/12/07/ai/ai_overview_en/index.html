@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lucky-chen.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="GoalChinese version: 大模型入门总览：四层技术框架 This guide maps the large language model (LLM) stack across four layers: applications, models, inference infrastructure, and GPU computing. Each section outlines th">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Getting Started with AI: A Four-Layer Technology Map">
+<meta property="og:url" content="https://lucky-chen.github.io/2025/12/07/ai/ai_overview_en/index.html">
+<meta property="og:site_name" content="Chen&#39;s Notes">
+<meta property="og:description" content="GoalChinese version: 大模型入门总览：四层技术框架 This guide maps the large language model (LLM) stack across four layers: applications, models, inference infrastructure, and GPU computing. Each section outlines th">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-12-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-24T13:07:23.423Z">
+<meta property="article:author" content="lucky_chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://lucky-chen.github.io/2025/12/07/ai/ai_overview_en/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Getting Started with AI: A Four-Layer Technology Map | Chen's Notes</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Chen's Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://lucky-chen.github.io/2025/12/07/ai/ai_overview_en/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="lucky_chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Chen's Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Getting Started with AI: A Four-Layer Technology Map
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-12-07 00:00:00" itemprop="dateCreated datePublished" datetime="2025-12-07T00:00:00+08:00">2025-12-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2026-10-24 21:07:23" itemprop="dateModified" datetime="2026-10-24T21:07:23+08:00">2026-10-24</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI/" itemprop="url" rel="index"><span itemprop="name">AI</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Goal"><a href="#Goal" class="headerlink" title="Goal"></a>Goal</h1><p><strong>Chinese version: <a href="/i18n/zh/ai/ai-overview.html">大模型入门总览：四层技术框架</a></strong></p>
+<p>This guide maps the large language model (LLM) stack across four layers: applications, models, inference infrastructure, and GPU computing. Each section outlines the main concepts and links to explanations, implementations, and engineering case studies.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Main Question</th>
+<th>Core Modules</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Application and Product</td>
+<td>How do you build applications with models?</td>
+<td>Agents and Workflows; Data and Knowledge Integration; Tools and External Systems</td>
+</tr>
+<tr>
+<td>Model</td>
+<td>How do models work and learn?</td>
+<td>Transformer Architecture and Tokenizers; Pretraining; Post-Training; Model Evaluation</td>
+</tr>
+<tr>
+<td>Inference and Infrastructure</td>
+<td>What systems support training and inference?</td>
+<td>Training Systems; Runtime Infrastructure; Inference Systems (the focus here)</td>
+</tr>
+<tr>
+<td>CUDA and GPU</td>
+<td>How do model operations run on GPUs?</td>
+<td>GPU Execution; Memory and Performance</td>
+</tr>
+</tbody></table>
+<span id="more"></span>
+
+<h1 id="Knowledge-Map"><a href="#Knowledge-Map" class="headerlink" title="Knowledge Map"></a>Knowledge Map</h1><p>Read from applications down to GPU computing, or follow the learning path for your role. The two flows below show how the layers work together during generation and training.</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Application and Product</span><br><span class="line">├─ Agents and Workflows: Manage context, control execution, and reuse skills and tools</span><br><span class="line">├─ Data and Knowledge Integration: Ingest data and retrieve relevant context</span><br><span class="line">└─ Tools and External Systems: Call external tools and return their results</span><br><span class="line"></span><br><span class="line">Model</span><br><span class="line">├─ Transformer Architecture and Tokenizers: Represent text as vectors and compute next-token distributions</span><br><span class="line">├─ Pretraining: Learn from large datasets through next-token prediction</span><br><span class="line">├─ Post-Training: Train on demonstrations, preferences, and rewards</span><br><span class="line">└─ Model Evaluation: Measure capabilities, training progress, and limitations</span><br><span class="line"></span><br><span class="line">Inference and Infrastructure</span><br><span class="line">├─ Training Systems: Training frameworks and distributed training (overview only)</span><br><span class="line">├─ Runtime Infrastructure: Resource scheduling, communication, storage, and fault tolerance (overview only)</span><br><span class="line">└─ Inference Systems: Inference Pipeline, Cache Management, and Scheduling and Compute Optimization (covered here)</span><br><span class="line"></span><br><span class="line">CUDA and GPU</span><br><span class="line">├─ GPU Execution: Execute tensor operations on the GPU</span><br><span class="line">└─ Memory and Performance: Reduce data movement and reuse data efficiently</span><br></pre></td></tr></table></figure>
+
+<h2 id="How-Does-a-Prompt-Become-a-Response"><a href="#How-Does-a-Prompt-Become-a-Response" class="headerlink" title="How Does a Prompt Become a Response?"></a>How Does a Prompt Become a Response?</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">User prompt</span><br><span class="line">    ↓</span><br><span class="line">Application / Agents and Workflows: Assemble the prompt, history, and memory;</span><br><span class="line">    load skills and include retrieved context or tool results as needed</span><br><span class="line">    ↓</span><br><span class="line">Model / Tokenizer: Encode the input as token IDs</span><br><span class="line">    ↓</span><br><span class="line">Inference / Prefill: Run the Transformer, build the KV cache, and compute the next-token distribution</span><br><span class="line">    ↓</span><br><span class="line">Inference / Token selection and decoding: Select a token, then process it to compute</span><br><span class="line">    the next distribution; reuse and update the KV cache until generation stops</span><br><span class="line">    │</span><br><span class="line">    └─ GPU kernels perform the tensor operations at each step</span><br><span class="line">    ↓</span><br><span class="line">Model / Tokenizer: Decode generated token IDs into text</span><br><span class="line">    ↓</span><br><span class="line">Application: Return the answer, or execute a requested tool call,</span><br><span class="line">    add its result to the context, and call the model again</span><br></pre></td></tr></table></figure>
+
+<h2 id="How-Is-a-Model-Trained"><a href="#How-Is-a-Model-Trained" class="headerlink" title="How Is a Model Trained?"></a>How Is a Model Trained?</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Model / Architecture and tokenizer: Define the model and text encoding</span><br><span class="line">    ↓</span><br><span class="line">Model / Pretraining data: Collect, clean, deduplicate, filter, split, and tokenize data;</span><br><span class="line">    track dataset versions and mixture ratios</span><br><span class="line">    ↓</span><br><span class="line">Model / Pretraining: Compute the loss, backpropagate gradients, and update parameters</span><br><span class="line">    │</span><br><span class="line">    └─ The training framework dispatches GPU kernels that operate on tensors</span><br><span class="line">    ↓</span><br><span class="line">Pretrained model</span><br><span class="line">    ↓</span><br><span class="line">Model / Post-training: Prepare demonstrations, preference data, and reward signals;</span><br><span class="line">    train with SFT, preference optimization, or reinforcement learning</span><br><span class="line">    │</span><br><span class="line">    └─ The training framework updates parameters using the same GPU execution stack</span><br><span class="line">    ↓</span><br><span class="line">Model / Evaluation: Measure capabilities and limitations; revise the data and training methods</span><br><span class="line">    ↓</span><br><span class="line">Inference / Inference Pipeline: Load the model and serve application requests</span><br></pre></td></tr></table></figure>
+
+<h2 id="Roles-and-Learning-Paths"><a href="#Roles-and-Learning-Paths" class="headerlink" title="Roles and Learning Paths"></a>Roles and Learning Paths</h2><p>The four role categories below group responsibilities found in job listings from <a target="_blank" rel="noopener" href="https://talent.deepseek.com/">DeepSeek</a>, <a target="_blank" rel="noopener" href="https://seed.bytedance.com/zh/career">ByteDance Seed</a>, and <a target="_blank" rel="noopener" href="https://www.anthropic.com/careers/jobs">Anthropic</a>. Role names are representative; titles and responsibilities vary by company. GPU computing and performance roles may sit within infrastructure teams.</p>
+<p>Depth: <strong>Familiar</strong> — know what it does and its limitations; <strong>Working knowledge</strong> — explain how it works and its tradeoffs; <strong>Proficient</strong> — implement and troubleshoot independently.</p>
+<table>
+<thead>
+<tr>
+<th>Role Category</th>
+<th>Typical Roles</th>
+<th>Responsibilities</th>
+<th>Learning Path and Depth</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AI Application Development</td>
+<td>AI Product Engineer<br>Agent Engineer</td>
+<td>Build AI products<br>Combine models, retrieval, and tools<br>Implement business workflows</td>
+<td>→ Applications (Proficient)<br>→ Models (Working knowledge)<br>→ Inference and Infrastructure (Working knowledge)<br>→ GPU Computing (Familiar)</td>
+</tr>
+<tr>
+<td>Model Research and Development</td>
+<td>Research Engineer, Pretraining<br>Research Engineer, Post-Training<br>Multimodal Research Engineer</td>
+<td>Develop model architectures, datasets, and training methods<br>Run experiments and evaluate model capabilities</td>
+<td>→ Models (Proficient)<br>→ Inference and Infrastructure (Working knowledge)<br>→ GPU Computing (Working knowledge)<br>→ Applications (Familiar)</td>
+</tr>
+<tr>
+<td>AI Systems and Infrastructure</td>
+<td>Training Framework Engineer<br>Inference Systems Engineer</td>
+<td>Build training, inference, and data platforms<br>Improve reliability, scalability, and resource utilization</td>
+<td>→ Models (Working knowledge)<br>→ GPU Computing (Working knowledge)<br>→ Inference and Infrastructure (Proficient)<br>→ Applications (Familiar)</td>
+</tr>
+<tr>
+<td>GPU Computing and Performance</td>
+<td>GPU Kernel Engineer<br>AI Compiler Engineer</td>
+<td>Build kernels, communication libraries, and compilers<br>Optimize model workloads for the hardware</td>
+<td>→ Models (Working knowledge)<br>→ GPU Computing (Proficient)<br>→ Inference and Infrastructure (Working knowledge)<br>→ Applications (Familiar)</td>
+</tr>
+</tbody></table>
+<h1 id="Application-and-Product-Layer"><a href="#Application-and-Product-Layer" class="headerlink" title="Application and Product Layer"></a>Application and Product Layer</h1><p>Build applications that use models, retrieve knowledge, and call external tools.</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Data and Knowledge Integration → Agents and Workflows ↔ Tools and External Systems</span><br></pre></td></tr></table></figure>
+
+<h2 id="Agents-and-Workflows"><a href="#Agents-and-Workflows" class="headerlink" title="Agents and Workflows"></a>Agents and Workflows</h2><p><strong>Question:</strong> How does an agent maintain context, call tools, track progress, and decide when to stop?</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Agent: An execution loop in which a model chooses actions and tools to complete a task</span><br><span class="line">├─ Context management: Prompts, history, memory, and context compaction</span><br><span class="line">├─ Execution control: Model calls, tool execution, state updates, and stopping conditions</span><br><span class="line">├─ Reuse: Skills, tools, and subagents</span><br><span class="line">└─ Workflows: Predefined execution paths that can include agents</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Concepts</th>
+<th>Code and Examples</th>
+<th>Case Studies</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Context assembly and updates</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Context engineering</a>: Information selection, compression, and memory</td>
+<td><a href="/2025/12/07/ai/agent_sdk_design_en/">Agent SDK architecture</a>: Context, memory, and transcripts</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/multi-agent-research-system">Anthropic Research</a>: Context isolation and information aggregation (production case study)</td>
+</tr>
+<tr>
+<td>Execution control</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>: Execution patterns and tool loops</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/deepseek-harness">deepseek-harness</a>: Runtime and plugins; <code>sdlc</code>: Business workflow</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/multi-agent-research-system">Anthropic Research</a>: Task decomposition and execution reliability (production case study)</td>
+</tr>
+</tbody></table>
+<h3 id="Skills"><a href="#Skills" class="headerlink" title="Skills"></a>Skills</h3><p><strong>Question:</strong> How can an agent reuse procedures and domain knowledge across tasks?</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Skills: Reusable procedures, instructions, and supporting resources</span><br><span class="line">├─ Packaging: Instructions, references, scripts, and templates</span><br><span class="line">├─ Discovery and loading: Select skills by their descriptions; load instructions and resources on demand</span><br><span class="line">└─ Execution and maintenance: Follow instructions, run scripts, and update the skill based on feedback</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Concepts</th>
+<th>Code and Examples</th>
+<th>Case Studies</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Skill packaging</td>
+<td><a target="_blank" rel="noopener" href="https://agentskills.io/home">Official documentation</a>: Directory layout, metadata, and supporting files</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/anthropics/skills">anthropics/skills</a>: Instructions, scripts, and templates</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills">Document skills in Claude</a>: How a PDF skill separates instructions, scripts, and references (implementation case study)</td>
+</tr>
+<tr>
+<td>On-demand loading and execution</td>
+<td><a target="_blank" rel="noopener" href="https://agentskills.io/home">Official documentation</a>: Discovery and loading mechanisms</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/anthropics/skills">Document skill implementations</a>: Resource references and script calls</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills">Progressive disclosure design</a>: Load only the resources a task needs (implementation case study)</td>
+</tr>
+</tbody></table>
+<h2 id="Data-and-Knowledge-Integration"><a href="#Data-and-Knowledge-Integration" class="headerlink" title="Data and Knowledge Integration"></a>Data and Knowledge Integration</h2><p><strong>Question:</strong> How do you keep source data up to date and retrieve the context a task needs?</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Data and Knowledge Integration: Ingest data and retrieve relevant context</span><br><span class="line">├─ Data ingestion and maintenance: Collect, clean, organize, and update source data</span><br><span class="line">├─ Provenance and permissions: Track sources, versions, access rights, and intended use</span><br><span class="line">└─ Retrieval-augmented generation (RAG): Chunk, index, retrieve, and rerank source material for the context</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Concepts</th>
+<th>Code and Examples</th>
+<th>Case Studies</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Data ingestion and retrieval</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/contextual-retrieval">Contextual Retrieval</a>: Chunking, indexing, contextual enrichment, and reranking</td>
+<td><a target="_blank" rel="noopener" href="https://platform.claude.com/cookbook/capabilities-contextual-embeddings-guide">RAG Cookbook</a>: Document processing, retrieval, and comparative experiments</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<h2 id="Tools-and-External-Systems"><a href="#Tools-and-External-Systems" class="headerlink" title="Tools and External Systems"></a>Tools and External Systems</h2><p><strong>Question:</strong> How does a model request a tool call, and how does the application execute it and return the result?</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Tools and External Systems: Call external tools and return their results</span><br><span class="line">├─ Tool definitions: Descriptions, input and output schemas, and permissions</span><br><span class="line">├─ Tool calling: The model requests a call; the application executes it and returns the result</span><br><span class="line">└─ Model Context Protocol (MCP): A standard interface for external tools and resources</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Concepts</th>
+<th>Code and Examples</th>
+<th>Case Studies</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tool integration and execution</td>
+<td><a target="_blank" rel="noopener" href="https://modelcontextprotocol.io/docs/learn/architecture">MCP architecture</a>: Tools, resources, and protocol boundaries</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/modelcontextprotocol/servers">MCP Servers</a>: Reference tool and resource implementations</td>
+<td><a target="_blank" rel="noopener" href="https://www.anthropic.com/engineering/code-execution-with-mcp">Anthropic MCP code execution</a>: On-demand tool loading and intermediate-data filtering (design and experiments)</td>
+</tr>
+</tbody></table>
+<h1 id="Model-Layer"><a href="#Model-Layer" class="headerlink" title="Model Layer"></a>Model Layer</h1><p>This layer covers how models represent text, learn from data, and are evaluated.</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Transformer Architecture and Tokenizers → Pretraining → Post-Training → Model Evaluation</span><br></pre></td></tr></table></figure>
+
+<h2 id="Transformer-Architecture-and-Tokenizers"><a href="#Transformer-Architecture-and-Tokenizers" class="headerlink" title="Transformer Architecture and Tokenizers"></a>Transformer Architecture and Tokenizers</h2><p><strong>Question:</strong> How does a model represent text and predict the next token?</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Transformer Architecture and Tokenizers: Represent text as vectors and compute next-token distributions</span><br><span class="line">├─ Text representation: Tokenization, token IDs, and embeddings</span><br><span class="line">├─ Transformer computation: Positional encodings, attention, and feed-forward networks</span><br><span class="line">└─ Next-token prediction: Probability distributions, token selection, and autoregressive generation</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Concepts</th>
+<th>Code and Examples</th>
+<th>Case Studies</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Text representation</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/learn/llm-course/en/chapter1/1">HF LLM Course</a>: Tokenizers, tokens, and model inputs</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/karpathy/nanochat">nanochat</a>: Tokenizer and embeddings</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Transformer computation</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1706.03762">Original Transformer paper</a>: Attention, positional encodings, and model architecture</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/karpathy/nanochat">nanochat</a>: Transformer implementation</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/html/2412.19437v2">DeepSeek-V3 §2</a>: MLA, MoE, and MTP; <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2501.08313">MiniMax-01</a>: Hybrid attention (advanced reading)</td>
+</tr>
+<tr>
+<td>Next-token prediction</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/learn/llm-course/en/chapter1/1">HF LLM Course</a>: Autoregressive models and generation</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/karpathy/nanochat">nanochat</a>: Next-token probabilities, sampling, and generation loops</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p>Multimodal extensions: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2502.13923">Qwen2.5-VL</a> introduces vision-language model design; <a target="_blank" rel="noopener" href="https://qwenlm.github.io/blog/qwen2.5-omni/">Qwen2.5-Omni</a> covers audio, video, and streaming speech generation.</p>
+<h2 id="Pretraining"><a href="#Pretraining" class="headerlink" title="Pretraining"></a>Pretraining</h2><p><strong>Question:</strong> How does a model learn general capabilities from large datasets, and how are the data and training runs tracked?</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Pretraining: Learn from large datasets through next-token prediction</span><br><span class="line">├─ Data preparation: Source selection, cleaning, deduplication, filtering, and tokenization</span><br><span class="line">├─ Data management: Dataset splits, mixture ratios, and version tracking</span><br><span class="line">└─ Training objective and optimization: Next-token prediction, loss, backpropagation, and parameter updates</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Concepts</th>
+<th>Code and Examples</th>
+<th>Case Studies</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Data preparation and management</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2406.17557">FineWeb</a>: Cleaning, deduplication, and quality experiments</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/datatrove">DataTrove</a>: Processing pipelines; <a target="_blank" rel="noopener" href="https://github.com/huggingface/smollm/blob/main/text/pretraining/README.md">SmolLM</a>: Data dependencies and stage configuration</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2407.21783">Llama 3</a>: Dataset preparation; <a target="_blank" rel="noopener" href="https://qwenlm.github.io/blog/qwen3/">Qwen3</a>: Data scaling and training stages (model reports)</td>
+</tr>
+<tr>
+<td>Training objective and optimization</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/learn/llm-course/en/chapter7/6">HF: Training a language model from scratch</a>: Objectives, loss, and training</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/pytorch/examples">PyTorch Examples</a>: Training loops; <a target="_blank" rel="noopener" href="https://github.com/huggingface/smollm/blob/main/text/pretraining/README.md">SmolLM</a>: Training recipes and checkpoints</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2407.21783">Llama 3</a>: Training design and scaling experience (model report)</td>
+</tr>
+</tbody></table>
+<p>Training frameworks handle data loading, batching, and automatic differentiation. Distributed training extends this to multiple devices.</p>
+<h2 id="Post-Training"><a href="#Post-Training" class="headerlink" title="Post-Training"></a>Post-Training</h2><p><strong>Question:</strong> How do you train a model to follow instructions, align with user preferences, reason, or perform a specific task?</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Post-Training: Train on demonstrations, preferences, and rewards</span><br><span class="line">├─ Data and feedback: Collect demonstrations, preference labels, and reward signals; review and version the datasets</span><br><span class="line">├─ Training methods</span><br><span class="line">│  ├─ Supervised fine-tuning (SFT): Train on example responses</span><br><span class="line">│  ├─ Preference optimization: Train on preferred and rejected responses with methods such as direct preference optimization (DPO)</span><br><span class="line">│  └─ Reinforcement learning (RL): Optimize rewards from human preferences, verifiable outcomes, or other feedback</span><br><span class="line">├─ Fine-tuning methods: Full fine-tuning or parameter-efficient fine-tuning (PEFT), such as low-rank adaptation (LoRA)</span><br><span class="line">└─ Iteration: Evaluate results, analyze failures, and revise the training data</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Concepts</th>
+<th>Code and Examples</th>
+<th>Case Studies</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Training data and feedback</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/learn/smol-course/unit0/1">HF Smol Course</a>: Demonstration and preference data</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl">TRL</a>: Sample formats and data processing</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2501.12948">DeepSeek-R1</a>: Cold-start training, dataset preparation, and distillation (model report)</td>
+</tr>
+<tr>
+<td>Training methods</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2203.02155">InstructGPT</a>: SFT, reward models, and RLHF; <a target="_blank" rel="noopener" href="https://huggingface.co/learn/smol-course/unit0/1">HF Smol Course</a>: Preference alignment</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl">TRL</a>: SFT, DPO, and other trainers; <a target="_blank" rel="noopener" href="https://github.com/verl-project/verl">verl</a>: Reinforcement learning recipes</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2501.12948">DeepSeek-R1</a>: Reinforcement learning for reasoning; <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2503.14476">DAPO</a>: Training stability (training experiments)</td>
+</tr>
+<tr>
+<td>Parameter updates and iteration</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/learn/smol-course/unit0/1">HF Smol Course</a>: Task-specific fine-tuning</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl">TRL</a>: Parameter-efficient fine-tuning integration</td>
+<td><a target="_blank" rel="noopener" href="https://www.minimax.io/news/minimax-m1-technical-seminar-2">MiniMax-M1 technical seminar</a>: Adjustments to numerical precision, rewards, and data quality</td>
+</tr>
+</tbody></table>
+<h2 id="Model-Evaluation"><a href="#Model-Evaluation" class="headerlink" title="Model Evaluation"></a>Model Evaluation</h2><p><strong>Question:</strong> How do you measure model capabilities, track training improvements, and identify limitations?</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Model Evaluation: Measure capabilities, training progress, and limitations</span><br><span class="line">├─ Evaluation design: Target capabilities, tasks, metrics, and controlled conditions</span><br><span class="line">├─ Execution: Run models and score their outputs</span><br><span class="line">└─ Analysis: Compare results, examine errors, and state what the evaluation does and does not measure</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Concepts</th>
+<th>Code and Examples</th>
+<th>Case Studies</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Evaluation design</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2211.09110">HELM</a>: Scenarios, metrics, and coverage</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/EleutherAI/lm-evaluation-harness">lm-evaluation-harness</a>: Task definitions</td>
+<td><a target="_blank" rel="noopener" href="https://openai.com/index/introducing-simpleqa/">OpenAI SimpleQA</a>: Factual question design and scoring (evaluation case study)</td>
+</tr>
+<tr>
+<td>Evaluation execution and result analysis</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2211.09110">HELM</a>: Comparisons across metrics and the limits of each evaluation</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/EleutherAI/lm-evaluation-harness">lm-evaluation-harness</a>: Model adapters and evaluation runs; <a target="_blank" rel="noopener" href="https://github.com/openai/simple-evals">simple-evals</a>: Scoring implementation</td>
+<td><a target="_blank" rel="noopener" href="https://openai.com/index/introducing-simpleqa/">OpenAI SimpleQA</a>: Abstention and calibration; findings are limited to short-answer factuality</td>
+</tr>
+</tbody></table>
+<h1 id="Inference-and-Infrastructure-Layer"><a href="#Inference-and-Infrastructure-Layer" class="headerlink" title="Inference and Infrastructure Layer"></a>Inference and Infrastructure Layer</h1><p>Training and inference systems share infrastructure for resource scheduling, communication, storage, and fault tolerance.</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Training Systems (training frameworks and distributed training)</span><br><span class="line">    ↑</span><br><span class="line">Runtime Infrastructure (resource scheduling, communication, storage, and fault tolerance)</span><br><span class="line">    ↓</span><br><span class="line">Inference Systems</span><br><span class="line">├─ Inference Pipeline</span><br><span class="line">├─ Cache Management</span><br><span class="line">└─ Scheduling and Compute Optimization</span><br></pre></td></tr></table></figure>
+
+<p>This section focuses on inference: generation, KV caching, and the scheduling and compute optimizations that affect latency, throughput, and GPU memory use.</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer">DeepInfer</a> powers DeepSeek’s production inference. It combines the model runtime, sampling, asynchronous scheduling, and optimized kernels.</p>
+<h2 id="Inference-Pipeline"><a href="#Inference-Pipeline" class="headerlink" title="Inference Pipeline"></a>Inference Pipeline</h2><p><strong>Question:</strong> How is a prompt processed, and how are tokens generated until a stopping condition is met?</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Inference Pipeline: Process the prompt and generate tokens</span><br><span class="line">├─ Prefill: Process the prompt, build the KV cache, and compute the next-token distribution</span><br><span class="line">├─ Decode: Process each new token using the KV cache, update the cache, and compute the next-token distribution</span><br><span class="line">└─ Generation control: Token selection, stopping conditions, and output handling</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Concepts</th>
+<th>Code and Examples</th>
+<th>Case Studies</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Prefill</td>
+<td><a target="_blank" rel="noopener" href="https://tvm.apache.org/docs/how_to/tutorials/optimize_llm.html">TVM LLM tutorial</a>: Prompt processing and next-token prediction</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/vllm-project/vllm">vLLM</a>, <a target="_blank" rel="noopener" href="https://github.com/sgl-project/sglang">SGLang</a>: Model execution paths; <a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer">DeepInfer</a>: Model runtimes and offline inference</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/open-infra-index/blob/main/202502OpenSourceWeek/day_6_one_more_thing_deepseekV3R1_inference_system_overview.md">DeepSeek inference system</a>: Prefill/decode disaggregation and parallelism configurations (production case study)</td>
+</tr>
+<tr>
+<td>Decode and generation control</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/llm_tutorial_optimization">HF inference tutorial</a>: Autoregressive generation, sampling, and caching</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/sgl-project/sglang">SGLang</a>: Generation loops; <a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer">DeepInfer</a>: Sampling, speculative decoding, and output control</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/open-infra-index/blob/main/202502OpenSourceWeek/day_6_one_more_thing_deepseekV3R1_inference_system_overview.md">DeepSeek inference system</a>: Prefill and decode performance and latency targets (production case study)</td>
+</tr>
+</tbody></table>
+<h2 id="Cache-Management"><a href="#Cache-Management" class="headerlink" title="Cache Management"></a>Cache Management</h2><p><strong>Question:</strong> How does a KV cache reuse previously computed keys and values, and how is its memory managed?</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Cache Management: Reuse cached keys and values while managing GPU memory</span><br><span class="line">├─ Cache reuse: Prefill stores keys and values; decoding reads and extends the cache</span><br><span class="line">├─ Memory management: Cache block allocation, paging, and fragmentation</span><br><span class="line">└─ Cache lifecycle: Sharing, reuse across requests, retention, and eviction</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Concepts</th>
+<th>Code and Examples</th>
+<th>Case Studies</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Cache reuse</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/kv_cache">Transformers Cache</a>: Cache creation, updates, and reuse</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/kv_cache">Cache code examples</a>: Observe generation under different strategies</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md#kv-cache-storage">DeepInfer deployment Q&amp;A</a>: Cross-request cache reuse, storage, and retention (production design; the full cache system is not open source)</td>
+</tr>
+<tr>
+<td>Memory management</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2309.06180">PagedAttention</a>: Paging, sharing, and fragmentation</td>
+<td><a target="_blank" rel="noopener" href="https://docs.vllm.ai/en/stable/design/paged_attention/">vLLM design documentation</a> and <a target="_blank" rel="noopener" href="https://github.com/vllm-project/vllm">code</a>: Cache block management and attention kernels</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/open-infra-index/blob/main/202502OpenSourceWeek/day_6_one_more_thing_deepseekV3R1_inference_system_overview.md">DeepSeek inference system</a>: Decode Load Balancer, KV cache use, and cache hit rates in production (production case study)</td>
+</tr>
+</tbody></table>
+<h2 id="Scheduling-and-Compute-Optimization"><a href="#Scheduling-and-Compute-Optimization" class="headerlink" title="Scheduling and Compute Optimization"></a>Scheduling and Compute Optimization</h2><p><strong>Question:</strong> How do batching and lower precision affect throughput, latency, memory use, and output quality?</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Scheduling and Compute Optimization: Balance throughput, latency, memory use, and output quality</span><br><span class="line">├─ Continuous batching: Add and remove requests as generation progresses</span><br><span class="line">├─ Low-precision computation: Weight and KV cache quantization, hardware support, and accuracy tradeoffs</span><br><span class="line">└─ Measurement: Throughput, latency, GPU memory use, and output quality</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Concepts</th>
+<th>Code and Examples</th>
+<th>Case Studies</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Continuous batching</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/continuous_batching">HF Continuous Batching</a>: Adding and removing requests during generation</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/sgl-project/sglang">SGLang</a>: Batch formation; <a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer">DeepInfer</a>: Asynchronous scheduling that overlaps CPU batch scheduling with device execution</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/open-infra-index/blob/main/202502OpenSourceWeek/day_6_one_more_thing_deepseekV3R1_inference_system_overview.md">DeepSeek inference system</a>: Batch splitting and compute-communication overlap (production case study); <a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md#data-parallel-load-balancing">DeepInfer deployment Q&amp;A</a>: Load balancing and compute-budget allocation; <a target="_blank" rel="noopener" href="https://www.lmsys.org/blog/2025-07-17-mtp/">SGLang MTP</a>: Decoding optimization experiments</td>
+</tr>
+<tr>
+<td>Low-precision computation</td>
+<td><a target="_blank" rel="noopener" href="https://docs.vllm.ai/en/stable/features/quantization/">vLLM Quantization</a>: Formats, precision, and hardware support</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/vllm-project/vllm">vLLM</a>: Quantization configuration and inference comparisons</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<h1 id="CUDA-and-GPU-Layer"><a href="#CUDA-and-GPU-Layer" class="headerlink" title="CUDA and GPU Layer"></a>CUDA and GPU Layer</h1><p>Training frameworks and inference runtimes express model computation as operations on tensors. This layer covers how those operations run on GPUs and how memory access affects performance.</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPU Execution ↔ Memory and Performance</span><br></pre></td></tr></table></figure>
+
+<h2 id="GPU-Execution"><a href="#GPU-Execution" class="headerlink" title="GPU Execution"></a>GPU Execution</h2><p><strong>Question:</strong> How do frameworks execute tensor operations as GPU kernels?</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">GPU Execution: Execute tensor operations on the GPU</span><br><span class="line">├─ Data and operations: Tensors and operators</span><br><span class="line">├─ Operator implementation: Compute libraries, compilers, and kernels</span><br><span class="line">└─ Device execution: Threads, thread blocks, warps, and streaming multiprocessors (SMs)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Concepts</th>
+<th>Code and Examples</th>
+<th>Case Studies</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Operator implementation</td>
+<td><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/cublas/">cuBLAS</a>: GPU matrix operations through cuBLAS</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/triton-lang/triton">Triton</a>: Basic kernels; <a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/FlashMLA">FlashMLA</a>: Attention kernels</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepInfer/blob/main/README.md">DeepInfer</a>: Integrating FlashMLA, DeepGEMM, and other kernel components into model runtimes (framework overview)</td>
+</tr>
+<tr>
+<td>Device execution</td>
+<td><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/cuda-programming-guide/">CUDA Programming Guide</a>: Kernels, thread organization, and execution models</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/cuda-samples">CUDA Samples</a>: Thread organization, synchronization, and asynchronous execution</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/html/2412.19437v2">DeepSeek-V3 §3.2.2</a>: Warp specialization, PTX, and compute-communication overlap (advanced reading)</td>
+</tr>
+</tbody></table>
+<h2 id="Memory-and-Performance"><a href="#Memory-and-Performance" class="headerlink" title="Memory and Performance"></a>Memory and Performance</h2><p><strong>Question:</strong> How do memory layout, data movement, and reuse affect GPU performance?</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Memory and Performance: Reduce data movement and reuse data efficiently</span><br><span class="line">├─ Memory hierarchy: Registers, shared memory, and GPU memory; capacity and bandwidth</span><br><span class="line">├─ Data movement and reuse: Tiling, data reuse, and recomputation</span><br><span class="line">└─ Validation: Execution time, GPU memory use, and numerical accuracy</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Concepts</th>
+<th>Code and Examples</th>
+<th>Case Studies</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Memory hierarchy</td>
+<td><a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/cuda-programming-guide/">CUDA Programming Guide</a>: Memory hierarchy and access patterns</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/DeepGEMM">DeepGEMM</a>: Low-precision matrix computation and performance tests</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/html/2412.19437v2">DeepSeek-V3 §3.3</a>: Low-precision storage and accumulator precision (advanced reading)</td>
+</tr>
+<tr>
+<td>Data movement and reuse</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2205.14135">FlashAttention</a>: Tiling and reduced memory access</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Dao-AILab/flash-attention">FlashAttention code</a>: Attention data reuse</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/html/2412.19437v2">DeepSeek-V3 §3.2.3</a>: Activation recomputation and memory tradeoffs (advanced reading)</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/06/12/dart/dart_compiler/" rel="prev" title="Dart编译器概述">
+      <i class="fa fa-chevron-left"></i> Dart编译器概述
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/12/07/ai/agent_sdk_design_en/" rel="next" title="Agent Engineering: SDK Requirements and Runtime Architecture">
+      Agent Engineering: SDK Requirements and Runtime Architecture <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Goal"><span class="nav-number">1.</span> <span class="nav-text">Goal</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Knowledge-Map"><span class="nav-number">2.</span> <span class="nav-text">Knowledge Map</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#How-Does-a-Prompt-Become-a-Response"><span class="nav-number">2.1.</span> <span class="nav-text">How Does a Prompt Become a Response?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#How-Is-a-Model-Trained"><span class="nav-number">2.2.</span> <span class="nav-text">How Is a Model Trained?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Roles-and-Learning-Paths"><span class="nav-number">2.3.</span> <span class="nav-text">Roles and Learning Paths</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Application-and-Product-Layer"><span class="nav-number">3.</span> <span class="nav-text">Application and Product Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Agents-and-Workflows"><span class="nav-number">3.1.</span> <span class="nav-text">Agents and Workflows</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Skills"><span class="nav-number">3.1.1.</span> <span class="nav-text">Skills</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Data-and-Knowledge-Integration"><span class="nav-number">3.2.</span> <span class="nav-text">Data and Knowledge Integration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tools-and-External-Systems"><span class="nav-number">3.3.</span> <span class="nav-text">Tools and External Systems</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Model-Layer"><span class="nav-number">4.</span> <span class="nav-text">Model Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Transformer-Architecture-and-Tokenizers"><span class="nav-number">4.1.</span> <span class="nav-text">Transformer Architecture and Tokenizers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pretraining"><span class="nav-number">4.2.</span> <span class="nav-text">Pretraining</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Post-Training"><span class="nav-number">4.3.</span> <span class="nav-text">Post-Training</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Model-Evaluation"><span class="nav-number">4.4.</span> <span class="nav-text">Model Evaluation</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Inference-and-Infrastructure-Layer"><span class="nav-number">5.</span> <span class="nav-text">Inference and Infrastructure Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Inference-Pipeline"><span class="nav-number">5.1.</span> <span class="nav-text">Inference Pipeline</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cache-Management"><span class="nav-number">5.2.</span> <span class="nav-text">Cache Management</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scheduling-and-Compute-Optimization"><span class="nav-number">5.3.</span> <span class="nav-text">Scheduling and Compute Optimization</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CUDA-and-GPU-Layer"><span class="nav-number">6.</span> <span class="nav-text">CUDA and GPU Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#GPU-Execution"><span class="nav-number">6.1.</span> <span class="nav-text">GPU Execution</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Memory-and-Performance"><span class="nav-number">6.2.</span> <span class="nav-text">Memory and Performance</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lucky_chen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">lucky_chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lucky-chen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lucky-chen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/qh438406812@gmail.com" title="E-Mail → qh438406812@gmail.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lucky_chen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
