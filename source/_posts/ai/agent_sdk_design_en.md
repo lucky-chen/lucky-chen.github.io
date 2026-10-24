@@ -1,58 +1,22 @@
 ---
-title: How I Entered AI and Designed an Agent SDK
-categories: [AI, Infra, Methodology]
+title: "Agent Engineering: SDK Requirements and Runtime Architecture"
+categories: [AI, Engineering]
 date: 2025-12-07
-tags: [Agent, Runtime, SDK, Architecture, Problem Analysis]
+tags: [AI]
 lang: en
 ---
 
 # Background
 
-**Chinese version: [我进入 AI 领域的方式，以及 Agent SDK 的设计](/i18n/zh/ai/agent-sdk-design.html)**
+**Chinese version: [Agent 工程：SDK 需求拆解与运行时架构](/i18n/zh/ai/agent-sdk-design.html)**
 
-This article is about how to enter a new field quickly. The method used here is **seeking truth from facts**, with three steps: **investigation**, **practice**, and **iteration through review**. The concrete example in this article is agent engineering in the AI domain.
+This article develops the Agent engineering topic within the Application / Product layer introduced in [Getting Started with AI: A Four-Layer Technology Map](/2025/12/07/ai/ai_overview_en/).
 
-- **Investigation**: what problems appeared when entering the AI field, how to approach it, and what initial assumptions were formed through investigation
-- **Conclusions**: what core judgments were formed after investigation and practice
-- **Practical engineering**: how those judgments were derived, designed, and validated through a real agent engineering project
+It covers the recurring requirements of an Agent SDK, the runtime architecture used to address them, and the implementation status recorded in this project. The SDK is shared application-side infrastructure: it manages sessions, orchestration, context, and tools, while model computation is delegated to model services.
 
 <!-- more -->
 
-# Investigation
-
-## Exploring and understanding what AI is
-
-- Understand the basic principles of AI and its capability boundaries
-- Understand engineering objects such as prompt, agent, context, and MCP
-- Understand where AI is effective in real delivery and where it loses control
-
-## Deriving a human-AI collaboration model from AI's characteristics
-
-- Decide which problems are suitable for AI and which must remain human-led
-- Reassign engineering focus toward requirement discovery, problem decomposition, architecture design, and execution control
-- Form a practical way of working where humans and AI collaborate on engineering tasks
-
-## Validating these judgments in practice and turning them into tools
-
-- Use real projects to validate whether the previous judgments hold
-- Turn effective methods into process, runtime, and tooling
-- Make those capabilities reusable, extensible, and sustainable
-
-# Conclusions from AI Project Retrospectives
-
-- **From the AI technology perspective**: AI behaves more like a group of highly capable but not fully controllable executors. The key is to define goals, paths, and constraints first, then progressively compress highly uncertain problems into more concrete and more deterministic ones.
-- **From the perspective of personal capability focus**: in the AI era, more value shifts upward into requirement discovery, problem definition, problem decomposition, solution design, process control, and result acceptance.
-- **From the perspective of project practice**: several projects in different directions are validating the same point: AI works better inside systems that are already decomposed, constrained, and supported by documents and process, rather than replacing an entire workflow without boundaries.
-
-| Project | Domain | Main Goal | Current Conclusion |
-| --- | --- | --- | --- |
-| `agent_runtime` | Infra | Provide a shared runtime foundation for agent systems, unifying session, orchestration, context, tooling, model, observability, and storage capabilities | Stable AI engineering depends not only on model calls, but on a controllable runtime |
-| `sdlc` | Software delivery | Connect requirement, design, implementation, and verification into a staged delivery chain, and support continuous update based on existing artifacts | AI fits better into decomposed, constrained, and document-backed engineering processes than into full end-to-end replacement |
-| `travel` direction project | Product / business | Validate AI capability in complex user scenarios such as requirement discovery, planning, and continuous task carrying | AI improves information processing and plan generation efficiency, but the real difficulty still lies in requirement discovery and problem definition under complex scenarios |
-
-# Practical Engineering
-
-## Why I Started with an Agent SDK
+# Why I Started with an Agent SDK
 
 Conclusion: an `Agent SDK` is the right place to start because it is the most suitable layer for carrying the common problems in AI engineering.
 
@@ -67,9 +31,7 @@ Conclusion: an `Agent SDK` is the right place to start because it is the most su
 
 It is foundational enough, general enough, and suitable enough to become a shared base reused by later projects.
 
-## SDK Design
-
-### Requirement Definition and Decomposition
+# Requirement Definition and Decomposition
 
 From a requirement perspective, this `Agent SDK` is not solving one isolated feature problem. It is solving a group of recurring needs that repeatedly appear in real agent engineering. The goal is to compress these needs into shared foundational capabilities, so upper-layer projects no longer rebuild runtime foundations repeatedly and can instead evolve on top of unified boundaries.
 
@@ -91,7 +53,9 @@ From a requirement perspective, this `Agent SDK` is not solving one isolated fea
 
 - **A need for future evolution**: this SDK will not stop at its current capability boundary. It will continue to extend into retrieval, memory, checkpoint, compression, and multi-agent capabilities. That means clear room for evolution must exist from the beginning.
 
-### SDK Design
+# Architecture Design
+
+## Overall Architecture
 
 Once the requirements are made clear, the next step is to map them into an implementable and extensible technical architecture. Overall, this SDK adopts a layered runtime architecture. Different layers are responsible for interface exposure, lifecycle control, orchestration, context governance, capability integration, model integration, observability, and persistence.
 
@@ -141,7 +105,7 @@ Overall architecture:
      +--------------------------------+
 ```
 
-#### Application Layer
+## Application Layer
 
 Responsibilities:
 1. Provide terminal or external application entry points and solve the lack of directly usable SDK entry forms
@@ -151,7 +115,7 @@ Included modules:
 - `TerminalSessionDemo`: provides a terminal interaction entry for reading input, invoking runtime APIs, and presenting results
 - External Application Integrations: entry forms for external apps or host systems to connect to the SDK
 
-#### Interface Layer
+## Interface Layer
 
 Responsibilities:
 1. Expose stable session and execution interfaces and solve unstable external access boundaries
@@ -163,7 +127,7 @@ Included modules:
 - `ISession`: defines session access, runtime state query, and execution entry points
 - Agent / Session API Contracts: unify the contracts exposed externally
 
-#### Runtime Controller Layer
+## Runtime Controller Layer
 
 Responsibilities:
 1. Carry session lifecycle and solve the lack of a unified execution unit in multi-turn systems
@@ -175,7 +139,7 @@ Included modules:
 - `AgentSession`: the main execution chain, state carrying, and result normalization for a single session
 - `RunCheckpoint`: reserved boundaries for checkpoint, resume, and background execution
 
-#### Agent Orchestration Layer
+## Agent Orchestration Layer
 
 Responsibilities:
 1. Handle routing and execution-mode orchestration for agent requests
@@ -188,7 +152,7 @@ Included modules:
 - `PEOAgent`: handles staged plan-execute-observe execution
 - `MultiAgentProtocol`: reserved protocol boundary for multi-agent collaboration
 
-#### Context Governance Layer
+## Context Governance Layer
 
 Responsibilities:
 1. Manage multiple context sources in multi-turn systems
@@ -201,7 +165,7 @@ Included modules:
 - `ContextAssembler`: assembles context from multiple sources
 - `ContextBudgetPolicy`: controls context budget, trimming, and constraints
 
-#### Capability and Tooling Layer
+## Capability and Tooling Layer
 
 Responsibilities:
 1. Carry external capability access and invocation
@@ -214,7 +178,7 @@ Included modules:
 - `RuntimePermissionPolicy`: performs permission checks and capability constraints before execution
 - `ExecutionEnvironment`: defines local, sandboxed, or remote execution boundaries
 
-#### Model Integration Layer
+## Model Integration Layer
 
 Responsibilities:
 1. Unify model integration patterns
@@ -225,7 +189,7 @@ Included modules:
 - Provider Adapters: isolate provider differences
 - `StreamingEventAdapter`: normalizes streaming events and outputs
 
-#### Observability Layer
+## Observability Layer
 
 Responsibilities:
 1. Record execution process and key events
@@ -236,7 +200,7 @@ Included modules:
 - `Metrics`: collects runtime metrics, resource consumption, and invocation statistics
 - Diagnostics / Usage: supplements runtime diagnostics and usage facts
 
-#### Data Layer
+## Data Layer
 
 Responsibilities:
 1. Persist runtime data and solve the problem that runtime facts are not stably retained
@@ -246,7 +210,7 @@ Included modules:
 - `Storage`: defines the unified persistence interface
 - File / Remote Persistence Backends: provide file-based or remote persistence implementations
 
-### Delivery Validation
+# Current Implementation Status
 
 The current implementation status can be summarized as follows:
 
@@ -270,16 +234,16 @@ The current implementation status can be summarized as follows:
 | `Data Layer` | `Storage` / File Persistence | Basic implementation | Unified storage interfaces and file persistence exist, but the data layer is still mainly focused on basic persistence |
 | `Data Layer` | Remote Persistence Backends | Reserved for extension | Architectural boundaries exist, but remote persistence is not implemented yet |
 
-### Summary of the Agent SDK
+# Experience and Comparisons
 
-#### What this SDK design and implementation taught
+## Lessons from SDK Design and Implementation
 
 - **Shared foundational capability**: an `Agent SDK` does not face isolated problems. It faces a set of recurring problems that appear together, including interface boundaries, execution control, context governance, tool integration, model invocation, observability, and persistence. The value of the framework lies in separating these concerns and turning them into shared infrastructure.
 - **Capability control**: an `Agent SDK` is not only responsible for bringing external capabilities into the system. It must also control how those capabilities are used, including MCP boundaries, tool registration and dispatch, permission checks, and execution environment constraints.
 - **Memory management**: multi-turn agent systems naturally need history carrying and stage memory, but those signals cannot grow without bound and cannot simply be mixed together. Transcript, memory, retrieval, and context budget need to be treated as separate governance problems.
 - **Scenario hosting**: the key job of an `Agent SDK` is not just model access. It is to host real scenario requirements such as multi-turn state, tool execution, permission constraints, memory management, and result write-back, and organize them into a runnable system.
 
-#### Comparison with industry Agent SDKs
+## Comparison with Industry Agent SDKs
 
 Common points:
 
@@ -291,7 +255,7 @@ Differences:
 - **Different maturity and capability depth**: compared with mature industry SDKs, this implementation is still foundational. It still has clear gaps in strategy maturity, breadth of capability, stability in complex scenarios, multi-agent support, long-term memory, and complex permission governance.
 - **Different priority**: the current priority of this SDK is to validate what architectural boundaries, runtime layering, and capability organization an agent system should have at the engineering level, rather than to maximize feature completeness first.
 
-#### Comparison with previous engineering experience
+## Comparison with Previous Engineering Experience
 
 Common points:
 
@@ -309,14 +273,8 @@ Differences:
 - **Open capability boundaries**: agent systems actively connect to external tools, external data sources, and execution environments, which significantly amplifies safety and permission-governance complexity.
 - **Higher verification requirements**: it is not enough to verify final results. The process, state, and runtime facts must also be trustworthy and traceable.
 
-# Summary
+# Scope and Limitations
 
-When entering a new field, the priority is not to chase trends first. The priority is to keep correcting judgment through **investigation**, **practice**, and **iteration through review**. The method used here is **seeking truth from facts**.
+This project organizes session lifecycle, execution control, context, tools, model access, observability, and persistence behind reusable SDK boundaries. The delivery table distinguishes basic implementations, partially completed capabilities, and reserved extensions; it does not establish production readiness.
 
-- **Investigation**: first understand what it is, what its strengths and weaknesses are, and what industry solutions and experience already exist.
-- **Practice**: form judgments from the investigation, then validate them through concrete engineering.
-- **Iteration through review**: summarize and review practice results, supplement the earlier investigation, update the existing judgments, and continue validating them.
-
-`Agent SDK`, as one of the earliest engineering foundations produced by this methodology, already shows that this direction is valid, that the architectural structure is complete, and that it can continue evolving as a shared base for later projects.
-
-**Chinese version: [我进入 AI 领域的方式，以及 Agent SDK 的设计](/i18n/zh/ai/agent-sdk-design.html)**
+For the wider technology map, see [Getting Started with AI: A Four-Layer Technology Map](/2025/12/07/ai/ai_overview_en/). Model development and inference infrastructure are separate topics in that overview.
