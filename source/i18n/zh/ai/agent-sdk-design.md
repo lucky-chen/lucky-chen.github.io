@@ -8,26 +8,18 @@ date: 2026-01-12
 
 **English version: [Agent Engineering: SDK Requirements and Runtime Architecture](/2025/12/07/ai/agent_sdk_design_en/)**
 
-本文展开 [AI 入门总览：四层技术框架](/i18n/zh/ai/ai-overview.html) 中 Application / Product layer 的 Agent 工程方向。
-
-内容包括 Agent SDK 的共性需求、运行时架构，以及本项目记录的实现状态。SDK 提供应用侧的共享基础设施，负责会话、编排、上下文和工具管理；模型计算由接入的模型服务承担。
-
-<!-- more -->
-
-# 为什么从 Agent SDK 切入
-
-结论：先做 `Agent SDK`，因为它最适合承接 AI 工程里的共性问题。
+本文从 Agent SDK 切入，将其作为 AI 入门的实践入口，通过以下 Agent 运行时与编排的共性需求理解 AI 应用工程：
 
 - 运行时承载
 - 接口边界
 - 编排控制
-- 上下文治理
+- 上下文管理
 - 工具接入
 - 模型接入
 - 权限控制
 - 可观测性
 
-它足够基础，足够通用，也最适合作为后续多个项目复用的共享底座。
+<!-- more -->
 
 # 需求定义与拆解
 

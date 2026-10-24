@@ -9,26 +9,18 @@ permalink: /2025/12/07/ai/agent_sdk_design_en/
 
 **Chinese version: [Agent 工程：SDK 需求拆解与运行时架构](/i18n/zh/ai/agent-sdk-design.html)**
 
-This article develops the Agent engineering topic within the Application / Product layer introduced in [Getting Started with AI: A Four-Layer Technology Map](/2025/12/07/ai/ai_overview_en/).
+This article uses an agent SDK as a hands-on introduction to AI application engineering through the following runtime and orchestration requirements:
 
-It covers the recurring requirements of an Agent SDK, the runtime architecture used to address them, and the implementation status recorded in this project. The SDK is shared application-side infrastructure: it manages sessions, orchestration, context, and tools, while model computation is delegated to model services.
-
-<!-- more -->
-
-# Why I Started with an Agent SDK
-
-Conclusion: an `Agent SDK` is the right place to start because it is the most suitable layer for carrying the common problems in AI engineering.
-
-- Runtime hosting
-- Interface boundaries
-- Orchestration control
-- Context governance
+- Runtime execution
+- API boundaries
+- Orchestration and execution control
+- Context management
 - Tool integration
 - Model integration
-- Permission control
+- Permissions
 - Observability
 
-It is foundational enough, general enough, and suitable enough to become a shared base reused by later projects.
+<!-- more -->
 
 # Requirement Definition and Decomposition
 
