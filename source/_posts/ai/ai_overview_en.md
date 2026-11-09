@@ -1,7 +1,7 @@
 ---
 title: "Getting Started with AI: A Four-Layer Technology Map"
 categories: [AI]
-date: 2025-12-07
+date: 2025-10-07
 ---
 
 # Goal

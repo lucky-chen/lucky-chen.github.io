@@ -1,7 +1,7 @@
 ---
 title: Agent 工程：SDK 需求拆解与运行时架构
 categories: [AI, 工程实践]
-date: 2026-01-12
+date: 2025-12-22
 ---
 
 # 背景

@@ -1,7 +1,7 @@
 ---
 title: 大模型入门总览：四层技术框架
 categories: [AI]
-date: 2025-12-07
+date: 2025-10-07
 ---
 
 # Goal
@@ -178,6 +178,14 @@ Tools and External Systems：连接外部能力，执行操作并回传结果
 ```text
 Transformer Architecture and Tokenizers → Pretraining → Post-Training → Model Evaluation
 ```
+
+站内文章按流程、内部机制与源码实现展开：
+
+- [大模型工作流程](/i18n/zh/ai/llm_workflow.html)：串联预训练、后训练、推理与评测，说明各阶段的输入、执行步骤与产物。
+- [LLM System（一）：GPT 结构与 Forward 计算](/i18n/zh/ai/llm_system_1.html)：展开 Embedding、Transformer、Final Norm 与 LM Head 怎样将 token IDs 转为 Logits。
+- [LLM System（二）：训练目标、参数更新与生成计算](/i18n/zh/ai/llm_system_2.html)：承接 Forward，说明 Loss、Backward、Optimizer、KV Cache 与 token 选择。
+- [nanochat：LLM 训练与推理流程](/i18n/zh/ai/llm_workflow_nanochat.html)：对应工作流程篇，说明各阶段的代码入口、调用顺序和产物。
+- [nanochat：LLM 核心架构与实现](/i18n/zh/ai/llm_system_nanochat.html)：对应 System 两篇，说明数据、模型、训练与生成机制的源码实现。
 
 ## Transformer Architecture and Tokenizers
 

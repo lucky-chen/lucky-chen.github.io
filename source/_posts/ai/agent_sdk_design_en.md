@@ -1,7 +1,7 @@
 ---
 title: "Agent Engineering: SDK Requirements and Runtime Architecture"
 categories: [AI, Engineering]
-date: 2026-01-12
+date: 2025-12-22
 permalink: /2025/12/07/ai/agent_sdk_design_en/
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: 面向产品工程师的精益数据分析
 categories: Product
-date: 2026-10-14
+date: 2026-09-14
 ---
 
 # 目标
