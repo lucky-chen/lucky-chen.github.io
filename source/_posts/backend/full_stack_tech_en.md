@@ -2,6 +2,7 @@
 title: Backend Architecture and Technology Stack Map
 categories: BackEnd
 date: 2026-07-09
+sticky: 60
 ---
 
 # Goal

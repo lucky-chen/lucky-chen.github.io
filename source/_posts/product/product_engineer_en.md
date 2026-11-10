@@ -2,6 +2,7 @@
 title: "Product Engineering: An SDE Career Path in the AI Era"
 categories: Product
 date: 2026-10-12
+sticky: 100
 ---
 
 # Goal
