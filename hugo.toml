@@ -1,0 +1,36 @@
+baseURL = 'http://localhost:1313/'
+title = "Chen's Notes"
+theme = 'hugo-book'
+
+defaultContentLanguage = 'zh'
+defaultContentLanguageInSubdir = true
+
+[languages.zh]
+  contentDir = 'content/zh'
+  locale = 'zh-CN'
+  label = '中文'
+  weight = 1
+
+[languages.en]
+  contentDir = 'content/en'
+  locale = 'en-US'
+  label = 'English'
+  weight = 2
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[params]
+  BookTheme = 'Ayu Light'  # or 'dark', 'auto'
+
+[markup.highlight]
+  noClasses = true
+  style = 'github'
+  lineNos = false
+  codeFences = true
+  guessSyntax = false
+
+[markup.tableOfContents]
+  startLevel = 1
+  endLevel = 3
+  ordered = false

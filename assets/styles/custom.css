@@ -1,0 +1,443 @@
+
+/* =========================================
+   1. Layout
+   ========================================= */
+
+:root {
+  --layout-max-width: 100%;
+  --menu-width: 320px;
+  --toc-width: 240px;
+}
+
+/* 充分利用宽屏 */
+.container {
+  max-width: none;
+}
+
+/* 正文区域 */
+.book-page {
+  flex: 1 1 auto;
+  max-width: 1000px;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+
+/* =========================================
+   2. Left Sidebar
+   ========================================= */
+
+/* 导航与正文分隔线 */
+.book-menu .book-menu-content {
+  border-right: 1px solid var(--gray-200);
+}
+
+/* 导航链接 */
+.book-menu nav a {
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  transition: background 0.15s, color 0.15s;
+}
+
+/* 鼠标悬停 */
+.book-menu nav a:hover {
+  background: var(--gray-100);
+  opacity: 1;
+}
+
+/* 当前文章 */
+.book-menu nav a.active {
+  background: var(--gray-100);
+  color: var(--color-link);
+  font-weight: 600;
+}
+
+/* 子级目录 */
+.book-menu nav ul ul {
+  padding-left: 14px;
+  border-left: 1px solid var(--gray-200);
+  margin-left: 12px;
+}
+
+/* 分类标题 */
+.book-menu .book-section-flat > a,
+.book-menu .book-section-flat > span,
+.book-menu .book-section-flat > label {
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+
+/* =========================================
+   3. Right Sidebar / TOC
+   ========================================= */
+
+/* 目录容器 */
+.book-toc nav {
+  border-left: 1px solid var(--gray-200);
+  padding-left: 0;
+}
+
+/* 列表重置 */
+.book-toc nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 目录链接 */
+.book-toc nav a {
+  display: block;
+  padding: 6px 12px;
+  margin-left: -1px;
+  border-left: 2px solid transparent;
+
+  color: var(--body-font-color);
+  opacity: 0.7;
+
+  font-size: 13px;
+  line-height: 1.6;
+  text-decoration: none;
+
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+}
+
+/* 右侧文章章节 */
+/* H1 */
+.book-toc nav > ul > li > a {
+  padding-left: 12px;
+}
+
+/* H2 */
+.book-toc nav > ul > li > ul > li > a {
+  padding-left: 28px;
+}
+
+/* H3 */
+.book-toc nav > ul > li > ul > li > ul > li > a {
+  padding-left: 44px;
+}
+
+/* TOC 自动多级编号 */
+/* 每层列表独立初始化计数器 */
+.book-toc nav ul {
+  counter-reset: toc;
+  list-style: none;
+}
+
+/* 每个目录项递增 */
+.book-toc nav li {
+  counter-increment: toc;
+}
+
+/* 显示多级编号 */
+.book-toc nav li > a::before {
+  content: counters(toc, ".") " ";
+  margin-right: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 悬停 */
+.book-toc nav a:hover {
+  color: var(--color-link);
+  opacity: 1;
+}
+
+/* 当前章节，由 toc-active.js 控制 */
+.book-toc nav a.active {
+  color: var(--color-link);
+  border-left-color: var(--color-link);
+  font-weight: 600;
+  opacity: 1;
+}
+
+
+/* =========================================
+   4. Typography — NexT Style
+   ========================================= */
+
+/* 正文字体 */
+.book-page .markdown {
+  color: #555;
+  font-size: 16px;
+  line-height: 1.65;
+  letter-spacing: 0;
+  overflow-wrap: break-word;
+}
+
+/* 段落 */
+.book-page .markdown p {
+  margin: 0 0 0.9em;
+}
+
+/* 标题统一 */
+.book-page .markdown h1,
+.book-page .markdown h2,
+.book-page .markdown h3,
+.book-page .markdown h4 {
+  color: #333;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+/* H1：文章主标题 */
+.book-page .markdown h1 {
+  font-size: 28px;
+  margin: 0 0 28px;
+}
+
+/* H2：主要章节 */
+.book-page .markdown h2 {
+  font-size: 23px;
+  margin: 36px 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+/* H3：次级章节 */
+.book-page .markdown h3 {
+  font-size: 19px;
+  margin: 26px 0 12px;
+}
+
+/* H4 */
+.book-page .markdown h4 {
+  font-size: 16px;
+  margin: 22px 0 10px;
+}
+
+/* 列表 */
+.book-page .markdown ul,
+.book-page .markdown ol {
+  padding-left: 1.6em;
+  margin: 0 0 1em;
+}
+
+.book-page .markdown li {
+  margin: 3px 0;
+}
+
+/* 嵌套列表 */
+.book-page .markdown li > ul,
+.book-page .markdown li > ol {
+  margin: 6px 0;
+}
+
+/* 链接 */
+.book-page .markdown a {
+  color: #406e8e;
+  text-decoration: none;
+  border-bottom: 1px solid #d0dce5;
+}
+
+.book-page .markdown a:hover {
+  color: #2277aa;
+  border-bottom-color: currentColor;
+}
+
+/* 图片 */
+.book-page .markdown img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+/* 分隔线 */
+.book-page .markdown hr {
+  border: 0;
+  border-top: 1px solid #ddd;
+  margin: 28px 0;
+}
+
+
+/* =========================================
+   5. Code — NexT Style
+   ========================================= */
+
+/* 代码块容器 */
+.book-page .markdown .highlight,
+.book-page .markdown > pre {
+  margin: 18px 0 22px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Chroma 代码块 */
+.book-page .markdown .highlight pre {
+  margin: 0;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+/* 普通代码块 */
+.book-page .markdown > pre {
+  padding: 14px 18px;
+  background: #f7f7f7;
+  font-size: 13.5px;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+/* 行内代码 */
+.book-page .markdown :not(pre) > code {
+  padding: 2px 5px;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  background: #f5f5f5;
+  color: #c7254e;
+  font-size: 0.875em;
+}
+
+/* 代码块内部 */
+.book-page .markdown pre code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: inherit;
+}
+
+
+/* =========================================
+   6. Table — NexT Style
+   ========================================= */
+
+.book-page .markdown table {
+  width: 100%;
+  margin: 20px 0;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.6;
+  background: #fff;
+}
+
+/* 表头 */
+.book-page .markdown th {
+  background: #f0f0f0;
+  color: #333;
+  font-weight: 600;
+  text-align: left;
+}
+
+/* 单元格 */
+.book-page .markdown th,
+.book-page .markdown td {
+  padding: 9px 14px;
+  border: 1px solid #ddd;
+}
+
+/* 隔行背景 */
+.book-page .markdown tbody tr:nth-child(even) {
+  background: #f8f8f8;
+}
+
+/* 悬停 */
+.book-page .markdown tbody tr:hover {
+  background: #f0f0f0;
+}
+
+
+/* =========================================
+   7. Blockquote — NexT Style
+   ========================================= */
+
+.book-page .markdown blockquote {
+  margin: 20px 0;
+  padding: 12px 18px;
+
+  border-left: 4px solid #d5d5d5;
+  border-radius: 0;
+
+  background: #f7f7f7;
+  color: #666;
+
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+/* 移除最后一个段落的多余间距 */
+.book-page .markdown blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+
+/* =========================================
+   8. Dark Mode
+   ========================================= */
+
+/* 正文 */
+html[data-theme="dark"] .book-page .markdown {
+  color: #c9c9c9;
+}
+
+/* 标题 */
+html[data-theme="dark"] .book-page .markdown h1,
+html[data-theme="dark"] .book-page .markdown h2,
+html[data-theme="dark"] .book-page .markdown h3,
+html[data-theme="dark"] .book-page .markdown h4 {
+  color: #e5e5e5;
+}
+
+/* 标题分隔线 */
+html[data-theme="dark"] .book-page .markdown h2 {
+  border-bottom-color: #404040;
+}
+
+/* 链接 */
+html[data-theme="dark"] .book-page .markdown a {
+  color: #8ab4d6;
+  border-bottom-color: #465563;
+}
+
+html[data-theme="dark"] .book-page .markdown a:hover {
+  color: #b2d6ef;
+}
+
+/* 行内代码 */
+html[data-theme="dark"] .book-page .markdown :not(pre) > code {
+  background: #303030;
+  color: #f0a0b0;
+  border-color: #404040;
+}
+
+/* 表格 */
+html[data-theme="dark"] .book-page .markdown table {
+  background: #242424;
+}
+
+html[data-theme="dark"] .book-page .markdown th {
+  background: #333;
+  color: #eee;
+}
+
+html[data-theme="dark"] .book-page .markdown th,
+html[data-theme="dark"] .book-page .markdown td {
+  border-color: #454545;
+}
+
+html[data-theme="dark"] .book-page .markdown tbody tr:nth-child(even) {
+  background: #2c2c2c;
+}
+
+html[data-theme="dark"] .book-page .markdown tbody tr:hover {
+  background: #383838;
+}
+
+/* 引用块 */
+html[data-theme="dark"] .book-page .markdown blockquote {
+  background: #2c2c2c;
+  border-left-color: #555;
+  color: #bbb;
+}
+
+/* 分隔线 */
+html[data-theme="dark"] .book-page .markdown hr {
+  border-top-color: #454545;
+}

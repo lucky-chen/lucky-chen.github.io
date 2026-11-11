@@ -1,5 +1,27 @@
-node_modules/
-public/
-.deploy_git/
-db.json
+# Hugo build output
+/public/
+/resources/_gen/
+
+# Hugo cache
+.hugo_build.lock
+.hugo_cache/
+.hugocache/
+
+# macOS
 .DS_Store
+.AppleDouble
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Temporary files
+*.swp
+*.swo
+*~
+
+# Python scripts
+__pycache__/
+*.pyc
