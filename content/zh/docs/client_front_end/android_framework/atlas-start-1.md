@@ -400,7 +400,7 @@ __那么问题来了__，有些provider是存在于bundle中的，主dex中并�
 上篇先到这里，各位先喝口水，再来下篇的分析。
 
 [tianweishu_note]: http://weishu.me/
-[atlas_gradle_apk]: /zh/docs/client_front_end/atlas-atlas-gradle-apk/
+[atlas_gradle_apk]: /zh/docs/client_front_end/android_framework/atlas-atlas-gradle-apk/
 [demo_github]: https://github.com/alibaba/atlas
 [atlas_framework_property]: /image/android/atlas_framework_property.svg
 [atlas_meta_data]: /image/android/atlas_meta_data.png

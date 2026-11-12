@@ -382,5 +382,5 @@ static Class<?> loadFromInstalledBundles(String className,boolean safe)
 到这里为止，整个bundle的加载、初始化过程分析完毕。
 
 [bundle_load_img]: /image/android/bundle_load_img.svg
-[atlas_start_2]: /zh/docs/client_front_end/atlas-start-2/
+[atlas_start_2]: /zh/docs/client_front_end/android_framework/atlas-start-2/
 [bundle_load_part_2]: /image/android/bundle_load_part_2_img.svg

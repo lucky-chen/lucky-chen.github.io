@@ -271,9 +271,9 @@ public void onCreate() {
 
 至此，Atlas启动过程的分析完成。
 
-[atlas_start_1]: /zh/docs/client_front_end/atlas-start-1/
-[atlas_gradle_apk]: /zh/docs/client_front_end/atlas-atlas-gradle-apk/
-[atals_bundle_load]: /zh/docs/client_front_end/atlas-bundle-load/
+[atlas_start_1]: /zh/docs/client_front_end/android_framework/atlas-start-1/
+[atlas_gradle_apk]: /zh/docs/client_front_end/android_framework/atlas-atlas-gradle-apk/
+[atals_bundle_load]: /zh/docs/client_front_end/android_framework/atlas-bundle-load/
 
 [atlas_core_start_img]: /image/android/atlas_core_start_img.svg
 [atlas_java_startup_img]: /image/android/atlas_java_startup_img.svg

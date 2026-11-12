@@ -347,4 +347,4 @@ categories:
 
 
   [1]: http://static.zybuluo.com/qh438406812/0jfd9hhh33c7fc69hbwpoe99/android_process_start.svg
-  [2]: /zh/docs/client_front_end/activity-ams-wms/
+  [2]: /zh/docs/client_front_end/android_framework/activity-ams-wms/

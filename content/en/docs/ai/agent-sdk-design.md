@@ -258,4 +258,4 @@ Agent systems also require attention to:
 
 This article documents the runtime design and recorded implementation status. Basic implementations, partial implementations, and reserved extensions do not establish production readiness.
 
-For the wider technology map, see [Getting Started with AI: A Four-Layer Technology Map](/en/docs/ai/ai-overview/). Model development and inference infrastructure are separate topics in that overview.
+For the wider technology map, see [AI Technology Stack Overview](/en/docs/ai/ai-technology-stack/). The overview organizes the stack into application and orchestration, training and inference frameworks, model architecture and algorithms, and computing and infrastructure.

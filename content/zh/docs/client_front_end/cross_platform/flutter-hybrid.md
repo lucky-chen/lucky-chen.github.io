@@ -65,7 +65,7 @@ A: 如下图所示，满足2个要求
 
 - 在不断push的过程中，多Engine势必会对内存造成极大的压力
 - 每个engine有一份独立的图片cache,内存必然爆炸。
-- 启动过程中，会初始化engine，造成页面启动过慢。参考另外一篇[FlutterEngine启动性能优化](/zh/docs/client_front_end/flutter-engine-startup/)，中低端机上，原生engine启动耗时Android 300ms左右，iOS在380ms左右，这个耗时是不可接受的.
+- 启动过程中，会初始化engine，造成页面启动过慢。参考另外一篇[FlutterEngine启动性能优化](/zh/docs/client_front_end/cross_platform/flutter-engine-startup/)，中低端机上，原生engine启动耗时Android 300ms左右，iOS在380ms左右，这个耗时是不可接受的.
 
 Flutter官方对[启动一份engine内存、耗时占用的测试结果](https://flutter.dev/docs/development/add-to-app/performance?spm=ata.13261165.0.0.563d158eT1oPLv)
 
