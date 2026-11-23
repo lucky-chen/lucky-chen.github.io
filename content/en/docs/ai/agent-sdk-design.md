@@ -3,8 +3,7 @@ title: 'Agent Engineering: SDK Requirements and Runtime Architecture'
 date: '2025-12-22'
 categories:
   - AI
-  - Engineering
-translationKey: agent-sdk-design
+weight: 5
 ---
 
 # Background
